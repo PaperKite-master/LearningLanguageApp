@@ -1,0 +1,12 @@
+export function toLessonDto(lesson) {
+  return {
+    id: lesson.id,
+    title: lesson.title,
+    timelineId: lesson.timeline_id ?? null,
+    videoUrl: lesson.video_url ?? null,
+    contentMarkdown: lesson.content_markdown ?? null,
+    order: lesson.order ?? 0,
+    createdAt: lesson.created_at ?? null
+  };
+}
+
