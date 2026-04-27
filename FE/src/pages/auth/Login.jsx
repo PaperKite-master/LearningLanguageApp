@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
 import CustomLockIcon from '../../components/CustomLockIcon';
 import BackgroundLayer from '../../components/BackgroundLayer';
@@ -16,6 +16,14 @@ const GoogleIcon = () => (
 );
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Simulate user login API, then redirect
+    navigate('/dashboard');
+  };
+
   return (
     <div className="app-container">
       <BackgroundLayer />
@@ -34,7 +42,7 @@ const Login = () => {
                   Chưa có tài khoản? <Link to="/signup" className="signup-link">Tạo tài khoản học tập miễn phí!</Link>
                 </div>
             
-            <form onSubmit={(e) => e.preventDefault()}>
+            <form onSubmit={handleLogin}>
               <div className="input-group">
                 <User className="input-icon" size={20} />
                 <input 

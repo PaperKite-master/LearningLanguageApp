@@ -52,9 +52,9 @@ const Sidebar = () => {
       </nav>
 
       <div className="sidebar-bottom">
-        <button className="bottom-btn">
+        <NavLink to="/profile" className={({isActive}) => isActive ? "bottom-btn active" : "bottom-btn"}>
           <UserCircle size={36} strokeWidth={2.5} />
-        </button>
+        </NavLink>
         <button className="bottom-btn">
           <LogOut size={36} strokeWidth={2.5} />
         </button>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Flame, 
   Target, 
@@ -10,12 +10,34 @@ import {
 } from 'lucide-react';
 
 const DashboardContent = () => {
+  // ---------------------------------------------------------
+  // MOCK DATABASE STATE (Ready for API Integration)
+  // Replace this with a useEffect fetch from your database
+  // ---------------------------------------------------------
+  const [userData, setUserData] = useState({
+    username: 'DEVELOPER!',
+    streak: 34,
+    target: 'N2',
+    hoursLearned: 156,
+    weeklyProgress: '+ 12%',
+    todayGoals: [
+      { id: 1, label: 'Bài học', current: 2, total: 3 },
+      { id: 2, label: 'Flashcards', current: 15, total: 20 },
+      { id: 3, label: 'Luyện tập', current: 1, total: 2 },
+    ]
+  });
+
+  // Example of how you would fetch from DB:
+  // useEffect(() => {
+  //   fetch('/api/user/dashboard').then(res => res.json()).then(data => setUserData(data));
+  // }, []);
+
   return (
     <div className="dashboard-content">
       {/* Welcome Banner */}
       <section className="welcome-banner">
         <div className="welcome-text">
-          <h1>おはよう、<span>DEVELOPER!</span></h1>
+          <h1>おはよう、<span>{userData.username}</span></h1>
           <p>Tiếp tục hành trình học tiếng Nhật ngay!</p>
         </div>
         
@@ -25,7 +47,7 @@ const DashboardContent = () => {
               <Flame className="stat-icon flame" size={18} />
               <span>Chuỗi ngày</span>
             </div>
-            <div className="stat-value">34</div>
+            <div className="stat-value">{userData.streak}</div>
           </div>
           
           <div className="stat-card">
@@ -33,7 +55,7 @@ const DashboardContent = () => {
               <Target className="stat-icon target" size={18} />
               <span>Mục tiêu</span>
             </div>
-            <div className="stat-value">N2</div>
+            <div className="stat-value">{userData.target}</div>
           </div>
           
           <div className="stat-card">
@@ -41,7 +63,7 @@ const DashboardContent = () => {
               <Clock className="stat-icon clock" size={18} />
               <span>Số giờ học</span>
             </div>
-            <div className="stat-value">156H</div>
+            <div className="stat-value">{userData.hoursLearned}H</div>
           </div>
           
           <div className="stat-card">
@@ -49,7 +71,7 @@ const DashboardContent = () => {
               <TrendingUp className="stat-icon trending" size={18} />
               <span>Tuần này</span>
             </div>
-            <div className="stat-value success">+ 12%</div>
+            <div className="stat-value success">{userData.weeklyProgress}</div>
           </div>
         </div>
       </section>
@@ -59,35 +81,20 @@ const DashboardContent = () => {
         <h2 className="section-title">MỤC TIÊU HÔM NAY</h2>
         <div className="goals-grid">
           
-          <div className="goal-card">
-            <div className="goal-info">
-              <span>Bài học</span>
-              <span className="goal-fraction">2 / 3</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{width: '66.6%'}}></div>
-            </div>
-          </div>
-
-          <div className="goal-card">
-            <div className="goal-info">
-              <span>Flashcards</span>
-              <span className="goal-fraction">15 / 20</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{width: '75%'}}></div>
-            </div>
-          </div>
-
-          <div className="goal-card">
-            <div className="goal-info">
-              <span>Luyện tập</span>
-              <span className="goal-fraction">1 / 2</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{width: '50%'}}></div>
-            </div>
-          </div>
+          {userData.todayGoals.map(goal => {
+            const progressPercent = (goal.current / goal.total) * 100;
+            return (
+              <div key={goal.id} className="goal-card">
+                <div className="goal-info">
+                  <span>{goal.label}</span>
+                  <span className="goal-fraction">{goal.current} / {goal.total}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{width: `${progressPercent}%`}}></div>
+                </div>
+              </div>
+            );
+          })}
           
         </div>
       </section>
