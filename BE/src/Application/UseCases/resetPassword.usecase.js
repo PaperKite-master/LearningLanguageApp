@@ -5,8 +5,7 @@ import { updateUserPassword } from '../../Infrastructure/SupabaseAuthClient.js';
  */
 export async function resetPasswordUseCase({ accessToken, newPassword }) {
   if (!accessToken) {
-    const err = new Error('Access token is required');
-    err.statusCode = 401;
+    const err = Object.assign(new Error('Access token is required'), { statusCode: 401 });
     throw err;
   }
 
