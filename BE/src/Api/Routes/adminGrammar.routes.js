@@ -1,7 +1,7 @@
 import { adminGrammarController } from '../Controllers/adminGrammar.controller.js';
+import { authenticate } from '../Middlewares/authenticate.js';
 import { grammarRepoPlugin } from '../Middlewares/grammarRepo.middleware.js';
 import { requireAdmin } from '../Middlewares/requireAdmin.middleware.js';
-import { AdminHeadersSchema } from '../Schemas/adminAuth.schemas.js';
 import {
   CreateGrammarBodySchema,
   GrammarIdParamsSchema,
@@ -15,9 +15,9 @@ export async function adminGrammarRoutes(app) {
   app.post(
     '/',
     {
-      preHandler: requireAdmin,
+      preHandler: [authenticate, requireAdmin],
       schema: {
-        headers: AdminHeadersSchema,
+        security: [{ bearerAuth: [] }],
         body: CreateGrammarBodySchema,
         response: {
           201: GrammarResponseSchema
@@ -30,9 +30,9 @@ export async function adminGrammarRoutes(app) {
   app.patch(
     '/:id',
     {
-      preHandler: requireAdmin,
+      preHandler: [authenticate, requireAdmin],
       schema: {
-        headers: AdminHeadersSchema,
+        security: [{ bearerAuth: [] }],
         params: GrammarIdParamsSchema,
         body: UpdateGrammarBodySchema,
         response: {

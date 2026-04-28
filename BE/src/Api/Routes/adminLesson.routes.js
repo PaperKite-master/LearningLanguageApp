@@ -1,7 +1,7 @@
 import { adminLessonController } from '../Controllers/adminLesson.controller.js';
+import { authenticate } from '../Middlewares/authenticate.js';
 import { lessonRepoPlugin } from '../Middlewares/lessonRepo.middleware.js';
 import { requireAdmin } from '../Middlewares/requireAdmin.middleware.js';
-import { AdminHeadersSchema } from '../Schemas/adminAuth.schemas.js';
 import {
   CreateLessonBodySchema,
   LessonIdParamsSchema,
@@ -15,9 +15,9 @@ export async function adminLessonRoutes(app) {
   app.post(
     '/',
     {
-      preHandler: requireAdmin,
+      preHandler: [authenticate, requireAdmin],
       schema: {
-        headers: AdminHeadersSchema,
+        security: [{ bearerAuth: [] }],
         body: CreateLessonBodySchema,
         response: {
           201: LessonResponseSchema
@@ -30,9 +30,9 @@ export async function adminLessonRoutes(app) {
   app.patch(
     '/:id',
     {
-      preHandler: requireAdmin,
+      preHandler: [authenticate, requireAdmin],
       schema: {
-        headers: AdminHeadersSchema,
+        security: [{ bearerAuth: [] }],
         params: LessonIdParamsSchema,
         body: UpdateLessonBodySchema,
         response: {

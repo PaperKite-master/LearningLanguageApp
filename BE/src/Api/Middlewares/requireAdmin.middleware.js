@@ -1,17 +1,16 @@
 export async function requireAdmin(request, reply) {
-  const configuredKey = process.env.ADMIN_API_KEY;
-  const headerKey = request.headers['x-admin-key'];
-  const headerRole = request.headers['x-role'];
-  const role = Array.isArray(headerRole) ? headerRole[0] : headerRole;
+  const userId = request.user?.sub;
 
-  if (configuredKey) {
-    if (!headerKey || headerKey !== configuredKey) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    return;
+  if (!userId) {
+    return reply.code(401).send({ error: 'Unauthorized' });
   }
 
-  if (role !== 'ADMIN') {
+  const profile = await request.server.prisma.profiles.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  if (!profile || profile.role !== 'ADMIN') {
     return reply.code(403).send({ error: 'Forbidden' });
   }
 }
