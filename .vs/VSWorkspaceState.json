@@ -1,12 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\BE\\docs",
-    "\\BE\\prisma",
-    "\\BE\\src",
     "\\FE",
     "\\FE\\src"
   ],
-  "SelectedNode": "\\BE",
+  "SelectedNode": "\\FE",
   "PreviewInSolutionExplorer": false
 }

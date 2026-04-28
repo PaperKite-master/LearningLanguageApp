@@ -8,6 +8,7 @@ import Profile from './pages/profile/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminContent from './pages/admin/AdminContent';
+import AdminLessonCreate from './pages/admin/AdminLessonCreate';
 import AdminFlashcard from './pages/admin/AdminFlashcard';
 import AdminTimeline from './pages/admin/AdminTimeline';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -41,6 +42,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/content" element={<AdminContent />} />
+        <Route path="/admin/content/create" element={<AdminLessonCreate />} />
         <Route path="/admin/timeline" element={<AdminTimeline />} />
         <Route path="/admin/flashcard" element={<AdminFlashcard />} />
         <Route path="/admin/settings" element={<AdminSettings />} />

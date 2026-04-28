@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Edit2, Trash2, X } from 'lucide-react';
 
 const INITIAL_MOCK_CONTENT = [
@@ -9,6 +10,7 @@ const INITIAL_MOCK_CONTENT = [
 ];
 
 const AdminContentList = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [contentList, setContentList] = useState(INITIAL_MOCK_CONTENT);
   
@@ -28,12 +30,7 @@ const AdminContentList = () => {
 
   // Handlers
   const handleOpenAddModal = () => {
-    setModalMode('add');
-    setFormData({ 
-      id: `L00${contentList.length + 1}`, // Auto-increment mock ID
-      title: '', topic: '', level: 'N5', category: 'Từ vựng', status: 'Draft' 
-    });
-    setIsModalOpen(true);
+    navigate('/admin/content/create');
   };
 
   const handleOpenEditModal = (item) => {
