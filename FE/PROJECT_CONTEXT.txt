@@ -1,0 +1,285 @@
+# PROJECT_CONTEXT.md
+
+## Tổng quan dự án
+
+Tên dự án: **Japanese Learning App for IT**
+
+Đây là một nền tảng học **tiếng Nhật dành riêng cho sinh viên IT và lập trình viên**.
+
+Mục tiêu của ứng dụng:
+
+* Học từ vựng tiếng Nhật trong môi trường **IT / công ty công nghệ**
+* Luyện **ngữ pháp sử dụng trong giao tiếp công việc**
+* Luyện đọc hiểu **tài liệu kỹ thuật**
+* Luyện typing bảng chữ cái Nhật
+* Ôn tập bằng **quiz, flashcard và mini game**
+
+---
+
+# Công nghệ sử dụng
+
+Frontend stack:
+
+* Vite
+* React
+* JavaScript
+* CSS / Tailwind (optional)
+
+Project này **chỉ bao gồm Frontend**.
+Backend API sẽ được tích hợp sau.
+
+Thiết kế giao diện dựa trên **Figma design**.
+
+---
+
+# Đối tượng người dùng
+
+Ứng dụng dành cho:
+
+* Sinh viên ngành **Công nghệ thông tin**
+* Lập trình viên muốn làm việc với **công ty Nhật**
+* Người học tiếng Nhật với mục tiêu **IT / Software Development**
+
+Ví dụ nội dung bài học:
+
+* IT vocabulary
+* Software development terms
+* Workplace communication
+* Technical reading
+
+---
+
+# Quy tắc phát triển
+
+AI phải tuân theo các quy tắc sau:
+
+1. Không được tạo project React/Vite mới.
+2. Luôn sử dụng project hiện tại.
+3. Mọi **page** phải đặt trong:
+
+src/pages/
+
+4. Mọi **reusable component** phải đặt trong:
+
+src/components/
+
+5. Logic gọi API đặt trong:
+
+src/services/
+
+6. Custom hooks đặt trong:
+
+src/hooks/
+
+---
+
+# Cấu trúc trang
+
+## Public Area (chưa đăng nhập)
+
+Landing Page
+
+Sections:
+
+* About App
+* Features
+* CTA (Call to Action)
+
+Pages:
+
+/login
+/register
+
+---
+
+## User Area (sau khi đăng nhập)
+
+Trang chính:
+
+User Dashboard
+
+Các khu vực:
+
+* Learning Timeline
+* Practice & Games
+* Flashcards
+* Progress Tracking
+* Notifications
+* Profile
+
+---
+
+# Learning Timeline
+
+Học theo lộ trình bài học.
+
+Flow:
+
+Timeline Overview
+→ Timeline Detail
+→ Lesson List
+→ Lesson Detail
+
+---
+
+# Lesson Detail
+
+Một bài học gồm:
+
+* Grammar Explanation
+* Mini Grammar Test
+* Alphabet Typing Practice
+* Video Learning (YouTube embed)
+* Vocabulary Popup khi hover
+* Save / Mark Lesson Complete
+
+---
+
+# Timeline Quiz
+
+Sau khi hoàn thành lesson:
+
+Timeline Quiz
+
+Pages:
+
+* Quiz Attempt
+* Quiz Result
+
+---
+
+# Practice & Games
+
+Các hoạt động luyện tập.
+
+Pages:
+
+* Grammar Matching Game
+* Other Practice Games
+
+---
+
+# Flashcards
+
+Quản lý flashcard học từ vựng.
+
+Pages:
+
+* Flashcard List
+* Create Flashcard
+* Export to Quizlet
+
+---
+
+# Progress Tracking
+
+Theo dõi tiến độ học tập.
+
+Pages:
+
+* Learning Progress
+* Quiz Results
+* Mascot Status (Gamification)
+
+---
+
+# Notifications
+
+Nhắc lịch học.
+
+Pages:
+
+* Reminder Settings
+* Study Schedule
+
+---
+
+# Profile
+
+Quản lý thông tin người dùng.
+
+Pages:
+
+* View Profile
+* Edit Profile
+* Account Settings
+
+Action:
+
+Logout
+
+---
+
+# React Project Structure
+
+src/
+
+pages/
+
+landing/
+LandingPage.jsx
+
+auth/
+Login.jsx
+Register.jsx
+
+dashboard/
+Dashboard.jsx
+
+timeline/
+TimelineOverview.jsx
+TimelineDetail.jsx
+LessonList.jsx
+LessonDetail.jsx
+
+quiz/
+QuizAttempt.jsx
+QuizResult.jsx
+
+practice/
+GrammarMatchingGame.jsx
+PracticeGames.jsx
+
+flashcards/
+FlashcardList.jsx
+CreateFlashcard.jsx
+
+progress/
+LearningProgress.jsx
+QuizResults.jsx
+MascotStatus.jsx
+
+notifications/
+ReminderSettings.jsx
+StudySchedule.jsx
+
+profile/
+ViewProfile.jsx
+EditProfile.jsx
+AccountSettings.jsx
+
+---
+
+# Routing
+
+/ → Landing Page
+
+/login → Login
+
+/register → Register
+
+/dashboard → User Dashboard
+
+/timeline → Timeline Overview
+
+/lesson/:id → Lesson Detail
+
+/quiz → Timeline Quiz
+
+/practice → Practice Games
+
+/flashcards → Flashcard List
+
+/progress → Learning Progress
+
+/profile → Profile
