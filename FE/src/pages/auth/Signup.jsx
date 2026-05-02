@@ -17,11 +17,10 @@ const GoogleIcon = () => (
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    fullName: '',
     password: '',
     confirmPassword: '',
-    email: '',
-    phone: ''
+    email: ''
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +28,7 @@ const Signup = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.username.trim()) newErrors.username = "Tên đăng nhập không được để trống";
+    if (!formData.fullName.trim()) newErrors.fullName = "Họ và tên không được để trống";
     if (!formData.password) newErrors.password = "Mật khẩu không được để trống";
     else if (formData.password.length < 6) newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
     
@@ -47,8 +46,14 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log('Form is valid', formData);
-      // Proceed with registration
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        role: "USER"
+      };
+      console.log('Form is valid, ready to send:', payload);
+      // Proceed with registration API call
     }
   };
 
@@ -84,13 +89,13 @@ const Signup = () => {
                 <User className="input-icon" size={20} />
                 <input 
                   type="text" 
-                  name="username"
-                  value={formData.username}
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleChange}
-                  className={`styled-input pill-element ${errors.username ? 'input-error' : ''}`} 
-                  placeholder="Tên đăng nhập" 
+                  className={`styled-input pill-element ${errors.fullName ? 'input-error' : ''}`} 
+                  placeholder="Họ và tên" 
                 />
-                {errors.username && <span className="error-text">{errors.username}</span>}
+                {errors.fullName && <span className="error-text">{errors.fullName}</span>}
               </div>
               
               <div className="input-group">
@@ -146,17 +151,7 @@ const Signup = () => {
                 {errors.email && <span className="error-text">{errors.email}</span>}
               </div>
 
-              <div className="input-group">
-                <Smartphone className="input-icon" size={20} />
-                <input 
-                  type="tel" 
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="styled-input pill-element" 
-                  placeholder="Số điện thoại" 
-                />
-              </div>
+
               
               <button type="submit" className="login-btn pill-element">
                 Đăng ký

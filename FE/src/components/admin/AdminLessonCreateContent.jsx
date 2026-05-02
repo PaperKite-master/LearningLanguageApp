@@ -2,6 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MDEditor from '@uiw/react-md-editor';
 import { ArrowLeft, Save, FileText } from 'lucide-react';
+import lessonApi from '../../api/lessonApi';
+import grammarApi from '../../api/grammarApi';
 
 const AdminLessonCreateContent = () => {
   const navigate = useNavigate();
@@ -66,42 +68,35 @@ const AdminLessonCreateContent = () => {
     }
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     
-    let payload = {};
-    let endpoint = '';
-
-    if (contentType === 'lesson') {
-      endpoint = 'POST /admin/lessons';
-      payload = {
-        data: {
-          id: `lesson_${Date.now()}`,
+    try {
+      if (contentType === 'lesson') {
+        const payload = {
           title: lessonFormData.title,
           timelineId: lessonFormData.timelineId,
           videoUrl: lessonFormData.videoUrl,
           contentMarkdown: markdownValue,
-          order: 0,
-          createdAt: new Date().toISOString()
-        }
-      };
-    } else {
-      endpoint = 'POST /admin/grammars';
-      payload = {
-        data: {
-          id: `grammar_${Date.now()}`,
+          order: 0
+        };
+        await lessonApi.create(payload);
+        alert('Tạo bài học thành công!');
+      } else {
+        const payload = {
           lessonId: grammarFormData.lessonId,
           title: grammarFormData.title,
           contentMarkdown: markdownValue,
-          order: 0,
-          createdAt: new Date().toISOString()
-        }
-      };
+          order: 0
+        };
+        await grammarApi.create(payload);
+        alert('Tạo ngữ pháp thành công!');
+      }
+      
+      navigate('/admin/content');
+    } catch (error) {
+      alert('Lưu thất bại: ' + error.message);
     }
-
-    console.log(`Sending to Backend (${endpoint}):`, JSON.stringify(payload, null, 2));
-    alert(`Lưu thành công! Đã console.log payload chuẩn cấu trúc của ${contentType.toUpperCase()}`);
-    navigate('/admin/content');
   };
 
   return (

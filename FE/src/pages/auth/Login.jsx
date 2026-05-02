@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import CustomLockIcon from '../../components/CustomLockIcon';
 import BackgroundLayer from '../../components/BackgroundLayer';
 import LeftColumn from '../../components/LeftColumn';
+import authApi from '../../api/authApi';
 
 const GoogleIcon = () => (
   <svg className="google-icon" viewBox="0 0 24 24">
@@ -17,11 +18,31 @@ const GoogleIcon = () => (
 
 const Login = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
 
-  const handleLogin = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate user login API, then redirect
-    navigate('/dashboard');
+    const payload = {
+      email: formData.email,
+      password: formData.password
+    };
+    
+    try {
+      const result = await authApi.login(payload);
+      console.log('Login success:', result.message);
+      // Có thể lưu user info vào context hoặc redux ở đây
+      navigate('/dashboard');
+    } catch (error) {
+      alert('Đăng nhập thất bại: ' + error.message);
+    }
   };
 
   return (
@@ -44,11 +65,15 @@ const Login = () => {
             
             <form onSubmit={handleLogin}>
               <div className="input-group">
-                <User className="input-icon" size={20} />
+                <Mail className="input-icon" size={20} />
                 <input 
-                  type="text" 
+                  type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="styled-input pill-element" 
-                  placeholder="Tên đăng nhập" 
+                  placeholder="Email" 
+                  required
                 />
               </div>
               
@@ -56,8 +81,12 @@ const Login = () => {
                 <CustomLockIcon className="input-icon" size={20} />
                 <input 
                   type="password" 
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className="styled-input pill-element" 
                   placeholder="Mật khẩu" 
+                  required
                 />
               </div>
               
