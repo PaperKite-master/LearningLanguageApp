@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Edit2, Trash2, X } from 'lucide-react';
+import lessonApi from '../../api/lessonApi';
 
 const INITIAL_MOCK_CONTENT = [
   { id: 'L001', title: 'Luyện gõ chữ Hiragana', topic: 'Hiragana', level: 'N5', category: 'Bảng chữ cái', status: 'Published' },
@@ -12,7 +13,20 @@ const INITIAL_MOCK_CONTENT = [
 const AdminContentList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [contentList, setContentList] = useState(INITIAL_MOCK_CONTENT);
+  const [contentList, setContentList] = useState([]);
+  
+  useEffect(() => {
+    const fetchLessons = async () => {
+      try {
+        const data = await lessonApi.getAll();
+        setContentList(data);
+      } catch (error) {
+        console.error("Lỗi tải bài học:", error);
+        setContentList(INITIAL_MOCK_CONTENT); // Tạm dùng dữ liệu giả nếu lỗi
+      }
+    };
+    fetchLessons();
+  }, []);
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,22 +110,21 @@ const AdminContentList = () => {
                 <tr key={item.id}>
                   <td className="col-id">{item.id}</td>
                   <td className="col-name">{item.title}</td>
-                  <td className="col-email">{item.topic}</td>
+                  <td className="col-email">{item.topic || 'Chưa có'}</td>
                   
                   <td className="col-role">
-                    {/* Reusing role-student CSS for N5 badge matching the design */}
                     <span className="role-badge role-level">
-                      {item.level}
+                      {item.level || 'N5'}
                     </span>
                   </td>
                   
                   <td className="col-category">
-                    <span className="category-text">{item.category}</span>
+                    <span className="category-text">{item.category || 'Bài học'}</span>
                   </td>
                   
                   <td className="col-status">
-                    <span className={`status-badge status-${item.status.toLowerCase()}`}>
-                      {item.status}
+                    <span className={`status-badge status-${(item.status || 'draft').toLowerCase()}`}>
+                      {item.status || 'Draft'}
                     </span>
                   </td>
                   

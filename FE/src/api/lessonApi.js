@@ -1,6 +1,12 @@
 import axiosClient from './axiosClient';
 
 const lessonApi = {
+  getAll: async () => {
+    const url = '/lessons';
+    const response = await axiosClient.get(url);
+    return response.data.data;
+  },
+
   create: async (payload) => {
     const url = '/admin/lessons';
     const response = await axiosClient.post(url, payload);
