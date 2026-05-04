@@ -1,16 +1,37 @@
-import { User } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import authApi from '../../api/authApi';
 import CustomLockIcon from '../../components/CustomLockIcon';
 import BackgroundLayer from '../../components/BackgroundLayer';
 import LeftColumn from '../../components/LeftColumn';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
 
-  const handleLogin = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate API login, then redirect
-    navigate('/admin/dashboard');
+    const payload = {
+      email: formData.email,
+      password: formData.password
+    };
+    
+    try {
+      const result = await authApi.login(payload);
+      console.log('Admin login success:', result.message);
+      navigate('/admin/dashboard');
+    } catch (error) {
+      alert('Đăng nhập Admin thất bại: ' + error.message);
+    }
   };
 
   return (
@@ -29,13 +50,16 @@ const AdminLogin = () => {
               
               <div className="admin-input-group">
                 <div className="admin-icon-wrapper">
-                  <User size={18} color="#a0a8b9" strokeWidth={2} />
-                  {/* Pseudo edit/badge indicator simulated via CSS or simple lucide combo */}
+                  <Mail size={18} color="#a0a8b9" strokeWidth={2} />
                 </div>
                 <input 
-                  type="text" 
+                  type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="admin-input" 
-                  placeholder="Tên đăng nhập" 
+                  placeholder="Email Admin" 
+                  required
                 />
               </div>
               
@@ -45,8 +69,12 @@ const AdminLogin = () => {
                 </div>
                 <input 
                   type="password" 
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className="admin-input" 
                   placeholder="Mật khẩu" 
+                  required
                 />
               </div>
               

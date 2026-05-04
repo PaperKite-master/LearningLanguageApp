@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\FE",
-    "\\FE\\src"
+    "\\BE"
   ],
-  "SelectedNode": "\\FE",
+  "SelectedNode": "\\BE\\.env.example",
   "PreviewInSolutionExplorer": false
 }
