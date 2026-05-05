@@ -14,6 +14,8 @@ const AdminLessonCreateContent = () => {
   const [lessonFormData, setLessonFormData] = useState({
     title: '',
     timelineId: '',
+    topic: '',
+    status: 'published',
     videoUrl: ''
   });
 
@@ -76,6 +78,8 @@ const AdminLessonCreateContent = () => {
         const payload = {
           title: lessonFormData.title,
           timelineId: lessonFormData.timelineId,
+          topic: lessonFormData.topic,
+          status: lessonFormData.status,
           videoUrl: lessonFormData.videoUrl,
           contentMarkdown: markdownValue,
           order: 0
@@ -151,29 +155,47 @@ const AdminLessonCreateContent = () => {
 
         {/* Dynamic Form based on Selection */}
         {contentType === 'lesson' ? (
-          <div className="form-group-row" style={{ marginBottom: 0 }}>
-            <div className="form-group" style={{ flex: 2 }}>
-              <label>Tiêu đề bài học</label>
-              <input 
-                type="text" name="title" value={lessonFormData.title} onChange={handleLessonChange} 
-                className="modal-input" required placeholder="VD: Bài 1: Chào hỏi cơ bản"
-              />
+          <>
+            <div className="form-group-row" style={{ marginBottom: '15px' }}>
+              <div className="form-group" style={{ flex: 2 }}>
+                <label>Tiêu đề bài học</label>
+                <input 
+                  type="text" name="title" value={lessonFormData.title} onChange={handleLessonChange} 
+                  className="modal-input" required placeholder="VD: Bài 1: Chào hỏi cơ bản"
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Mã Lộ trình (Timeline ID)</label>
+                <input 
+                  type="text" name="timelineId" value={lessonFormData.timelineId} onChange={handleLessonChange} 
+                  className="modal-input" required placeholder="VD: timeline_n5_01"
+                />
+              </div>
             </div>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label>Mã Lộ trình (Timeline ID)</label>
-              <input 
-                type="text" name="timelineId" value={lessonFormData.timelineId} onChange={handleLessonChange} 
-                className="modal-input" required placeholder="VD: timeline_n5_01"
-              />
+            <div className="form-group-row" style={{ marginBottom: 0 }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Chủ đề (Topic)</label>
+                <input 
+                  type="text" name="topic" value={lessonFormData.topic} onChange={handleLessonChange} 
+                  className="modal-input" required placeholder="VD: Từ vựng, Ngữ pháp..."
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Trạng thái</label>
+                <select name="status" value={lessonFormData.status} onChange={handleLessonChange} className="modal-input">
+                  <option value="published">Đã xuất bản (Published)</option>
+                  <option value="draft">Bản nháp (Draft)</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ flex: 1.5 }}>
+                <label>Video URL (Youtube/AWS)</label>
+                <input 
+                  type="url" name="videoUrl" value={lessonFormData.videoUrl} onChange={handleLessonChange} 
+                  className="modal-input" placeholder="https://..."
+                />
+              </div>
             </div>
-            <div className="form-group" style={{ flex: 1.5 }}>
-              <label>Video URL (Youtube/AWS)</label>
-              <input 
-                type="url" name="videoUrl" value={lessonFormData.videoUrl} onChange={handleLessonChange} 
-                className="modal-input" placeholder="https://..."
-              />
-            </div>
-          </div>
+          </>
         ) : (
           <div className="form-group-row" style={{ marginBottom: 0 }}>
             <div className="form-group" style={{ flex: 2 }}>
