@@ -23,6 +23,12 @@ const authApi = {
     return response.data;
   },
 
+  getMe: async () => {
+    const url = '/auth/me';
+    const response = await axiosClient.get(url);
+    return response.data;
+  },
+
   logout: () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');

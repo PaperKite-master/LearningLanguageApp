@@ -36,10 +36,20 @@ const Login = () => {
     };
     
     try {
+      // 1. Lấy token
       const result = await authApi.login(payload);
       console.log('Login success:', result.message);
-      // Có thể lưu user info vào context hoặc redux ở đây
-      navigate('/dashboard');
+      
+      // 2. Lấy thông tin user (để kiểm tra role)
+      const user = await authApi.getMe();
+      console.log('User info:', user);
+
+      // 3. Phân luồng theo role
+      if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       alert('Đăng nhập thất bại: ' + error.message);
     }
