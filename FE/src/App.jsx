@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './pages/landing/LandingPage';
 import Dashboard from './pages/dashboard/Dashboard';
 import Study from './pages/study/Study';
+import LessonDetail from './pages/study/LessonDetail';
 import Alphabet from './pages/alphabet/Alphabet';
 import Progress from './pages/progress/Progress';
 import Profile from './pages/profile/Profile';
@@ -13,7 +14,6 @@ import AdminFlashcard from './pages/admin/AdminFlashcard';
 import AdminTimeline from './pages/admin/AdminTimeline';
 import AdminSettings from './pages/admin/AdminSettings';
 import Login from './pages/auth/Login';
-import AdminLogin from './pages/auth/AdminLogin';
 import Signup from './pages/auth/Signup';
 import './index.css';
 
@@ -28,6 +28,7 @@ function App() {
         
         {/* Study Page  */}
         <Route path="/study" element={<Study />} />
+        <Route path="/lesson/:id" element={<LessonDetail />} />
 
         {/* Alphabet Page */}
         <Route path="/alphabet" element={<Alphabet />} />
@@ -49,7 +50,6 @@ function App() {
         
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/signup" element={<Signup />} />
         
         {/* Catch all */}
