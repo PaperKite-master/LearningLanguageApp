@@ -3,6 +3,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { healthRoutes } from './Api/Routes/health.routes.js';
 import { lessonRoutes } from './Api/Routes/lesson.routes.js';
+import { grammarRoutes } from './Api/Routes/grammar.routes.js';
 import { adminLessonRoutes } from './Api/Routes/adminLesson.routes.js';
 import { adminGrammarRoutes } from './Api/Routes/adminGrammar.routes.js';
 import { authRoutes } from './Api/Routes/auth.routes.js';
@@ -56,6 +57,7 @@ export async function buildApp() {
   await app.register(healthRoutes, { prefix: '/health' });
   await app.register(authRoutes, { prefix: '/auth' });
   await app.register(lessonRoutes, { prefix: '/lessons' });
+  await app.register(grammarRoutes, { prefix: '/grammars' });
   await app.register(adminLessonRoutes, { prefix: '/admin/lessons' });
   await app.register(adminGrammarRoutes, { prefix: '/admin/grammars' });
 

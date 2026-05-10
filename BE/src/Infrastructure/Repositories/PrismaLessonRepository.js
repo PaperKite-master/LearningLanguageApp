@@ -6,7 +6,13 @@ export class PrismaLessonRepository {
   async list() {
     return this.prisma.lessons.findMany({
       where: { status: 'published' },
-      orderBy: { created_at: 'desc' }
+      orderBy: [{ order: 'asc' }, { created_at: 'asc' }]
+    });
+  }
+
+  async findById(id) {
+    return this.prisma.lessons.findFirst({
+      where: { id, status: 'published' }
     });
   }
 

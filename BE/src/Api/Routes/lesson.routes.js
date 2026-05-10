@@ -1,5 +1,9 @@
 import { lessonController } from '../Controllers/lesson.controller.js';
-import { ListLessonsResponseSchema } from '../Schemas/lesson.schemas.js';
+import {
+  LessonIdParamsSchema,
+  LessonResponseSchema,
+  ListLessonsResponseSchema
+} from '../Schemas/lesson.schemas.js';
 import { lessonRepoPlugin } from '../Middlewares/lessonRepo.middleware.js';
 
 export async function lessonRoutes(app) {
@@ -15,6 +19,19 @@ export async function lessonRoutes(app) {
       }
     },
     lessonController.list
+  );
+
+  app.get(
+    '/:id',
+    {
+      schema: {
+        params: LessonIdParamsSchema,
+        response: {
+          200: LessonResponseSchema
+        }
+      }
+    },
+    lessonController.detail
   );
 }
 

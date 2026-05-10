@@ -12,7 +12,15 @@ export const LessonDtoSchema = Type.Object({
   createdAt: Type.Union([Type.String(), Type.Null()])
 });
 
+export const LessonIdParamsSchema = Type.Object({
+  id: Type.String()
+});
+
 export const ListLessonsResponseSchema = Type.Object({
   data: Type.Array(LessonDtoSchema)
+});
+
+export const LessonResponseSchema = Type.Object({
+  data: LessonDtoSchema
 });
 
