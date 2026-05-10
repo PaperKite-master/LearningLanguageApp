@@ -19,7 +19,8 @@ const AdminContentList = () => {
     const fetchLessons = async () => {
       try {
         const data = await lessonApi.getAll();
-        setContentList(data);
+        const sortedData = (data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setContentList(sortedData);
       } catch (error) {
         console.error("Lỗi tải bài học:", error);
         setContentList(INITIAL_MOCK_CONTENT); // Tạm dùng dữ liệu giả nếu lỗi
@@ -108,7 +109,9 @@ const AdminContentList = () => {
             <tbody>
               {filteredContent.map((item) => (
                 <tr key={item.id}>
-                  <td className="col-id">{item.id}</td>
+                  <td className="col-id">
+                    {item.order ? `L${String(item.order).padStart(3, '0')}` : item.id.substring(0, 8)}
+                  </td>
                   <td className="col-name">{item.title}</td>
                   <td className="col-email">{item.topic || 'Chưa có'}</td>
                   

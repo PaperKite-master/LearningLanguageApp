@@ -2,13 +2,9 @@ import axiosClient from './axiosClient';
 
 const userLessonApi = {
   getLessonById: async (id) => {
-    // Workaround: Backend chưa có API GET /lessons/:id, nên ta lấy danh sách và filter
-    const url = `/lessons`;
+    const url = `/lessons/${id}`;
     const response = await axiosClient.get(url);
-    const lessons = response.data.data || [];
-    const lesson = lessons.find(l => l.id === id);
-    if (!lesson) throw new Error('Lesson not found');
-    return lesson;
+    return response.data.data;
   },
 
   getGrammarsByLessonId: async (lessonId) => {

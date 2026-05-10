@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Key, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import lessonApi from '../../api/lessonApi';
 
 const LearningPath = () => {
+  const navigate = useNavigate();
   
   // ---------------------------------------------------------
   // MOCK DATABASE STATE (Ready for API Integration)
@@ -9,8 +12,8 @@ const LearningPath = () => {
   // ---------------------------------------------------------
   const [pathData, setPathData] = useState([
     { id: 'div1', type: 'divider', text: 'NÓI LỜI CHÀO VÀ TẠM BIỆT' },
-    { id: 1, type: 'node', active: true, offset: -110, progressValue: 100 },
-    { id: 2, type: 'node', active: true, offset: 110, progressValue: 40 },
+    { id: 1, type: 'node', active: false, offset: -110, progressValue: 0 },
+    { id: 2, type: 'node', active: false, offset: 110, progressValue: 0 },
     { id: 3, type: 'node', active: false, offset: -110, progressValue: 0 },
     { id: 4, type: 'node', active: false, offset: 110, progressValue: 0 }, 
     { id: 5, type: 'node', active: false, offset: -110, progressValue: 0 }, 
@@ -33,10 +36,43 @@ const LearningPath = () => {
     { id: 'ckpt3', type: 'checkpoint', text: 'Kiểm tra thử - 3', num: 3 },
   ]);
 
-  // Example of how you would fetch from DB:
-  // useEffect(() => {
-  //   fetch('/api/user/study-path').then(res => res.json()).then(data => setPathData(data));
-  // }, []);
+  useEffect(() => {
+    const fetchLessons = async () => {
+      try {
+        const data = await lessonApi.getAll();
+        const rawLessons = data || [];
+        
+        // Sắp xếp bài học theo thời gian tạo (cũ nhất xếp trước, mới nhất xếp sau)
+        const realLessons = rawLessons.sort((a, b) => {
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+        
+        setPathData(prevPath => {
+          let lessonIdx = 0;
+          return prevPath.map(item => {
+            if (item.type === 'node') {
+              if (lessonIdx < realLessons.length) {
+                const lesson = realLessons[lessonIdx];
+                lessonIdx++;
+                return {
+                  ...item,
+                  realId: lesson.id,
+                  active: true,
+                  // Tạm thời set progress 100 cho bài 1, 40 cho bài 2 để đẹp giao diện
+                  progressValue: lessonIdx === 1 ? 100 : (lessonIdx === 2 ? 40 : 0)
+                };
+              }
+            }
+            return item;
+          });
+        });
+      } catch (error) {
+        console.error('Failed to load lessons for path:', error);
+      }
+    };
+    
+    fetchLessons();
+  }, []);
 
   // SVG Connector line helper
   const renderLineToNextNode = (currentOffset, nextOffset, isActive) => {
@@ -190,11 +226,19 @@ const LearningPath = () => {
               <div 
                 key={item.id} 
                 className={`node-wrapper ${dynamicClasses.join(' ')}`}
-                style={{ transform: `translateX(${item.offset}px)` }}
+                style={{ 
+                  transform: `translateX(${item.offset}px)`,
+                  cursor: item.realId ? 'pointer' : 'default'
+                }}
+                onClick={() => {
+                  if (item.realId) {
+                    navigate(`/lesson/${item.realId}`);
+                  }
+                }}
               >
                 {renderProgressRing(item)}
                 <div className="node-circle" style={{ zIndex: 10 }}>
-                  <BookOpen size={24} />
+                  {item.active ? <BookOpen size={24} /> : <Lock size={24} opacity={0.5} />}
                 </div>
                 {renderLineToNextNode(item.offset, nextOffset, item.active)}
               </div>

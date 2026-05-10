@@ -16,7 +16,8 @@ const AdminLessonCreateContent = () => {
     timelineId: '',
     topic: '',
     status: 'published',
-    videoUrl: ''
+    videoUrl: '',
+    order: ''
   });
 
   // Dữ liệu cho admin/grammars
@@ -75,6 +76,19 @@ const AdminLessonCreateContent = () => {
     
     try {
       if (contentType === 'lesson') {
+        let finalOrder = parseInt(lessonFormData.order);
+        
+        // Nếu user bỏ trống hoặc nhập số không hợp lệ, tự động tính max(order) + 1
+        if (isNaN(finalOrder)) {
+          const existingLessons = await lessonApi.getAll();
+          if (existingLessons && existingLessons.length > 0) {
+            const maxOrder = Math.max(...existingLessons.map(l => l.order || 0));
+            finalOrder = maxOrder + 1;
+          } else {
+            finalOrder = 1;
+          }
+        }
+
         const payload = {
           title: lessonFormData.title,
           timelineId: lessonFormData.timelineId,
@@ -82,7 +96,7 @@ const AdminLessonCreateContent = () => {
           status: lessonFormData.status,
           videoUrl: lessonFormData.videoUrl,
           contentMarkdown: markdownValue,
-          order: 0
+          order: finalOrder
         };
         await lessonApi.create(payload);
         alert('Tạo bài học thành công!');
@@ -169,6 +183,13 @@ const AdminLessonCreateContent = () => {
                 <input 
                   type="text" name="timelineId" value={lessonFormData.timelineId} onChange={handleLessonChange} 
                   className="modal-input" required placeholder="VD: timeline_n5_01"
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Vị trí Mã bài học (Order)</label>
+                <input 
+                  type="number" name="order" value={lessonFormData.order} onChange={handleLessonChange} 
+                  className="modal-input" placeholder="Để trống = Auto"
                 />
               </div>
             </div>
