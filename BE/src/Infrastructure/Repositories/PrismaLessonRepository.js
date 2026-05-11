@@ -50,6 +50,10 @@ export class PrismaLessonRepository {
       }
     });
   }
+
+  async delete(id) {
+    return this.prisma.lessons.delete({ where: { id } });
+  }
 }
 
 function normalizeNullableUuid(value) {

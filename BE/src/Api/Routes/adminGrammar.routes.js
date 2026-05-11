@@ -42,5 +42,20 @@ export async function adminGrammarRoutes(app) {
     },
     adminGrammarController.update
   );
+
+  app.delete(
+    '/:id',
+    {
+      preHandler: [authenticate, requireAdmin],
+      schema: {
+        security: [{ bearerAuth: [] }],
+        params: GrammarIdParamsSchema,
+        response: {
+          204: {}
+        }
+      }
+    },
+    adminGrammarController.remove
+  );
 }
 

@@ -42,5 +42,20 @@ export async function adminLessonRoutes(app) {
     },
     adminLessonController.update
   );
+
+  app.delete(
+    '/:id',
+    {
+      preHandler: [authenticate, requireAdmin],
+      schema: {
+        security: [{ bearerAuth: [] }],
+        params: LessonIdParamsSchema,
+        response: {
+          204: {}
+        }
+      }
+    },
+    adminLessonController.remove
+  );
 }
 

@@ -1,5 +1,6 @@
 import { createLessonUseCase } from '../../Application/UseCases/createLesson.usecase.js';
 import { updateLessonUseCase } from '../../Application/UseCases/updateLesson.usecase.js';
+import { deleteLessonUseCase } from '../../Application/UseCases/deleteLesson.usecase.js';
 
 export const adminLessonController = {
   create: async (request, reply) => {
@@ -31,6 +32,21 @@ export const adminLessonController = {
       }
       if (err?.code === 'P2023') {
         return reply.code(400).send({ error: 'Invalid UUID format in request body' });
+      }
+      throw err;
+    }
+  },
+
+  remove: async (request, reply) => {
+    try {
+      await deleteLessonUseCase({ lessonRepo: request.lessonRepo, id: request.params.id });
+      return reply.code(204).send();
+    } catch (err) {
+      if (err?.code === 'P2025') {
+        return reply.code(404).send({ error: 'Lesson not found' });
+      }
+      if (err?.code === 'P2023') {
+        return reply.code(400).send({ error: 'Invalid UUID format in request params' });
       }
       throw err;
     }

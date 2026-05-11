@@ -37,5 +37,9 @@ export class PrismaGrammarRepository {
       }
     });
   }
+
+  async delete(id) {
+    return this.prisma.grammars.delete({ where: { id } });
+  }
 }
 
