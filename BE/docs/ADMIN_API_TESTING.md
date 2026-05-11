@@ -162,9 +162,31 @@ Thay `<GRAMMAR_ID>` bằng `data.id` nhận được ở bước tạo grammar.
 
 Kết quả kỳ vọng: HTTP **200** và `{ "data": { ... } }`.
 
+### 5.7) Tạo timeline (FR-C-04)
+
+1) Mở `POST /admin/timelines`
+2) Bấm **Try it out**
+3) Nhập header admin như mục 5.2
+4) Body ví dụ:
+
+```json
+{
+  "title": "Beginner Roadmap",
+  "description": "Lộ trình học cơ bản",
+  "order": 1
+}
+```
+
+Kết quả kỳ vọng: HTTP **201** và `{ "data": { ... } }`.
+
+### 5.8) Xem timeline công khai
+
+Mở `GET /timelines` hoặc `GET /timelines/{id}` để kiểm tra timeline và các lesson published bên trong.
+
 ## 6) Lưu ý lỗi thường gặp
 
 - **401 Unauthorized**: bạn đã set `ADMIN_API_KEY` nhưng thiếu/sai header `x-admin-key`.
 - **403 Forbidden**: bạn chưa set `ADMIN_API_KEY` và thiếu header `x-role: ADMIN`.
 - **404 Lesson not found / Grammar not found**: id không tồn tại (Prisma code `P2025`).
+- **404 Timeline not found**: id timeline không tồn tại (Prisma code `P2025`).
 

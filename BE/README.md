@@ -47,4 +47,5 @@ npm run dev
 
 - `GET /health` -> `{ ok: true }`
 - `GET /lessons` -> `{ data: LessonDto[] }`
+- `GET /timelines` -> `{ data: TimelineDto[] }`
 
