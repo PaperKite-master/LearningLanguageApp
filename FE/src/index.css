@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
 
 :root {
   --font-main: 'Be Vietnam Pro', sans-serif;
@@ -702,7 +702,7 @@ body, html {
 
 .nav-item.active {
   opacity: 1;
-  color: var(--cyan-neon);
+  color: #fbbf24;
 }
 
 .nav-icon {
@@ -710,7 +710,7 @@ body, html {
 }
 
 .nav-item.active .nav-icon {
-  color: var(--cyan-neon);
+  color: #fbbf24;
   filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.5));
 }
 
@@ -743,7 +743,7 @@ body, html {
 
 .bottom-btn:hover {
   opacity: 1;
-  color: var(--cyan-neon);
+  color: #fbbf24;
 }
 
 /* --- Main Area --- */
@@ -826,7 +826,7 @@ body, html {
 }
 
 .stat-icon.flame { color: #ff9800; }
-.stat-icon.target { color: var(--cyan-neon); }
+.stat-icon.target { color: #fbbf24; }
 .stat-icon.clock { color: #d49fff; }
 .stat-icon.trending { color: #4caf50; }
 
@@ -934,7 +934,7 @@ body, html {
 }
 
 .cyan-icon {
-  color: var(--cyan-neon);
+  color: #fbbf24;
 }
 
 .jp-char {
@@ -1101,7 +1101,7 @@ body, html {
 }
 
 .stat-icon-flame { color: #ff9800; }
-.stat-icon-hex { color: var(--cyan-neon); }
+.stat-icon-hex { color: #fbbf24; }
 
 .stat-details {
   display: flex;
@@ -1210,10 +1210,10 @@ body, html {
 }
 
 .node-wrapper.completed .node-circle {
-  background-color: #0d3b66; 
-  border-color: var(--cyan-neon);
-  color: var(--cyan-neon);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+  background-color: #422006; 
+  border-color: #fbbf24;
+  color: #fbbf24;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
 }
 
 .node-wrapper.in-progress .node-circle {
@@ -1260,7 +1260,7 @@ body, html {
 }
 
 .key-icon-wrapper {
-  color: var(--cyan-neon);
+  color: #fbbf24;
   filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.5));
 }
 
@@ -2881,3 +2881,69 @@ Actually, I'll stick to sliding it right! */
 .kebab-dropdown-item.danger-item:hover {
   background-color: rgba(239, 68, 68, 0.1);
 }
+
+
+
+
+/* --- INTERACTIVE EXERCISES STYLES --- */
+.interactive-fill-blank { display: inline-flex; align-items: center; position: relative; margin: 0 4px; }
+.interactive-fill-blank .fill-input { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; padding: 4px 8px; font-size: 1rem; outline: none; transition: all 0.2s; text-align: center; }
+.interactive-fill-blank.correct .fill-input { border-color: #10b981; background: rgba(16,185,129,0.1); color: #10b981; pointer-events: none; }
+.interactive-fill-blank.error .fill-input { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+.interactive-fill-blank .status-icon { position: absolute; right: -24px; }
+.interactive-fill-blank .correct-icon { color: #10b981; }
+.interactive-fill-blank .error-icon { color: #ef4444; }
+
+.interactive-matching { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1); }
+.matching-columns { display: flex; gap: 40px; justify-content: center; }
+.matching-col { display: flex; flex-direction: column; gap: 12px; flex: 1; max-width: 200px; }
+.matching-item { background: #1c2035; border: 2px solid rgba(255,255,255,0.1); padding: 12px 16px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; user-select: none; }
+.matching-item:hover:not(.matched) { border-color: #60a5fa; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(96,165,250,0.2); }
+.matching-item.selected { border-color: #3b82f6; background: rgba(59,130,246,0.2); }
+.matching-item.matched { opacity: 0; pointer-events: none; transform: scale(0.9); }
+.matching-success { text-align: center; padding: 30px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.matching-success h3 { color: #10b981; margin: 16px 0; }
+.reset-match-btn { background: transparent; border: 1px solid #10b981; color: #10b981; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+.reset-match-btn:hover { background: rgba(16,185,129,0.1); }
+.shake-error { animation: shake 0.5s; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+@keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+.interactive-mcq { background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1); }
+.mcq-question { font-size: 1.2rem; color: #fff; margin-bottom: 20px; font-weight: 600; }
+.mcq-options { display: flex; flex-direction: column; gap: 12px; }
+.mcq-option { display: flex; align-items: center; gap: 12px; padding: 16px; background: #1c2035; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.mcq-option:hover:not(.selected):not(.correct):not(.wrong) { border-color: #60a5fa; transform: translateX(4px); }
+.mcq-option.selected { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+.mcq-option.correct { border-color: #10b981; background: rgba(16,185,129,0.1); pointer-events: none; }
+.mcq-option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.1); pointer-events: none; }
+.mcq-circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+.mcq-option.selected .mcq-circle { border-color: #3b82f6; background: #3b82f6; }
+.mcq-option.correct .mcq-circle { border-color: #10b981; background: #10b981; }
+.mcq-option.wrong .mcq-circle { border-color: #ef4444; background: #ef4444; }
+.mcq-submit-btn, .mcq-reset-btn { margin-top: 20px; padding: 10px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.mcq-submit-btn { background: #3b82f6; color: #fff; }
+.mcq-submit-btn:hover { background: #2563eb; }
+.mcq-reset-btn { background: transparent; border: 1px solid #10b981; color: #10b981; }
+.mcq-reset-btn:hover { background: rgba(16,185,129,0.1); }
+
+.interactive-reorder { background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1); }
+.reorder-question { font-size: 1.2rem; color: #fff; margin-bottom: 20px; font-weight: 600; }
+.reorder-answer-area { min-height: 60px; padding: 16px; border-bottom: 2px solid rgba(255,255,255,0.2); margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.reorder-placeholder { color: #6b7280; font-style: italic; }
+.reorder-bank-area { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.reorder-word { padding: 10px 16px; background: #1c2035; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; font-size: 1.1rem; user-select: none; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.reorder-word:hover { transform: translateY(-2px); border-color: #60a5fa; box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+.reorder-word.selected { border-color: #10b981; background: rgba(16,185,129,0.1); }
+.reorder-actions { display: flex; justify-content: flex-end; }
+.reorder-check-btn { background: #10b981; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.reorder-check-btn:disabled { background: #4b5563; cursor: not-allowed; opacity: 0.5; }
+.reorder-check-btn:hover:not(:disabled) { background: #059669; }
+.reorder-success { display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(16,185,129,0.1); border-radius: 8px; border: 1px solid #10b981; color: #10b981; font-weight: bold; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.reorder-reset-btn { margin-left: auto; background: transparent; border: 1px solid #10b981; color: #10b981; padding: 6px 16px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+.reorder-reset-btn:hover { background: rgba(16,185,129,0.2); }
+
+.wmde-markdown li p { display: inline; }
+.wmde-markdown li > br:first-child { display: none; }
+.wmde-markdown li > p:first-child > br:first-child { display: none; }
+

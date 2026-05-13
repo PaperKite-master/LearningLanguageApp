@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Key, Lock } from 'lucide-react';
+import { BookOpen, Key, Lock, Star, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import lessonApi from '../../api/lessonApi';
 
@@ -42,24 +42,30 @@ const LearningPath = () => {
         const data = await lessonApi.getAll();
         const rawLessons = data || [];
         
-        // Sắp xếp bài học theo thời gian tạo (cũ nhất xếp trước, mới nhất xếp sau)
+        // Sắp xếp bài học theo vị trí order
         const realLessons = rawLessons.sort((a, b) => {
-          return new Date(a.createdAt) - new Date(b.createdAt);
+          return (a.order || 0) - (b.order || 0);
         });
         
         setPathData(prevPath => {
-          let lessonIdx = 0;
           return prevPath.map(item => {
             if (item.type === 'node') {
-              if (lessonIdx < realLessons.length) {
-                const lesson = realLessons[lessonIdx];
-                lessonIdx++;
+              // Tìm bài học có order tương ứng với id của node trên bản đồ
+              const lesson = realLessons.find(l => l.order === item.id);
+              
+              if (lesson) {
+                const savedProgress = localStorage.getItem(`lessonProgress_${lesson.id}`);
+                let progressValue = 0;
+                if (savedProgress) {
+                  const parsed = JSON.parse(savedProgress);
+                  progressValue = parsed.percentage || 0;
+                }
                 return {
                   ...item,
                   realId: lesson.id,
+                  order: lesson.order,
                   active: true,
-                  // Tạm thời set progress 100 cho bài 1, 40 cho bài 2 để đẹp giao diện
-                  progressValue: lessonIdx === 1 ? 100 : (lessonIdx === 2 ? 40 : 0)
+                  progressValue
                 };
               }
             }
@@ -127,6 +133,8 @@ const LearningPath = () => {
     const circumference = 2 * Math.PI * radius;
     const percentage = item.progressValue;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
+    
+    const ringColor = percentage === 100 ? "#fbbf24" : "#38bdf8";
 
     return (
       <svg 
@@ -142,18 +150,18 @@ const LearningPath = () => {
         }}
       >
         <circle
-          stroke="#6b7280"
-          strokeWidth="6"
+          stroke="#4b5563"
+          strokeWidth="8"
           fill="transparent"
           r={radius}
           cx="50"
           cy="50"
         />
         <circle
-          stroke="#38bdf8"
-          strokeWidth="6"
+          stroke={ringColor}
+          strokeWidth="8"
           fill="transparent"
-          strokeLinecap="butt"
+          strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           r={radius}
@@ -232,13 +240,20 @@ const LearningPath = () => {
                 }}
                 onClick={() => {
                   if (item.realId) {
-                    navigate(`/lesson/${item.realId}`);
+                    const displayId = item.order ? `L${String(item.order).padStart(3, '0')}` : item.realId;
+                    navigate(`/lesson/${displayId}`, { state: { realId: item.realId } });
                   }
                 }}
               >
                 {renderProgressRing(item)}
                 <div className="node-circle" style={{ zIndex: 10 }}>
-                  {item.active ? <BookOpen size={24} /> : <Lock size={24} opacity={0.5} />}
+                  {item.progressValue === 100 ? (
+                    <Crown size={28} color="#fbbf24" fill="#fbbf24" />
+                  ) : item.active ? (
+                    item.progressValue > 0 ? <Star size={24} color="#38bdf8" /> : <BookOpen size={24} />
+                  ) : (
+                    <Lock size={24} opacity={0.5} />
+                  )}
                 </div>
                 {renderLineToNextNode(item.offset, nextOffset, item.active)}
               </div>

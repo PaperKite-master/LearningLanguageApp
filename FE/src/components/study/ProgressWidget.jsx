@@ -1,20 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { Flame, Target, Rocket } from 'lucide-react';
 
+import lessonApi from '../../api/lessonApi';
+
 const ProgressWidget = () => {
-  // ---------------------------------------------------------
-  // MOCK DATABASE STATE (Ready for API Integration)
-  // ---------------------------------------------------------
   const [progressData, setProgressData] = useState({
-    overallPercentage: 15,
+    overallPercentage: 0,
     streak: 34,
-    achievements: { current: 6, total: 40 }
+    achievements: { current: 0, total: 0 }
   });
 
-  // Example of how you would fetch from DB:
-  // useEffect(() => {
-  //   fetch('/api/user/study-progress').then(res => res.json()).then(data => setProgressData(data));
-  // }, []);
+  useEffect(() => {
+    const fetchAndCalculateProgress = async () => {
+      try {
+        const data = await lessonApi.getAll();
+        const totalLessons = data ? data.length : 0;
+        
+        if (totalLessons === 0) return;
+
+        let totalPercentageSum = 0;
+        let fullyCompletedCount = 0;
+
+        data.forEach(lesson => {
+          const savedProgress = localStorage.getItem(`lessonProgress_${lesson.id}`);
+          if (savedProgress) {
+            const parsed = JSON.parse(savedProgress);
+            const percent = parsed.percentage || 0;
+            totalPercentageSum += percent;
+            if (percent === 100) {
+              fullyCompletedCount += 1;
+            }
+          }
+        });
+
+        const overall = Math.round(totalPercentageSum / totalLessons);
+
+        setProgressData(prev => ({
+          ...prev,
+          overallPercentage: overall,
+          achievements: { current: fullyCompletedCount, total: totalLessons }
+        }));
+      } catch (error) {
+        console.error('Failed to load lessons for progress widget:', error);
+      }
+    };
+
+    fetchAndCalculateProgress();
+  }, []);
 
   // Circular progress calculation
   const percentage = progressData.overallPercentage;

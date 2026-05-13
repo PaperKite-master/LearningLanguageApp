@@ -1,23 +1,60 @@
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MDEditor from '@uiw/react-md-editor';
+import remarkBreaks from 'remark-breaks';
 import { ArrowLeft, Save, FileText } from 'lucide-react';
 import lessonApi from '../../api/lessonApi';
 import grammarApi from '../../api/grammarApi';
+import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder } from '../../components/study/InteractiveExercises';
+
+const extractText = (children) => {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) return children.map(extractText).join('');
+  if (children?.props?.children) return extractText(children.props.children);
+  return String(children);
+};
+
+const markdownComponents = {
+  code: ({ inline, className, children, ...props }) => {
+    const text = extractText(children);
+    const match = /language-(\w+)/.exec(className || '');
+    
+    if (!inline && match && match[1] === 'match') {
+      return <InteractiveMatching text={text} />;
+    }
+    if (!inline && match && match[1] === 'mcq') {
+      return <InteractiveMultipleChoice text={text} />;
+    }
+    if (!inline && match && match[1] === 'reorder') {
+      return <InteractiveReorder text={text} />;
+    }
+    if (text.startsWith('ans:')) {
+      const answer = text.replace('ans:', '');
+      return <InteractiveFillBlank correctAnswer={answer} />;
+    }
+    return <code className={className} {...props}>{children}</code>;
+  }
+};
 
 const AdminLessonCreateContent = () => {
   const navigate = useNavigate();
-  const [markdownValue, setMarkdownValue] = useState('## Nội dung\n\nBắt đầu nhập nội dung của bạn tại đây...');
+  const location = useLocation();
+  
+  const editMode = location.state?.editMode || false;
+  const lessonData = location.state?.lessonData || null;
+
+  const defaultTemplate = `## Mục tiêu\n- \n\n## Nội dung chính\n1. \n\n## Từ vựng mới\n- \n\n## Bài tập luyện tập\n1. `;
+  const [markdownValue, setMarkdownValue] = useState(editMode && lessonData?.contentMarkdown ? lessonData.contentMarkdown : defaultTemplate);
   const [contentType, setContentType] = useState('lesson'); // 'lesson' or 'grammar'
   
   // Dữ liệu cho admin/lessons
   const [lessonFormData, setLessonFormData] = useState({
-    title: '',
-    timelineId: '',
-    topic: '',
-    status: 'published',
-    videoUrl: '',
-    order: ''
+    title: editMode ? lessonData.title || '' : '',
+    timelineId: editMode ? lessonData.timelineId || '' : '',
+    topic: editMode ? lessonData.topic || '' : '',
+    status: editMode ? lessonData.status || 'published' : 'published',
+    videoUrl: editMode ? lessonData.videoUrl || '' : '',
+    order: editMode ? lessonData.order || '' : ''
   });
 
   // Dữ liệu cho admin/grammars
@@ -98,8 +135,14 @@ const AdminLessonCreateContent = () => {
           contentMarkdown: markdownValue,
           order: finalOrder
         };
-        await lessonApi.create(payload);
-        alert('Tạo bài học thành công!');
+        
+        if (editMode) {
+          await lessonApi.update(lessonData.id, payload);
+          alert('Cập nhật bài học thành công!');
+        } else {
+          await lessonApi.create(payload);
+          alert('Tạo bài học thành công!');
+        }
       } else {
         const payload = {
           lessonId: grammarFormData.lessonId,
@@ -130,14 +173,16 @@ const AdminLessonCreateContent = () => {
           >
             <ArrowLeft size={24} color="#fff" />
           </button>
-          <h1 className="admin-heading" style={{ marginBottom: 0 }}>TẠO BÀI HỌC MỚI</h1>
+          <h1 className="admin-heading" style={{ marginBottom: 0 }}>
+            {editMode ? 'CHỈNH SỬA BÀI HỌC' : 'TẠO BÀI HỌC MỚI'}
+          </h1>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
           <button className="modal-btn-cancel" onClick={() => navigate('/admin/content')}>
             Hủy
           </button>
           <button className="admin-btn-primary" onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Save size={18} /> Lưu & Xuất bản
+            <Save size={18} /> {editMode ? 'Lưu Thay Đổi' : 'Lưu & Xuất bản'}
           </button>
         </div>
       </div>
@@ -255,6 +300,10 @@ const AdminLessonCreateContent = () => {
           onChange={setMarkdownValue}
           height={600}
           preview="live"
+          previewOptions={{
+            components: markdownComponents,
+            remarkPlugins: [remarkBreaks]
+          }}
         />
       </div>
 
