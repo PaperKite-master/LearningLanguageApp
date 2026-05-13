@@ -1,29 +1,35 @@
 import axiosClient from './axiosClient';
 
-const lessonApi = {
+const timelineApi = {
   getAll: async () => {
-    const url = '/lessons';
+    const url = '/timelines';
+    const response = await axiosClient.get(url);
+    return response.data.data;
+  },
+
+  getById: async (id) => {
+    const url = `/timelines/${id}`;
     const response = await axiosClient.get(url);
     return response.data.data;
   },
 
   create: async (payload) => {
-    const url = '/admin/lessons';
+    const url = '/admin/timelines';
     const response = await axiosClient.post(url, payload);
     return response.data.data;
   },
 
   update: async (id, payload) => {
-    const url = `/admin/lessons/${id}`;
+    const url = `/admin/timelines/${id}`;
     const response = await axiosClient.patch(url, payload);
     return response.data.data;
   },
 
   delete: async (id) => {
-    const url = `/admin/lessons/${id}`;
+    const url = `/admin/timelines/${id}`;
     const response = await axiosClient.delete(url);
     return response.data;
   }
 };
 
-export default lessonApi;
+export default timelineApi;

@@ -2,8 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, PlayCircle, BookOpen } from 'lucide-react';
 import MDEditor from '@uiw/react-md-editor';
+import remarkBreaks from 'remark-breaks';
 import userLessonApi from '../../api/userLessonApi';
 import Sidebar from '../../components/dashboard/Sidebar';
+import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder } from '../../components/study/InteractiveExercises';
+
+const extractText = (children) => {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) return children.map(extractText).join('');
+  if (children?.props?.children) return extractText(children.props.children);
+  return String(children);
+};
+
+const getMarkdownComponents = (onComplete) => ({
+  code: ({ inline, className, children, node, ...props }) => {
+    const text = extractText(children);
+    const match = /language-(\w+)/.exec(className || '');
+    
+    // Tạo ID duy nhất cho exercise, ưu tiên dùng node offset nếu có, nếu không thì dùng text
+    const exerciseId = node?.position?.start?.offset ? `ex_${node.position.start.offset}` : text;
+    
+    // Xử lý game ghép từ (code block dạng: ```match)
+    if (!inline && match && match[1] === 'match') {
+      return <InteractiveMatching text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
+    }
+    
+    // Xử lý trắc nghiệm (code block dạng: ```mcq)
+    if (!inline && match && match[1] === 'mcq') {
+      return <InteractiveMultipleChoice text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
+    }
+    
+    // Xử lý sắp xếp câu (code block dạng: ```reorder)
+    if (!inline && match && match[1] === 'reorder') {
+      return <InteractiveReorder text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
+    }
+    
+    // Xử lý điền từ (inline code dạng: `ans:TỪ_KHÓA`)
+    if (text.startsWith('ans:')) {
+      const answer = text.replace('ans:', '');
+      return <InteractiveFillBlank correctAnswer={answer} onComplete={() => onComplete && onComplete(exerciseId)} />;
+    }
+    
+    return <code className={className} {...props}>{children}</code>;
+  }
+});
 
 const LessonDetail = () => {
   const { id } = useParams();
@@ -12,6 +54,18 @@ const LessonDetail = () => {
   const [grammars, setGrammars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [totalExercises, setTotalExercises] = useState(0);
+  const [completedIds, setCompletedIds] = useState([]);
+
+  const countExercises = (markdown) => {
+    if (!markdown) return 0;
+    let count = 0;
+    count += (markdown.match(/ans:/g) || []).length;
+    count += (markdown.match(/```match/g) || []).length;
+    count += (markdown.match(/```mcq/g) || []).length;
+    count += (markdown.match(/```reorder/g) || []).length;
+    return count;
+  };
 
   useEffect(() => {
     const fetchLessonData = async () => {
@@ -20,6 +74,17 @@ const LessonDetail = () => {
         // Lấy chi tiết bài học
         const lessonData = await userLessonApi.getLessonById(id);
         setLesson(lessonData);
+        
+        const total = countExercises(lessonData.contentMarkdown);
+        setTotalExercises(total);
+        
+        // Khôi phục tiến độ từ localStorage
+        const realId = lessonData.id || id;
+        const savedProgress = localStorage.getItem(`lessonProgress_${realId}`);
+        if (savedProgress) {
+          const parsed = JSON.parse(savedProgress);
+          setCompletedIds(parsed.completedIds || []);
+        }
 
         // Lấy danh sách ngữ pháp liên quan (không bắt buộc, nếu API lỗi thì có thể bỏ qua)
         try {
@@ -38,6 +103,26 @@ const LessonDetail = () => {
 
     fetchLessonData();
   }, [id]);
+
+  const handleExerciseComplete = (exerciseId) => {
+    setCompletedIds(prev => {
+      if (prev.includes(exerciseId)) return prev;
+
+      const newIds = [...prev, exerciseId];
+      const realId = lesson?.id || id;
+      // Tránh việc phần trăm vượt quá 100 nếu admin sửa bài làm tăng số lượng
+      const safeTotal = totalExercises > 0 ? totalExercises : 1;
+      const percentage = Math.min(100, Math.round((newIds.length / safeTotal) * 100));
+      
+      localStorage.setItem(`lessonProgress_${realId}`, JSON.stringify({
+        completedCount: newIds.length,
+        completedIds: newIds,
+        totalExercises,
+        percentage
+      }));
+      return newIds;
+    });
+  };
 
   // Hàm chuyển đổi link Youtube sang định dạng nhúng (embed)
   const getEmbedUrl = (url) => {
@@ -124,7 +209,16 @@ const LessonDetail = () => {
               <BookOpen size={20} color="#10b981" /> Nội Dung Chính
             </h3>
             <div className="markdown-preview-wrapper" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-              <MDEditor.Markdown source={lesson.contentMarkdown} style={{ background: 'transparent' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Tiến độ bài học:</span>
+                <span style={{ color: '#10b981', fontWeight: 'bold' }}>{completedIds.length} / {totalExercises} Hoàn thành</span>
+              </div>
+              <MDEditor.Markdown 
+                source={lesson.contentMarkdown} 
+                style={{ background: 'transparent' }} 
+                components={getMarkdownComponents(handleExerciseComplete)}
+                remarkPlugins={[remarkBreaks]}
+              />
             </div>
           </div>
         )}
@@ -138,8 +232,12 @@ const LessonDetail = () => {
             {grammars.map((grammar, index) => (
               <div key={grammar.id || index} style={{ marginBottom: '20px', background: '#1c2035', padding: '24px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <h4 style={{ fontSize: '1.3rem', color: '#60a5fa', marginBottom: '15px' }}>{grammar.title}</h4>
-                <div className="markdown-preview-wrapper" style={{ fontSize: '1.05rem', lineHeight: '1.7' }}>
-                  <MDEditor.Markdown source={grammar.contentMarkdown} style={{ background: 'transparent' }} />
+                <div className="markdown-preview-wrapper" style={{ fontSize: '1.05rem', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+                  <MDEditor.Markdown 
+                    source={grammar.contentMarkdown} 
+                    style={{ background: 'transparent' }} 
+                    components={markdownComponents}
+                  />
                 </div>
               </div>
             ))}

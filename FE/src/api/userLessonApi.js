@@ -1,15 +1,34 @@
 import axiosClient from './axiosClient';
+import lessonApi from './lessonApi';
+
+const getRealIdFromDisplayId = async (displayId) => {
+  if (typeof displayId === 'string' && displayId.startsWith('L')) {
+    const orderStr = displayId.substring(1);
+    const orderNum = parseInt(orderStr, 10);
+    if (!isNaN(orderNum)) {
+      const allLessons = await lessonApi.getAll();
+      const found = allLessons.find(l => l.order === orderNum);
+      if (found) return found.id;
+    }
+  }
+  return displayId;
+};
 
 const userLessonApi = {
   getLessonById: async (id) => {
-    const url = `/lessons/${id}`;
+    // Nếu truyền L001 thì tự dịch ra UUID
+    const realId = await getRealIdFromDisplayId(id);
+    
+    const url = `/lessons/${realId}`;
     const response = await axiosClient.get(url);
     return response.data.data;
   },
 
   getGrammarsByLessonId: async (lessonId) => {
+    const realId = await getRealIdFromDisplayId(lessonId);
+    
     // Assuming backend endpoint for grammars filtered by lessonId
-    const url = `/grammars?lessonId=${lessonId}`;
+    const url = `/grammars?lessonId=${realId}`;
     const response = await axiosClient.get(url);
     return response.data.data;
   }

@@ -19,7 +19,7 @@ const AdminContentList = () => {
     const fetchLessons = async () => {
       try {
         const data = await lessonApi.getAll();
-        const sortedData = (data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const sortedData = (data || []).sort((a, b) => (b.order || 0) - (a.order || 0));
         setContentList(sortedData);
       } catch (error) {
         console.error("Lỗi tải bài học:", error);
@@ -30,9 +30,7 @@ const AdminContentList = () => {
   }, []);
   
   // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
-  const [formData, setFormData] = useState({ id: '', title: '', topic: '', level: 'N5', category: 'Từ vựng', status: 'Draft' });
+  // Removed old modal states
   
   // Delete confirm state
   const [itemToDelete, setItemToDelete] = useState(null);
@@ -49,24 +47,22 @@ const AdminContentList = () => {
   };
 
   const handleOpenEditModal = (item) => {
-    setModalMode('edit');
-    setFormData(item);
-    setIsModalOpen(true);
+    navigate('/admin/content/create', { state: { editMode: true, lessonData: item } });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (modalMode === 'add') {
-      setContentList([...contentList, formData]);
-    } else {
-      setContentList(contentList.map(item => item.id === formData.id ? formData : item));
+  const executeDelete = async () => {
+    try {
+      if (itemToDelete && itemToDelete.id) {
+        await lessonApi.delete(itemToDelete.id);
+        setContentList(contentList.filter(item => item.id !== itemToDelete.id));
+        alert('Xóa bài học thành công!');
+      }
+    } catch (error) {
+      console.error('Lỗi khi xóa bài học:', error);
+      alert('Có lỗi xảy ra khi xóa bài học. Vui lòng thử lại.');
+    } finally {
+      setItemToDelete(null);
     }
-    setIsModalOpen(false);
-  };
-
-  const executeDelete = () => {
-    setContentList(contentList.filter(item => item.id !== itemToDelete.id));
-    setItemToDelete(null);
   };
 
   return (
@@ -150,115 +146,6 @@ const AdminContentList = () => {
         </div>
         
       </div>
-
-      {/* CREATE / EDIT MODAL */}
-      {isModalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box">
-            <div className="modal-header">
-              <h2>{modalMode === 'add' ? 'Thêm Bài Học Mới' : 'Chỉnh Sửa Bài Học'}</h2>
-              <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>
-                <X size={24} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="modal-body-form">
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label>Mã bài học (ID)</label>
-                  <input type="text" value={formData.id} disabled className="modal-input disabled-input" />
-                </div>
-                <div className="form-group">
-                  <label>Chủ đề</label>
-                  <input 
-                    type="text" 
-                    value={formData.topic} 
-                    onChange={e => setFormData({...formData, topic: e.target.value})} 
-                    className="modal-input" 
-                    required 
-                    placeholder="VD: Từ vựng, Trợ từ..."
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Tiêu đề bài học</label>
-                <input 
-                  type="text" 
-                  value={formData.title} 
-                  onChange={e => setFormData({...formData, title: e.target.value})} 
-                  className="modal-input" 
-                  required 
-                  placeholder="VD: Luyện gõ chữ Hiragana"
-                />
-              </div>
-
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label>Cấp độ</label>
-                  <select 
-                    value={formData.level} 
-                    onChange={e => setFormData({...formData, level: e.target.value})} 
-                    className="modal-input"
-                  >
-                    <option value="N5">JLPT N5</option>
-                    <option value="N4">JLPT N4</option>
-                    <option value="N3">JLPT N3</option>
-                    <option value="N2">JLPT N2</option>
-                    <option value="N1">JLPT N1</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Phân loại</label>
-                  <select 
-                    value={formData.category} 
-                    onChange={e => setFormData({...formData, category: e.target.value})} 
-                    className="modal-input"
-                  >
-                    <option value="Bảng chữ cái">Bảng chữ cái</option>
-                    <option value="Từ vựng">Từ vựng</option>
-                    <option value="Ngữ pháp">Ngữ pháp</option>
-                    <option value="Kanji">Kanji</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Trạng thái hiển thị</label>
-                <div className="status-radio-group">
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name="status" 
-                      value="Published" 
-                      checked={formData.status === 'Published'}
-                      onChange={e => setFormData({...formData, status: e.target.value})}
-                    /> Thuận phát (Published)
-                  </label>
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name="status" 
-                      value="Draft" 
-                      checked={formData.status === 'Draft'}
-                      onChange={e => setFormData({...formData, status: e.target.value})}
-                    /> Lưu nháp (Draft)
-                  </label>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button type="button" className="modal-btn-cancel" onClick={() => setIsModalOpen(false)}>
-                  Hủy bỏ
-                </button>
-                <button type="submit" className="admin-btn-primary">
-                  {modalMode === 'add' ? 'Tạo Bài Học' : 'Lưu Thay Đổi'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {itemToDelete && (

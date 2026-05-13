@@ -11,6 +11,12 @@ const grammarApi = {
     const url = `/admin/grammars/${id}`;
     const response = await axiosClient.patch(url, payload);
     return response.data.data;
+  },
+
+  delete: async (id) => {
+    const url = `/admin/grammars/${id}`;
+    const response = await axiosClient.delete(url);
+    return response.data;
   }
 };
 
