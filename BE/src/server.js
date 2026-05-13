@@ -9,6 +9,7 @@ import { adminLessonRoutes } from './Api/Routes/adminLesson.routes.js';
 import { adminTimelineRoutes } from './Api/Routes/adminTimeline.routes.js';
 import { adminGrammarRoutes } from './Api/Routes/adminGrammar.routes.js';
 import { authRoutes } from './Api/Routes/auth.routes.js';
+import { flashcardRoutes } from './Api/Routes/flashcard.routes.js';
 import { prismaPlugin } from './Infrastructure/Persistence/prisma.plugin.js';
 
 export async function buildApp() {
@@ -64,6 +65,7 @@ export async function buildApp() {
   await app.register(adminLessonRoutes, { prefix: '/admin/lessons' });
   await app.register(adminTimelineRoutes, { prefix: '/admin/timelines' });
   await app.register(adminGrammarRoutes, { prefix: '/admin/grammars' });
+  await app.register(flashcardRoutes, { prefix: '/flashcards' });
 
   return app;
 }
