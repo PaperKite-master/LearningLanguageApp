@@ -5,7 +5,6 @@ const authApi = {
     const url = '/auth/login';
     const response = await axiosClient.post(url, payload);
     
-    // Lưu token sau khi đăng nhập thành công
     const { accessToken, refreshToken } = response.data;
     if (accessToken) {
       localStorage.setItem('accessToken', accessToken);
@@ -32,6 +31,23 @@ const authApi = {
   logout: () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+  },
+
+  forgotPassword: async (email) => {
+    const url = '/auth/forgot-password';
+    const response = await axiosClient.post(url, { email });
+    return response.data;
+  },
+
+  resetPassword: async (newPassword, token) => {
+    const url = '/auth/reset-password';
+    const response = await axiosClient.post(
+      url, 
+      { newPassword },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
   }
 };
 

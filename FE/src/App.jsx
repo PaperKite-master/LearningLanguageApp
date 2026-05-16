@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LandingPage from './pages/landing/LandingPage';
 import Dashboard from './pages/dashboard/Dashboard';
 import Study from './pages/study/Study';
@@ -15,11 +16,26 @@ import AdminTimeline from './pages/admin/AdminTimeline';
 import AdminSettings from './pages/admin/AdminSettings';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import './index.css';
+
+function RecoveryRedirect() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery') && hash.includes('access_token')) {
+      // Navigate to reset password and preserve the hash
+      navigate('/reset-password' + hash);
+    }
+  }, [navigate]);
+  return null;
+}
 
 function App() {
   return (
     <Router>
+      <RecoveryRedirect />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         
@@ -51,6 +67,8 @@ function App() {
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/login" replace />} />

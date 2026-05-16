@@ -54,7 +54,11 @@ const LearningPath = () => {
               const lesson = realLessons.find(l => l.order === item.id);
               
               if (lesson) {
-                const savedProgress = localStorage.getItem(`lessonProgress_${lesson.id}`);
+                const userStr = localStorage.getItem('user');
+                const userId = userStr ? JSON.parse(userStr).id : 'guest';
+                const progressKey = `progress_${userId}_lesson_${lesson.id}`;
+                
+                const savedProgress = localStorage.getItem(progressKey);
                 let progressValue = 0;
                 if (savedProgress) {
                   const parsed = JSON.parse(savedProgress);

@@ -43,6 +43,9 @@ const Login = () => {
       // 2. Lấy thông tin user (để kiểm tra role)
       const user = await authApi.getMe();
       console.log('User info:', user);
+      
+      // Lưu thông tin user (nhất là ID) để dùng cho theo dõi tiến độ
+      localStorage.setItem('user', JSON.stringify(user));
 
       // 3. Phân luồng theo role
       if (user.role === 'ADMIN') {
@@ -98,6 +101,12 @@ const Login = () => {
                   placeholder="Mật khẩu" 
                   required
                 />
+              </div>
+
+              <div style={{ textAlign: 'right', marginTop: '-10px', marginBottom: '20px' }}>
+                <Link to="/forgot-password" style={{ color: '#fff', fontSize: '13px', textDecoration: 'none', opacity: 0.8 }}>
+                  Quên mật khẩu?
+                </Link>
               </div>
               
               <button type="submit" className="login-btn pill-element">

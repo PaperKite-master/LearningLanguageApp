@@ -1,20 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, MoreHorizontal, Edit2, Trash2, X, Lock } from 'lucide-react';
-
-const MOCK_USERS = [
-  { id: 'U001', name: 'Nguyễn Văn A', email: 'anguyen@12gmail.com', role: 'Student', progress: 75, status: 'Active' },
-  { id: 'U002', name: 'Hồ Thị Bích', email: 'aassfv@214gmail.com', role: 'Pro', progress: 39, status: 'Active' },
-  { id: 'U003', name: 'Nguyễn Hoàng Luân', email: 'dsgtb@12gmail.com', role: 'Admin', progress: 55, status: 'Active' },
-  { id: 'U004', name: 'Nguyễn Thị Bích Ngọc', email: 'jmtyfgs@12gmail.com', role: 'Student', progress: 91, status: 'Active' },
-  { id: 'U005', name: 'Trần Thanh Thảo', email: 'ádafasa@12gmail.com', role: 'Student', progress: 6, status: 'Inactive' },
-  { id: 'U006', name: 'Lưu Hoàng Phúc An', email: 'hgmfn@12gmail.com', role: 'Student', progress: 16, status: 'Active' },
-  { id: 'U007', name: 'Phạm Hoàng An', email: 'hgmfn@12gmail.com', role: 'Student', progress: 50, status: 'Inactive' },
-  { id: 'U008', name: 'Hoàng Tuyết Nhi', email: 'aassfv@214gmail.com', role: 'Pro', progress: 87, status: 'Inactive' }
-];
+import userApi from '../../api/userApi';
 
 const AdminUsersContent = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [users, setUsers] = useState(MOCK_USERS);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Dropdown states
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -37,10 +28,47 @@ const AdminUsersContent = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await userApi.getAllUsers();
+      
+      const formattedUsers = data.map((user, index) => {
+        const formatRole = (roleStr) => {
+          if (!roleStr || roleStr.toUpperCase() === 'USER') return 'User';
+          return roleStr.charAt(0).toUpperCase() + roleStr.slice(1).toLowerCase();
+        };
+        const formatStatus = (statusStr) => {
+          if (statusStr === 'INACTIVE') return 'Inactive';
+          return 'Active';
+        };
+
+        return {
+          ...user,
+          displayId: `U${String(index + 1).padStart(3, '0')}`,
+          name: user.full_name || 'Người dùng', // Map full_name to name
+          uiRole: formatRole(user.role),
+          uiStatus: formatStatus(user.status),
+          progress: user.progress || 0
+        };
+      });
+      
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.id.toLowerCase().includes(searchTerm.toLowerCase())
+    (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.displayId && user.displayId.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const toggleDropdown = (e, userId) => {
@@ -54,19 +82,46 @@ const AdminUsersContent = () => {
 
   const handleEditClick = (user) => {
     setUserToEdit(user);
-    setEditFormData({ role: user.role, status: user.status });
+    const currentRole = (user.role || 'USER').toUpperCase();
+    setEditFormData({ 
+      role: currentRole, 
+      status: user.status || 'ACTIVE' 
+    });
     setActiveDropdown(null);
   };
 
-  const executeEdit = (e) => {
+  const executeEdit = async (e) => {
     e.preventDefault();
-    setUsers(users.map(u => u.id === userToEdit.id ? { ...u, role: editFormData.role, status: editFormData.status } : u));
-    setUserToEdit(null);
+    try {
+      await userApi.updateRole(userToEdit.id, editFormData.role.toUpperCase());
+      fetchUsers();
+      setUserToEdit(null);
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      alert('Có lỗi xảy ra khi cập nhật người dùng');
+    }
   };
 
-  const executeDelete = () => {
-    setUsers(users.filter(u => u.id !== userToDelete.id));
-    setUserToDelete(null);
+  const executeDelete = async () => {
+    try {
+      await userApi.deleteUser(userToDelete.id);
+      fetchUsers();
+      setUserToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      alert('Có lỗi xảy ra khi xóa người dùng');
+    }
+  };
+
+  const toggleStatus = async (user) => {
+    try {
+      const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      await userApi.updateStatus(user.id, newStatus);
+      fetchUsers();
+    } catch (error) {
+      console.error('Failed to toggle status:', error);
+    }
+    setActiveDropdown(null);
   };
 
   return (
@@ -91,6 +146,9 @@ const AdminUsersContent = () => {
 
         {/* Data Table */}
         <div className="admin-table-wrapper">
+          {loading ? (
+             <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>Đang tải dữ liệu...</div>
+          ) : (
           <table className="admin-users-table" style={{ position: 'relative' }}>
             <thead>
               <tr>
@@ -106,13 +164,13 @@ const AdminUsersContent = () => {
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.id}>
-                  <td className="col-id">{user.id}</td>
-                  <td className="col-name">{user.name}</td>
+                  <td className="col-id">{user.displayId}</td>
+                  <td className="col-name">{user.name || 'Người dùng'}</td>
                   <td className="col-email">{user.email}</td>
                   
                   <td className="col-role">
-                    <span className={`role-badge role-${user.role.toLowerCase()}`}>
-                      {user.role}
+                    <span className={`role-badge role-${user.uiRole.toLowerCase()}`}>
+                      {user.uiRole}
                     </span>
                   </td>
                   
@@ -129,8 +187,8 @@ const AdminUsersContent = () => {
                   </td>
                   
                   <td className="col-status">
-                    <span className={`status-badge status-${user.status.toLowerCase()}`}>
-                      {user.status}
+                    <span className={`status-badge status-${user.uiStatus.toLowerCase()}`}>
+                      {user.uiStatus}
                     </span>
                   </td>
                   
@@ -149,11 +207,8 @@ const AdminUsersContent = () => {
                           <button className="kebab-dropdown-item" onClick={() => handleEditClick(user)}>
                             <Edit2 size={16} /> Chỉnh sửa
                           </button>
-                          <button className="kebab-dropdown-item" onClick={() => {
-                            setUsers(users.map(u => u.id === user.id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u));
-                            setActiveDropdown(null);
-                          }}>
-                            <Lock size={16} /> {user.status === 'Active' ? 'Khóa tài khoản' : 'Mở khóa'}
+                          <button className="kebab-dropdown-item" onClick={() => toggleStatus(user)}>
+                            <Lock size={16} /> {user.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Mở khóa'}
                           </button>
                           <button className="kebab-dropdown-item danger-item" onClick={() => {
                             setUserToDelete(user);
@@ -169,8 +224,9 @@ const AdminUsersContent = () => {
               ))}
             </tbody>
           </table>
+          )}
           
-          {filteredUsers.length === 0 && (
+          {!loading && filteredUsers.length === 0 && (
             <div className="no-data-msg">Không tìm thấy tài khoản phù hợp</div>
           )}
         </div>
@@ -205,9 +261,8 @@ const AdminUsersContent = () => {
                     onChange={e => setEditFormData({...editFormData, role: e.target.value})} 
                     className="modal-input"
                   >
-                    <option value="Student">Học viên (Student)</option>
-                    <option value="Pro">Tài khoản Pro</option>
-                    <option value="Admin">Quản trị viên (Admin)</option>
+                    <option value="USER">Học viên (User)</option>
+                    <option value="ADMIN">Quản trị viên (Admin)</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -217,8 +272,8 @@ const AdminUsersContent = () => {
                     onChange={e => setEditFormData({...editFormData, status: e.target.value})} 
                     className="modal-input"
                   >
-                    <option value="Active">Đang hoạt động</option>
-                    <option value="Inactive">Bị vô hiệu / Khóa</option>
+                    <option value="ACTIVE">Đang hoạt động</option>
+                    <option value="INACTIVE">Bị vô hiệu / Khóa</option>
                   </select>
                 </div>
               </div>
