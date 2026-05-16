@@ -16,11 +16,30 @@ export const LessonIdParamsSchema = Type.Object({
   id: Type.String()
 });
 
+export const LessonProgressEventSchema = Type.Union([
+  Type.Literal('OPEN'),
+  Type.Literal('COMPLETE')
+]);
+
+export const LessonProgressBodySchema = Type.Object({
+  event: LessonProgressEventSchema
+});
+
+export const LessonProgressDtoSchema = Type.Object({
+  lessonId: Type.String(),
+  isCompleted: Type.Boolean(),
+  lastAccessed: Type.String()
+});
+
 export const ListLessonsResponseSchema = Type.Object({
   data: Type.Array(LessonDtoSchema)
 });
 
 export const LessonResponseSchema = Type.Object({
   data: LessonDtoSchema
+});
+
+export const LessonProgressResponseSchema = Type.Object({
+  data: LessonProgressDtoSchema
 });
 
