@@ -21,8 +21,12 @@ const ProgressWidget = () => {
         let totalPercentageSum = 0;
         let fullyCompletedCount = 0;
 
+        const userStr = localStorage.getItem('user');
+        const userId = userStr ? JSON.parse(userStr).id : 'guest';
+
         data.forEach(lesson => {
-          const savedProgress = localStorage.getItem(`lessonProgress_${lesson.id}`);
+          const progressKey = `progress_${userId}_lesson_${lesson.id}`;
+          const savedProgress = localStorage.getItem(progressKey);
           if (savedProgress) {
             const parsed = JSON.parse(savedProgress);
             const percent = parsed.percentage || 0;

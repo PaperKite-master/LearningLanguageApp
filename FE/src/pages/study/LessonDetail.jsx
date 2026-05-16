@@ -4,6 +4,7 @@ import { ArrowLeft, PlayCircle, BookOpen } from 'lucide-react';
 import MDEditor from '@uiw/react-md-editor';
 import remarkBreaks from 'remark-breaks';
 import userLessonApi from '../../api/userLessonApi';
+import lessonApi from '../../api/lessonApi';
 import Sidebar from '../../components/dashboard/Sidebar';
 import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder } from '../../components/study/InteractiveExercises';
 
@@ -80,10 +81,21 @@ const LessonDetail = () => {
         
         // Khôi phục tiến độ từ localStorage
         const realId = lessonData.id || id;
-        const savedProgress = localStorage.getItem(`lessonProgress_${realId}`);
+        const userStr = localStorage.getItem('user');
+        const userId = userStr ? JSON.parse(userStr).id : 'guest';
+        const progressKey = `progress_${userId}_lesson_${realId}`;
+        
+        const savedProgress = localStorage.getItem(progressKey);
         if (savedProgress) {
           const parsed = JSON.parse(savedProgress);
           setCompletedIds(parsed.completedIds || []);
+        }
+
+        // Gọi API backend báo mở bài
+        try {
+          await lessonApi.saveProgress(realId, 'OPEN');
+        } catch (apiErr) {
+          console.log('Không thể lưu tiến độ mở bài lên server:', apiErr);
         }
 
         // Lấy danh sách ngữ pháp liên quan (không bắt buộc, nếu API lỗi thì có thể bỏ qua)
@@ -114,12 +126,24 @@ const LessonDetail = () => {
       const safeTotal = totalExercises > 0 ? totalExercises : 1;
       const percentage = Math.min(100, Math.round((newIds.length / safeTotal) * 100));
       
-      localStorage.setItem(`lessonProgress_${realId}`, JSON.stringify({
+      const userStr = localStorage.getItem('user');
+      const userId = userStr ? JSON.parse(userStr).id : 'guest';
+      const progressKey = `progress_${userId}_lesson_${realId}`;
+      
+      localStorage.setItem(progressKey, JSON.stringify({
         completedCount: newIds.length,
         completedIds: newIds,
         totalExercises,
         percentage
       }));
+
+      // Gọi API báo hoàn thành
+      if (percentage === 100) {
+        lessonApi.saveProgress(realId, 'COMPLETE').catch(err => {
+          console.error('Không thể lưu tiến độ hoàn thành:', err);
+        });
+      }
+
       return newIds;
     });
   };
