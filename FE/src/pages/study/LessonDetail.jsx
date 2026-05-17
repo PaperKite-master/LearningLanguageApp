@@ -6,7 +6,7 @@ import remarkBreaks from 'remark-breaks';
 import userLessonApi from '../../api/userLessonApi';
 import lessonApi from '../../api/lessonApi';
 import Sidebar from '../../components/dashboard/Sidebar';
-import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder } from '../../components/study/InteractiveExercises';
+import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
 
 const extractText = (children) => {
   if (typeof children === 'string') return children;
@@ -28,6 +28,11 @@ const getMarkdownComponents = (onComplete) => ({
       return <InteractiveMatching text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
     }
     
+    // Xử lý nối từ (code block dạng: ```connect)
+    if (!inline && match && match[1] === 'connect') {
+      return <InteractiveConnect text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
+    }
+
     // Xử lý trắc nghiệm (code block dạng: ```mcq)
     if (!inline && match && match[1] === 'mcq') {
       return <InteractiveMultipleChoice text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
@@ -63,6 +68,7 @@ const LessonDetail = () => {
     let count = 0;
     count += (markdown.match(/ans:/g) || []).length;
     count += (markdown.match(/```match/g) || []).length;
+    count += (markdown.match(/```connect/g) || []).length;
     count += (markdown.match(/```mcq/g) || []).length;
     count += (markdown.match(/```reorder/g) || []).length;
     return count;
@@ -116,7 +122,7 @@ const LessonDetail = () => {
     fetchLessonData();
   }, [id]);
 
-  const handleExerciseComplete = (exerciseId) => {
+  const handleExerciseComplete = React.useCallback((exerciseId) => {
     setCompletedIds(prev => {
       if (prev.includes(exerciseId)) return prev;
 
@@ -146,7 +152,9 @@ const LessonDetail = () => {
 
       return newIds;
     });
-  };
+  }, [id, lesson?.id, totalExercises]);
+
+  const mdComponents = React.useMemo(() => getMarkdownComponents(handleExerciseComplete), [handleExerciseComplete]);
 
   // Hàm chuyển đổi link Youtube sang định dạng nhúng (embed)
   const getEmbedUrl = (url) => {
@@ -240,7 +248,7 @@ const LessonDetail = () => {
               <MDEditor.Markdown 
                 source={lesson.contentMarkdown} 
                 style={{ background: 'transparent' }} 
-                components={getMarkdownComponents(handleExerciseComplete)}
+                components={mdComponents}
                 remarkPlugins={[remarkBreaks]}
               />
             </div>

@@ -5,7 +5,7 @@ import remarkBreaks from 'remark-breaks';
 import { ArrowLeft, Save, FileText } from 'lucide-react';
 import lessonApi from '../../api/lessonApi';
 import grammarApi from '../../api/grammarApi';
-import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder } from '../../components/study/InteractiveExercises';
+import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
 
 const extractText = (children) => {
   if (typeof children === 'string') return children;
@@ -27,6 +27,9 @@ const markdownComponents = {
     }
     if (!inline && match && match[1] === 'reorder') {
       return <InteractiveReorder text={text} />;
+    }
+    if (!inline && match && match[1] === 'connect') {
+      return <InteractiveConnect text={text} />;
     }
     if (text.startsWith('ans:')) {
       const answer = text.replace('ans:', '');
