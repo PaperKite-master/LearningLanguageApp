@@ -6,16 +6,9 @@ export const AdminUserIdParamsSchema = Type.Object({
 
 export const AdminUserRoleSchema = Type.Union([
   Type.Literal('ADMIN'),
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-  Type.Literal('STUDENT'),
->>>>>>> Truong
-  Type.Literal('PRO')
-=======
+  Type.Literal('PRO'),
   Type.Literal('USER'),
   Type.Literal('GUEST')
->>>>>>> Stashed changes
 ]);
 
 export const AdminUserStoredRoleSchema = Type.Union([
