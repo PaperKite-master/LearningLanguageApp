@@ -270,7 +270,8 @@ const AdminUsersContent = () => {
                   <select 
                     value={editFormData.status} 
                     onChange={e => setEditFormData({...editFormData, status: e.target.value})} 
-                    className="modal-input"
+                    className="modal-input disabled-input"
+                    disabled
                   >
                     <option value="ACTIVE">Đang hoạt động</option>
                     <option value="INACTIVE">Bị vô hiệu / Khóa</option>

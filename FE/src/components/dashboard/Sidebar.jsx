@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -11,8 +11,16 @@ import {
   LogOut
 } from 'lucide-react';
 import logo from '../../assets/logo.png'; // Assuming logo can be reused
+import authApi from '../../api/authApi';
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    authApi.logout();
+    navigate('/login');
+  };
+
   return (
     <aside className="dashboard-sidebar">
       <div className="sidebar-logo">
@@ -55,7 +63,7 @@ const Sidebar = () => {
         <NavLink to="/profile" className={({isActive}) => isActive ? "bottom-btn active" : "bottom-btn"}>
           <UserCircle size={36} strokeWidth={2.5} />
         </NavLink>
-        <button className="bottom-btn">
+        <button className="bottom-btn" onClick={handleLogout} title="Đăng xuất">
           <LogOut size={36} strokeWidth={2.5} />
         </button>
       </div>

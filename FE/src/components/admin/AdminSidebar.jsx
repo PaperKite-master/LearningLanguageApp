@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -11,8 +11,16 @@ import {
   LogOut
 } from 'lucide-react';
 import logo from '../../assets/logo.png';
+import authApi from '../../api/authApi';
 
 const AdminSidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    authApi.logout();
+    navigate('/login');
+  };
+
   return (
     <aside className="dashboard-sidebar admin-sidebar">
       <div className="sidebar-logo">
@@ -50,9 +58,9 @@ const AdminSidebar = () => {
         <NavLink to="/admin/settings" className={({isActive}) => isActive ? "bottom-btn bottom-active" : "bottom-btn"}>
           <Settings size={32} strokeWidth={2.5} />
         </NavLink>
-        <Link to="/admin-login" className="bottom-btn">
+        <button onClick={handleLogout} className="bottom-btn" title="Đăng xuất">
           <LogOut size={32} strokeWidth={2.5} />
-        </Link>
+        </button>
       </div>
     </aside>
   );
