@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+// Dev/Docker cùng origin: để trống → '/api'. Deploy tách BE: VITE_API_BASE_URL=https://api.example.com
+const rawBase = import.meta.env.VITE_API_BASE_URL;
+const baseURL =
+  rawBase != null && String(rawBase).trim() !== ''
+    ? String(rawBase).replace(/\/$/, '')
+    : '/api';
+
 const axiosClient = axios.create({
-  baseURL: '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
