@@ -21,10 +21,13 @@ Copy file env mẫu:
 cp .env.example .env
 ```
 
-Sau đó chỉnh `DATABASE_URL` / `DIRECT_URL` theo môi trường bạn dùng:
+Sau đó chỉnh biến môi trường:
 
-- Local Postgres (Docker): chỉ cần `DATABASE_URL`
-- Supabase: cần `DATABASE_URL` (pooler) + `DIRECT_URL` (direct) — xem `docs/SUPABASE.md`
+- **CORS:** `CORS_ORIGIN` — URL FE (Vercel), ví dụ `https://hina-japanese-app.vercel.app` (phân tách bằng dấu phẩy nếu nhiều origin)
+- **Supabase Auth:** `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- **Database:** `DATABASE_URL` / `DIRECT_URL`
+  - Local Postgres (Docker): chỉ cần `DATABASE_URL`
+  - Supabase: pooler + direct — xem `docs/SUPABASE.md`
 
 ## Prisma
 

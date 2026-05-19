@@ -1,6 +1,8 @@
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import { corsOriginDelegate } from './Infrastructure/corsConfig.js';
 import { healthRoutes } from './Api/Routes/health.routes.js';
 import { lessonRoutes } from './Api/Routes/lesson.routes.js';
 import { timelineRoutes } from './Api/Routes/timeline.routes.js';
@@ -21,6 +23,13 @@ export async function buildApp() {
           ? { target: 'pino-pretty', options: { colorize: true } }
           : undefined
     }
+  });
+
+  await app.register(cors, {
+    origin: corsOriginDelegate,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Swagger / OpenAPI
