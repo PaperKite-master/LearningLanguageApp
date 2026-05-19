@@ -11,7 +11,10 @@ import { adminGrammarRoutes } from './Api/Routes/adminGrammar.routes.js';
 import { adminUsersRoutes } from './Api/Routes/adminUsers.routes.js';
 import { authRoutes } from './Api/Routes/auth.routes.js';
 import { flashcardRoutes } from './Api/Routes/flashcard.routes.js';
+import { notificationRoutes } from './Api/Routes/notification.routes.js';
 import { prismaPlugin } from './Infrastructure/Persistence/prisma.plugin.js';
+import { startScheduler } from './Infrastructure/scheduler.js';
+import { verifySMTPConnection } from './Infrastructure/EmailService.js';
 
 export async function buildApp() {
   const app = Fastify({
@@ -68,6 +71,13 @@ export async function buildApp() {
   await app.register(adminGrammarRoutes, { prefix: '/admin/grammars' });
   await app.register(adminUsersRoutes, { prefix: '/admin/users' });
   await app.register(flashcardRoutes, { prefix: '/flashcards' });
+  await app.register(notificationRoutes, { prefix: '/notifications' });
+
+  // Start cron scheduler for daily reminder emails
+  startScheduler(app.prisma);
+
+  // Verify SMTP connection on startup
+  await verifySMTPConnection();
 
   return app;
 }
