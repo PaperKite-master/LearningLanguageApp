@@ -1,6 +1,8 @@
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import { corsOriginDelegate } from './Infrastructure/corsConfig.js';
 import { healthRoutes } from './Api/Routes/health.routes.js';
 import { lessonRoutes } from './Api/Routes/lesson.routes.js';
 import { timelineRoutes } from './Api/Routes/timeline.routes.js';
@@ -11,10 +13,8 @@ import { adminGrammarRoutes } from './Api/Routes/adminGrammar.routes.js';
 import { adminUsersRoutes } from './Api/Routes/adminUsers.routes.js';
 import { authRoutes } from './Api/Routes/auth.routes.js';
 import { flashcardRoutes } from './Api/Routes/flashcard.routes.js';
-import { notificationRoutes } from './Api/Routes/notification.routes.js';
+import { adminFlashcardRoutes } from './Api/Routes/adminFlashcard.routes.js';
 import { prismaPlugin } from './Infrastructure/Persistence/prisma.plugin.js';
-import { startScheduler } from './Infrastructure/scheduler.js';
-import { verifySMTPConnection } from './Infrastructure/EmailService.js';
 
 export async function buildApp() {
   const app = Fastify({
@@ -24,6 +24,13 @@ export async function buildApp() {
           ? { target: 'pino-pretty', options: { colorize: true } }
           : undefined
     }
+  });
+
+  await app.register(cors, {
+    origin: corsOriginDelegate,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Swagger / OpenAPI
@@ -70,14 +77,8 @@ export async function buildApp() {
   await app.register(adminTimelineRoutes, { prefix: '/admin/timelines' });
   await app.register(adminGrammarRoutes, { prefix: '/admin/grammars' });
   await app.register(adminUsersRoutes, { prefix: '/admin/users' });
+  await app.register(adminFlashcardRoutes, { prefix: '/admin/flashcards' });
   await app.register(flashcardRoutes, { prefix: '/flashcards' });
-  await app.register(notificationRoutes, { prefix: '/notifications' });
-
-  // Start cron scheduler for daily reminder emails
-  startScheduler(app.prisma);
-
-  // Verify SMTP connection on startup
-  await verifySMTPConnection();
 
   return app;
 }
