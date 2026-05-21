@@ -30,12 +30,12 @@ const ForgotPassword = () => {
       <main className="main-content">
         <LeftColumn />
         <div className="right-column">
-          <div className="login-form-container" style={{ position: 'relative' }}>
-            <Link to="/login" className="back-button" style={{ position: 'absolute', top: 0, left: 0, display: 'flex', alignItems: 'center', gap: '5px', color: '#fff', textDecoration: 'none', opacity: 0.7 }}>
+          <div className="login-form-container">
+            <Link to="/login" className="back-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#fff', textDecoration: 'none', opacity: 0.7, marginBottom: '20px' }}>
               <ArrowLeft size={16} /> Quay lại
             </Link>
             
-            <h1 className="login-heading" style={{ marginTop: '30px' }}>QUÊN<br />MẬT KHẨU?</h1>
+            <h1 className="login-heading">QUÊN MẬT KHẨU?</h1>
             
             <p className="login-desc">
               Đừng lo lắng! Hãy nhập email bạn đã đăng ký, chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.
@@ -69,7 +69,7 @@ const ForgotPassword = () => {
                   type="submit" 
                   className="login-btn pill-element"
                   disabled={status === 'loading'}
-                  style={{ marginTop: status === 'error' ? '10px' : '25px', opacity: status === 'loading' ? 0.7 : 1 }}
+                  style={{ marginTop: status === 'error' ? '10px' : '25px', opacity: status === 'loading' ? 0.7 : 1, whiteSpace: 'nowrap' }}
                 >
                   {status === 'loading' ? 'Đang gửi...' : 'Gửi yêu cầu khôi phục'}
                 </button>

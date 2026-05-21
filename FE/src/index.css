@@ -146,7 +146,9 @@ body, html {
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: 0.5px;
-  line-height: 1.2;
+  line-height: 1.4;
+  padding-bottom: 5px;
+  padding-top: 5px;
   margin-bottom: 16px;
   background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%);
   -webkit-background-clip: text;
@@ -234,8 +236,8 @@ body, html {
   font-weight: 700;
   cursor: pointer;
   margin: 10px 0 30px; /* Adjust spacing */
-  /* Make button slightly narrower to match design */
-  width: 160px;
+  min-width: 160px;
+  width: fit-content;
   display: block;
   margin-left: auto;
   margin-right: auto;
