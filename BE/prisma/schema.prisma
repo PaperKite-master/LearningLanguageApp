@@ -453,6 +453,7 @@ model users {
   user_lesson_progress        user_lesson_progress[]
   user_mascot_progress        user_mascot_progress?
   user_notifications_config   user_notifications_config?
+  user_activity_log           user_activity_log[]
 
   @@index([created_at(sort: Desc)], map: "idx_users_created_at_desc")
   @@index([email], map: "idx_users_email")
@@ -557,13 +558,15 @@ model mascots {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model profiles {
-  id         String    @id @db.Uuid
-  full_name  String?
-  avatar_url String?
-  role       String?   @default("USER")
-  total_exp  Int?      @default(0)
-  updated_at DateTime? @default(now()) @db.Timestamptz(6)
-  users      users     @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                   String    @id @db.Uuid
+  full_name            String?
+  avatar_url           String?
+  role                 String?   @default("USER")
+  target_level         String?   @default("N3")
+  total_study_minutes  Int?      @default(0)
+  total_exp            Int?      @default(0)
+  updated_at           DateTime? @default(now()) @db.Timestamptz(6)
+  users                users     @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -637,6 +640,17 @@ model user_lesson_progress {
   @@schema("public")
 }
 
+model user_activity_log {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String   @db.Uuid
+  activity_type String
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id, created_at(sort: Desc)])
+  @@schema("public")
+}
+
 model user_mascot_progress {
   user_id       String   @id @db.Uuid
   mascot_id     String?  @db.Uuid
@@ -654,6 +668,8 @@ model user_notifications_config {
   is_enabled    Boolean?  @default(true)
   reminder_time DateTime? @default(dbgenerated("'08:00:00'::time without time zone")) @db.Time(6)
   timezone      String?   @default("Asia/Ho_Chi_Minh")
+  reminder_date DateTime? @db.Date
+  reminder_type String?   @default("DAILY")
   users         users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")

@@ -1,3 +1,5 @@
+import { logUserActivityUseCase } from './logUserActivity.usecase.js';
+
 export async function updateLessonProgressUseCase({ prisma, userId, lessonId, event }) {
   const isCompleted = event === 'COMPLETE';
 
@@ -19,6 +21,10 @@ export async function updateLessonProgressUseCase({ prisma, userId, lessonId, ev
       last_accessed: new Date()
     }
   });
+
+  if (isCompleted) {
+    await logUserActivityUseCase({ prisma, userId, activityType: 'lesson' });
+  }
 
   return {
     lessonId: progress.lesson_id,
