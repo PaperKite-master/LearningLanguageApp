@@ -84,7 +84,8 @@ const AdminFlashcardsContent = () => {
           <table className="admin-users-table">
             <thead>
               <tr>
-                <th>Tiếng Nhật</th>
+                <th>Mã thẻ</th>
+                <th style={{ textAlign: 'center' }}>Tiếng Nhật</th>
                 <th>Phát âm (Hiragana)</th>
                 <th>Nghĩa Tiếng Việt</th>
                 <th>Cấp độ</th>
@@ -95,7 +96,8 @@ const AdminFlashcardsContent = () => {
             <tbody>
               {filteredFlashcards.map((item) => (
                 <tr key={item.id}>
-                  <td className="col-name">{item.jp}</td>
+                  <td className="col-id" style={{ color: '#9ca3af', fontFamily: 'monospace' }}>{item.id}</td>
+                  <td className="col-name" style={{ textAlign: 'center' }}>{item.jp}</td>
                   <td className="col-email">{item.kana}</td>
                   <td className="col-category">
                     <span className="category-text">{item.meaning}</span>

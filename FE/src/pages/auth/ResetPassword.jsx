@@ -75,12 +75,12 @@ const ResetPassword = () => {
       <main className="main-content">
         <LeftColumn />
         <div className="right-column">
-          <div className="login-form-container" style={{ position: 'relative' }}>
-            <Link to="/login" className="back-button" style={{ position: 'absolute', top: 0, left: 0, display: 'flex', alignItems: 'center', gap: '5px', color: '#fff', textDecoration: 'none', opacity: 0.7 }}>
+          <div className="login-form-container">
+            <Link to="/login" className="back-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#fff', textDecoration: 'none', opacity: 0.7, marginBottom: '20px' }}>
               <ArrowLeft size={16} /> Về đăng nhập
             </Link>
             
-            <h1 className="login-heading" style={{ marginTop: '30px' }}>ĐẶT LẠI<br />MẬT KHẨU</h1>
+            <h1 className="login-heading">ĐẶT LẠI MẬT KHẨU</h1>
             
             <p className="login-desc">
               Vui lòng nhập mật khẩu mới của bạn bên dưới.
@@ -131,7 +131,7 @@ const ResetPassword = () => {
                   type="submit" 
                   className="login-btn pill-element"
                   disabled={!token || status === 'loading'}
-                  style={{ marginTop: status === 'error' ? '10px' : '25px', opacity: (!token || status === 'loading') ? 0.7 : 1 }}
+                  style={{ marginTop: status === 'error' ? '10px' : '25px', opacity: (!token || status === 'loading') ? 0.7 : 1, whiteSpace: 'nowrap' }}
                 >
                   {status === 'loading' ? 'Đang xử lý...' : 'Xác nhận thay đổi'}
                 </button>

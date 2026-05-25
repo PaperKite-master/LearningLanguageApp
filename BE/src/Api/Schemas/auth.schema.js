@@ -42,6 +42,14 @@ export const LoginResponseSchema = Type.Object({
   expiresIn: Type.Optional(Type.Number()),
   tokenType: Type.Optional(Type.String()),
   message: Type.Optional(Type.String()),
+  user: Type.Optional(Type.Object({
+    id: Type.Optional(Type.String()),
+    email: Type.Optional(Type.String()),
+    role: Type.Optional(Type.String()),
+    fullName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    avatarUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    totalExp: Type.Optional(Type.Number()),
+  })),
 });
 
 export const ProfileResponseSchema = Type.Object({

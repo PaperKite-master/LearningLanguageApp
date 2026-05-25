@@ -1,0 +1,54 @@
+# Full stack: Postgres + API + static FE (nginx proxies /api to API)
+# Usage: docker compose up --build
+# Web: http://localhost:3000  |  API: http://localhost:4000
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: learning_language_app_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: learning_language_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d learning_language_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./BE
+      dockerfile: Dockerfile
+    container_name: learning_language_app_api
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      HOST: 0.0.0.0
+      # Same host for runtime + migrations (no pooler). Adjust if you use Supabase pooler.
+      DATABASE_URL: ${DATABASE_URL}
+      DIRECT_URL: ${DIRECT_URL}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./FE
+      dockerfile: Dockerfile
+    container_name: learning_language_app_web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

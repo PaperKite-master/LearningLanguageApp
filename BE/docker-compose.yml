@@ -1,3 +1,6 @@
+# Chỉ chạy Postgres cho dev local (BE/FE chạy ngoài máy).
+# Full stack (web + api + db): dùng docker-compose.yml ở thư mục gốc repo.
+
 services:
   db:
     image: postgres:16-alpine

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, 
   Flame, 
@@ -10,6 +10,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import userApi from '../../api/userApi';
 
 const ProfileContent = () => {
   // ---------------------------------------------------------
@@ -18,8 +19,9 @@ const ProfileContent = () => {
   // When a user logs in via Gmail/Database, fetch their data here
   const [userData, setUserData] = useState({
     name: 'Nguyễn Văn A',
-    email: 'nguyenvana@example.com',
-    password: '••••••••••',
+    email: '',
+    currentPassword: '',
+    newPassword: '',
     plan: 'PRO',
     stats: {
       streak: 34,
@@ -35,17 +37,62 @@ const ProfileContent = () => {
     }
   });
 
-  // Example DB Fetch:
-  // useEffect(() => {
-  //   fetch('/api/user/profile')
-  //     .then(res => res.json())
-  //     .then(data => setUserData(data));
-  // }, []);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        // Lấy email từ localStorage
+        const userStr = localStorage.getItem('user');
+        let localEmail = 'nguyenvana@example.com';
+        if (userStr && userStr !== 'undefined') {
+          try {
+            const parsedUser = JSON.parse(userStr);
+            if (parsedUser.email) {
+              localEmail = parsedUser.email;
+            }
+          } catch (e) {
+            console.warn("Could not parse user from localStorage", e);
+          }
+        }
+
+        const response = await userApi.getDashboardStats();
+        if (response) {
+          const payload = response.data && response.data.stats ? response.data : response;
+          const userObj = payload.user || {};
+          const statsObj = payload.stats || {};
+          
+          setUserData(prev => ({
+            ...prev,
+            name: userObj.name || prev.name,
+            email: localEmail,
+            stats: {
+              streak: statsObj.streak || 0,
+              target: statsObj.target || 'N5',
+              hoursLearned: `${statsObj.totalHours || 0}H`,
+              weeklyProgress: statsObj.weeklyGrowth != null ? (statsObj.weeklyGrowth >= 0 ? `+ ${statsObj.weeklyGrowth}%` : `${statsObj.weeklyGrowth}%`) : '+ 0%'
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProfileData();
+  }, []);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const toggleNewPasswordVisibility = () => {
+    setShowNewPassword(!showNewPassword);
   };
 
   // Handlers for controlled inputs
@@ -129,10 +176,11 @@ const ProfileContent = () => {
           <label>Tên hiển thị</label>
           <input 
             type="text" 
-            name="name" 
+            name="accountName" 
             value={userData.name} 
-            onChange={handleInputChange} 
             className="profile-input" 
+            disabled
+            autoComplete="off"
           />
         </div>
 
@@ -140,24 +188,29 @@ const ProfileContent = () => {
           <label>Email</label>
           <input 
             type="email" 
-            name="email" 
+            name="accountEmail" 
             value={userData.email} 
-            onChange={handleInputChange} 
             className="profile-input" 
-            placeholder="nguyenvana@example.com"
+            disabled
+            autoComplete="off"
           />
         </div>
 
         <div className="form-group">
-          <label>Mật khẩu mới</label>
+          <label>Mật khẩu hiện tại</label>
+          {/* Honeypot to defeat Edge/Chrome autofill */}
+          <input type="text" name="fakeusernameremembered" style={{display: 'none'}} aria-hidden="true" />
+          <input type="password" name="fakepasswordremembered" style={{display: 'none'}} aria-hidden="true" />
+          
           <div className="password-input-wrapper">
             <input 
               type={showPassword ? "text" : "password"} 
-              name="password" 
-              value={userData.password} 
+              name="currentPassword" 
+              value={userData.currentPassword || ''} 
               onChange={handleInputChange} 
               className="profile-input password-input" 
-              placeholder="••••••••••"
+              placeholder="Nhập mật khẩu hiện tại..."
+              autoComplete="new-password"
             />
             <button 
               type="button" 
@@ -165,6 +218,28 @@ const ProfileContent = () => {
               onClick={togglePasswordVisibility}
             >
               {showPassword ? <EyeOff size={20} color="#6b7280" /> : <Eye size={20} color="#6b7280" />}
+            </button>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>Mật khẩu mới</label>
+          <div className="password-input-wrapper">
+            <input 
+              type={showNewPassword ? "text" : "password"} 
+              name="newPassword" 
+              value={userData.newPassword || ''} 
+              onChange={handleInputChange} 
+              className="profile-input password-input" 
+              placeholder="Nhập mật khẩu mới..."
+              autoComplete="new-password"
+            />
+            <button 
+              type="button" 
+              className="password-toggle-btn" 
+              onClick={toggleNewPasswordVisibility}
+            >
+              {showNewPassword ? <EyeOff size={20} color="#6b7280" /> : <Eye size={20} color="#6b7280" />}
             </button>
           </div>
         </div>
