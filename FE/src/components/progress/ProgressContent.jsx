@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Flame, 
   Target, 
@@ -7,13 +7,14 @@ import {
   CheckCircle2,
   Circle
 } from 'lucide-react';
+import userApi from '../../api/userApi';
 
 const ProgressContent = () => {
   // ---------------------------------------------------------
   // MOCK DATABASE STATE (Ready for API Integration)
   // Replace this with a useEffect fetch from your database
   // ---------------------------------------------------------
-  const [progressData] = useState({
+  const [progressData, setProgressData] = useState({
     stats: {
       streak: 34,
       target: 'N2',
@@ -40,6 +41,36 @@ const ProgressContent = () => {
       { id: 6, title: 'Ngữ pháp cơ bản', done: false },
     ]
   });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await userApi.getDashboardStats();
+        if (response) {
+          const payload = response.data && response.data.stats ? response.data : response;
+          const statsObj = payload.stats || {};
+          
+          setProgressData(prev => ({
+            ...prev,
+            stats: {
+              streak: statsObj.streak || 0,
+              target: statsObj.target || 'N5',
+              hoursLearned: `${statsObj.totalHours || 0}H`,
+              weeklyProgress: statsObj.weeklyGrowth != null ? (statsObj.weeklyGrowth >= 0 ? `+ ${statsObj.weeklyGrowth}%` : `${statsObj.weeklyGrowth}%`) : '+ 0%'
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch progress stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStats();
+  }, []);
 
   return (
     <div className="progress-content-area">

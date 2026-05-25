@@ -69,6 +69,10 @@ export async function buildApp() {
   // Routes
   await app.register(healthRoutes, { prefix: '/health' });
   await app.register(authRoutes, { prefix: '/auth' });
+<<<<<<< Updated upstream
+=======
+  await app.register(userRoutes, { prefix: '/users' });
+>>>>>>> Stashed changes
   await app.register(lessonRoutes, { prefix: '/lessons' });
   await app.register(timelineRoutes, { prefix: '/timelines' });
   await app.register(grammarRoutes, { prefix: '/grammars' });

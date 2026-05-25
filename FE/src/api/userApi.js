@@ -33,6 +33,18 @@ const userApi = {
       console.warn(`API DELETE /users/${id} failed, mock success.`);
       return { success: true };
     }
+  },
+
+  getDashboardStats: async () => {
+    const url = '/users/me/dashboard';
+    const response = await axiosClient.get(url);
+    return response.data;
+  },
+
+  addStudyTime: async (minutes) => {
+    const url = '/users/me/study-time';
+    const response = await axiosClient.post(url, { minutes });
+    return response.data;
   }
 };
 

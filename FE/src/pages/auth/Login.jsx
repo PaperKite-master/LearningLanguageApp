@@ -36,15 +36,14 @@ const Login = () => {
     };
     
     try {
-      // 1. Lấy token
+      // 1. Lấy token và user
       const result = await authApi.login(payload);
       console.log('Login success:', result.message);
       
-      // 2. Lấy thông tin user (để kiểm tra role)
-      const user = await authApi.getMe();
+      const user = result.user || {};
       console.log('User info:', user);
       
-      // Lưu thông tin user (nhất là ID) để dùng cho theo dõi tiến độ
+      // Lưu thông tin user (bao gồm email)
       localStorage.setItem('user', JSON.stringify(user));
 
       // 3. Phân luồng theo role

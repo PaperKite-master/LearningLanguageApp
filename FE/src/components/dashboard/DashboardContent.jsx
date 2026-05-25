@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Flame, 
   Target, 
@@ -8,29 +9,81 @@ import {
   Layers,
   PlaySquare
 } from 'lucide-react';
+import userApi from '../../api/userApi';
 
 const DashboardContent = () => {
+  const navigate = useNavigate();
   // ---------------------------------------------------------
   // MOCK DATABASE STATE (Ready for API Integration)
   // Replace this with a useEffect fetch from your database
   // ---------------------------------------------------------
   const [userData, setUserData] = useState({
-    username: 'DEVELOPER!',
-    streak: 34,
-    target: 'N2',
-    hoursLearned: 156,
-    weeklyProgress: '+ 12%',
+    username: '...',
+    streak: 0,
+    target: '...',
+    hoursLearned: 0,
+    weeklyProgress: '0%',
     todayGoals: [
-      { id: 1, label: 'Bài học', current: 2, total: 3 },
-      { id: 2, label: 'Flashcards', current: 15, total: 20 },
-      { id: 3, label: 'Luyện tập', current: 1, total: 2 },
+      { id: 1, label: 'Bài học', current: 0, total: 3 },
+      { id: 2, label: 'Flashcards', current: 0, total: 20 },
+      { id: 3, label: 'Luyện tập', current: 0, total: 2 },
     ]
   });
+  const [loading, setLoading] = useState(true);
 
-  // Example of how you would fetch from DB:
-  // useEffect(() => {
-  //   fetch('/api/user/dashboard').then(res => res.json()).then(data => setUserData(data));
-  // }, []);
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await userApi.getDashboardStats();
+        if (response) {
+          // Check if the actual payload is nested under 'data' property
+          const payload = response.data && response.data.stats ? response.data : response;
+          
+          const userObj = payload.user || {};
+          const statsObj = payload.stats || {};
+          const dailyGoals = payload.dailyGoals || {};
+
+          setUserData({
+            username: userObj.name || 'Học viên',
+            streak: statsObj.streak || 0,
+            target: statsObj.target || 'N5',
+            hoursLearned: statsObj.totalHours || 0,
+            weeklyProgress: statsObj.weeklyGrowth != null ? (statsObj.weeklyGrowth >= 0 ? `+ ${statsObj.weeklyGrowth}%` : `${statsObj.weeklyGrowth}%`) : '+ 0%',
+            todayGoals: [
+              { 
+                id: 1, 
+                label: 'Bài học', 
+                current: dailyGoals.lessons?.completed || 0, 
+                total: dailyGoals.lessons?.target || 3 
+              },
+              { 
+                id: 2, 
+                label: 'Flashcards', 
+                current: dailyGoals.flashcards?.completed || 0, 
+                total: dailyGoals.flashcards?.target || 20 
+              },
+              { 
+                id: 3, 
+                label: 'Luyện tập', 
+                current: dailyGoals.practice?.completed || 0, 
+                total: dailyGoals.practice?.target || 2 
+              },
+            ]
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDashboardStats();
+  }, []);
+
+  if (loading) {
+    return <div className="dashboard-content"><p>Đang tải dữ liệu...</p></div>;
+  }
 
   return (
     <div className="dashboard-content">
@@ -104,7 +157,7 @@ const DashboardContent = () => {
         <h2 className="section-title">TRUY CẬP NHANH</h2>
         <div className="quick-access-grid">
           
-          <div className="access-card">
+          <div className="access-card" onClick={() => navigate('/study')} style={{ cursor: 'pointer' }}>
             <div className="icon-wrapper">
               <BookOpen size={24} className="cyan-icon" />
             </div>
@@ -114,7 +167,7 @@ const DashboardContent = () => {
             </div>
           </div>
 
-          <div className="access-card">
+          <div className="access-card" onClick={() => navigate('/alphabet')} style={{ cursor: 'pointer' }}>
             <div className="icon-wrapper">
               <span className="cyan-icon jp-char">あ</span>
             </div>
@@ -124,7 +177,7 @@ const DashboardContent = () => {
             </div>
           </div>
 
-          <div className="access-card">
+          <div className="access-card" onClick={() => navigate('/flashcard')} style={{ cursor: 'pointer' }}>
             <div className="icon-wrapper">
               <Layers size={24} className="cyan-icon" />
             </div>
@@ -134,7 +187,7 @@ const DashboardContent = () => {
             </div>
           </div>
 
-          <div className="access-card">
+          <div className="access-card" onClick={() => navigate('/videos')} style={{ cursor: 'pointer' }}>
             <div className="icon-wrapper">
               <PlaySquare size={24} className="cyan-icon" />
             </div>
