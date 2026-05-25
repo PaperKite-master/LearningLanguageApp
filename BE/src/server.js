@@ -12,6 +12,7 @@ import { adminTimelineRoutes } from './Api/Routes/adminTimeline.routes.js';
 import { adminGrammarRoutes } from './Api/Routes/adminGrammar.routes.js';
 import { adminUsersRoutes } from './Api/Routes/adminUsers.routes.js';
 import { authRoutes } from './Api/Routes/auth.routes.js';
+import { userRoutes } from './Api/Routes/user.routes.js';
 import { flashcardRoutes } from './Api/Routes/flashcard.routes.js';
 import { prismaPlugin } from './Infrastructure/Persistence/prisma.plugin.js';
 
@@ -69,10 +70,6 @@ export async function buildApp() {
   // Routes
   await app.register(healthRoutes, { prefix: '/health' });
   await app.register(authRoutes, { prefix: '/auth' });
-<<<<<<< Updated upstream
-=======
-  await app.register(userRoutes, { prefix: '/users' });
->>>>>>> Stashed changes
   await app.register(lessonRoutes, { prefix: '/lessons' });
   await app.register(timelineRoutes, { prefix: '/timelines' });
   await app.register(grammarRoutes, { prefix: '/grammars' });
