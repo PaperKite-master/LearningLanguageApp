@@ -70,6 +70,7 @@ export async function buildApp() {
   // Routes
   await app.register(healthRoutes, { prefix: '/health' });
   await app.register(authRoutes, { prefix: '/auth' });
+  await app.register(userRoutes, { prefix: '/users' });
   await app.register(lessonRoutes, { prefix: '/lessons' });
   await app.register(timelineRoutes, { prefix: '/timelines' });
   await app.register(grammarRoutes, { prefix: '/grammars' });
