@@ -19,7 +19,8 @@ axiosClient.interceptors.request.use(
   (config) => {
     // Lấy token từ localStorage
     const token = localStorage.getItem('accessToken');
-    if (token) {
+    const existingAuth = config.headers?.Authorization || config.headers?.authorization;
+    if (!existingAuth && token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
