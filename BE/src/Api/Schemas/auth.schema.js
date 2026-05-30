@@ -2,7 +2,7 @@ import { Type } from '@sinclair/typebox';
 
 export const RegisterBodySchema = Type.Object({
   email: Type.String({ format: 'email', maxLength: 255, description: 'User email address' }),
-  password: Type.String({ minLength: 8, maxLength: 32, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,32}$', description: 'Password (8-32 chars, at least 1 uppercase, 1 lowercase, 1 number)' }),
+  password: Type.String({ minLength: 8, maxLength: 32, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,32}$', description: 'Password (8-32 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special character)', examples: ['Password123!'] }),
   fullName: Type.Optional(Type.String({ minLength: 2, maxLength: 100, description: 'Display name' })),
   role: Type.Optional(Type.Union([
     Type.Literal('USER'),
@@ -18,12 +18,12 @@ export const ForgotPasswordBodySchema = Type.Object({
 });
 
 export const ResetPasswordBodySchema = Type.Object({
-  newPassword: Type.String({ minLength: 8, maxLength: 32, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,32}$', description: 'New password (8-32 chars, at least 1 uppercase, 1 lowercase, 1 number)' }),
+  newPassword: Type.String({ minLength: 8, maxLength: 32, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,32}$', description: 'New password (8-32 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special character)', examples: ['Password123!'] }),
 });
 
 export const LoginBodySchema = Type.Object({
   email: Type.String({ format: 'email', maxLength: 255, description: 'User email address' }),
-  password: Type.String({ minLength: 8, maxLength: 32, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,32}$', description: 'User password' }),
+  password: Type.String({ minLength: 8, maxLength: 32, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,32}$', description: 'User password', examples: ['Password123!'] }),
 });
 
 export const GenericMessageResponseSchema = Type.Object({
