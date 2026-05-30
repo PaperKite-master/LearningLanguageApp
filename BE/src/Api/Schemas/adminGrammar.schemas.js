@@ -26,3 +26,7 @@ export const GrammarResponseSchema = Type.Object({
   data: GrammarDtoSchema
 });
 
+export const GrammarListResponseSchema = Type.Object({
+  data: Type.Array(GrammarDtoSchema)
+});
+

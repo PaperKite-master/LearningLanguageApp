@@ -15,7 +15,8 @@ export const CreateLessonBodySchema = Type.Object({
   ], { default: 'published' })),
   videoUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   contentMarkdown: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  order: Type.Optional(Type.Integer({ minimum: 0 }))
+  order: Type.Optional(Type.Integer({ minimum: 0 })),
+  lessonCode: Type.Optional(Type.Union([Type.String(), Type.Null()]))
 });
 
 export const UpdateLessonBodySchema = Type.Partial(CreateLessonBodySchema);

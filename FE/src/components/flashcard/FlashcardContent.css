@@ -1,0 +1,336 @@
+/* =========================================
+   User Flashcards Styles
+   ========================================= */
+
+.flashcard-content-area {
+  padding: 40px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.flashcard-gradient-title {
+  font-size: 36px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #0ea5e9 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+
+/* Tabs */
+.flashcard-tabs {
+  margin-bottom: 40px;
+}
+
+.flashcard-tab-container {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 50px;
+  padding: 5px;
+  width: fit-content;
+}
+
+.fc-tab-btn {
+  background: transparent;
+  border: none;
+  color: #b5b5c3;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.fc-tab-btn.active {
+  background-color: #2e3a5f;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.fc-tab-btn:hover:not(.active) {
+  color: #ffffff;
+}
+
+/* Flashcard Viewer */
+.fc-viewer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+}
+
+.fc-card {
+  width: 100%;
+  height: 450px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.fc-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.fc-card.flipped .fc-card-inner {
+  transform: rotateX(180deg);
+}
+
+.fc-card-front, .fc-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  background-color: #3f1e8a;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.fc-card-back {
+  transform: rotateX(180deg);
+  background-color: #2d1566;
+}
+
+.fc-card-text {
+  font-size: 48px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.fc-card-subtext {
+  font-size: 48px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.fc-type-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #93c5fd;
+  margin-bottom: 5px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.fc-kana-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 15px;
+  width: 80%;
+}
+
+.fc-card-hint {
+  font-size: 14px;
+  color: #94a3b8;
+  position: absolute;
+  bottom: 30px;
+}
+
+/* Controls */
+.fc-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.fc-counter {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.fc-nav-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.fc-btn-prev {
+  background: transparent;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fc-btn-prev:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fc-btn-next {
+  background: #0ea5e9;
+  border: none;
+  color: #ffffff;
+  padding: 10px 32px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fc-btn-next:hover:not(:disabled) {
+  background: #0284c7;
+}
+
+.fc-btn-prev:disabled, .fc-btn-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* My Cards Section */
+.fc-mycards-section {
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+}
+
+.fc-mycards-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.fc-export-btn {
+  background: transparent;
+  border: 1px solid #a855f7;
+  color: #e9d5ff;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fc-export-btn:hover {
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.fc-create-first-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fc-create-box {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.fc-add-card-btn {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 16px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.fc-add-card-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.fc-loading, .fc-empty {
+  text-align: center;
+  color: #b5b5c3;
+  padding: 50px;
+  font-size: 18px;
+}
+
+/* JLPT Levels Grid */
+.fc-levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 800px;
+  margin-top: 20px;
+}
+
+.fc-level-box {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fc-level-box:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
+  border-color: #0ea5e9;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.fc-level-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #0ea5e9 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fc-level-count {
+  font-size: 14px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.fc-back-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.fc-back-btn:hover {
+  color: #ffffff;
+}
+

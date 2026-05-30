@@ -62,6 +62,7 @@ const LessonDetail = () => {
   const [error, setError] = useState('');
   const [totalExercises, setTotalExercises] = useState(0);
   const [completedIds, setCompletedIds] = useState([]);
+  const [activeTab, setActiveTab] = useState('lesson'); // 'lesson' or 'grammar'
 
   const countExercises = (markdown) => {
     if (!markdown) return 0;
@@ -216,63 +217,101 @@ const LessonDetail = () => {
           <h1 style={{ fontSize: '2.5rem', color: '#fff', margin: 0 }}>{lesson.title}</h1>
         </div>
 
-        {/* Khu vực Video */}
-        {embedUrl && (
-          <div style={{ marginBottom: '40px', background: '#1c2035', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', marginBottom: '15px' }}>
-              <PlayCircle size={20} color="#3b82f6" /> Video Bài Giảng
-            </h3>
-            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px' }}>
-              <iframe 
-                src={embedUrl} 
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-                title="Lesson Video"
-              />
-            </div>
-          </div>
-        )}
+        {/* Tabs Điều hướng */}
+        <div style={{ marginBottom: '30px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '30px' }}>
+          <button 
+            style={{ 
+              background: 'none', border: 'none', color: activeTab === 'lesson' ? '#00f2fe' : '#9ca3af', 
+              padding: '12px 0', fontSize: '1.2rem', fontWeight: activeTab === 'lesson' ? 'bold' : 'normal',
+              borderBottom: activeTab === 'lesson' ? '3px solid #00f2fe' : '3px solid transparent',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px'
+            }}
+            onClick={() => setActiveTab('lesson')}
+          >
+            📚 Bài Học & Luyện Tập
+          </button>
+          
+          <button 
+            style={{ 
+              background: 'none', border: 'none', color: activeTab === 'grammar' ? '#00f2fe' : '#9ca3af', 
+              padding: '12px 0', fontSize: '1.2rem', fontWeight: activeTab === 'grammar' ? 'bold' : 'normal',
+              borderBottom: activeTab === 'grammar' ? '3px solid #00f2fe' : '3px solid transparent',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px'
+            }}
+            onClick={() => setActiveTab('grammar')}
+          >
+            ✍️ Sổ tay Ngữ Pháp {grammars && grammars.length > 0 && <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>{grammars.length}</span>}
+          </button>
+        </div>
 
-        {/* Khu vực Nội dung Bài học (Markdown) */}
-        {lesson.contentMarkdown && (
-          <div style={{ marginBottom: '40px', background: '#1c2035', padding: '30px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', marginBottom: '20px' }}>
-              <BookOpen size={20} color="#10b981" /> Nội Dung Chính
-            </h3>
-            <div className="markdown-preview-wrapper" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Tiến độ bài học:</span>
-                <span style={{ color: '#10b981', fontWeight: 'bold' }}>{completedIds.length} / {totalExercises} Hoàn thành</span>
-              </div>
-              <MDEditor.Markdown 
-                source={lesson.contentMarkdown} 
-                style={{ background: 'transparent' }} 
-                components={mdComponents}
-                remarkPlugins={[remarkBreaks]}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Khu vực Ngữ pháp (Nếu có) */}
-        {grammars && grammars.length > 0 && (
-          <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '1.8rem', color: '#fff', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
-              Ngữ pháp bổ trợ
-            </h2>
-            {grammars.map((grammar, index) => (
-              <div key={grammar.id || index} style={{ marginBottom: '20px', background: '#1c2035', padding: '24px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <h4 style={{ fontSize: '1.3rem', color: '#60a5fa', marginBottom: '15px' }}>{grammar.title}</h4>
-                <div className="markdown-preview-wrapper" style={{ fontSize: '1.05rem', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
-                  <MDEditor.Markdown 
-                    source={grammar.contentMarkdown} 
-                    style={{ background: 'transparent' }} 
-                    components={markdownComponents}
+        {activeTab === 'lesson' && (
+          <div className="tab-content-lesson">
+            {/* Khu vực Video */}
+            {embedUrl && (
+              <div style={{ marginBottom: '40px', background: '#1c2035', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', marginBottom: '15px' }}>
+                  <PlayCircle size={20} color="#3b82f6" /> Video Bài Giảng
+                </h3>
+                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px' }}>
+                  <iframe 
+                    src={embedUrl} 
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                    title="Lesson Video"
                   />
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* Khu vực Nội dung Bài học (Markdown) */}
+            {lesson.contentMarkdown && (
+              <div style={{ marginBottom: '40px', background: '#1c2035', padding: '30px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="markdown-preview-wrapper" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Tiến độ luyện tập:</span>
+                    <span style={{ color: '#10b981', fontWeight: 'bold' }}>{completedIds.length} / {totalExercises} Hoàn thành</span>
+                  </div>
+                  <MDEditor.Markdown 
+                    source={lesson.contentMarkdown} 
+                    style={{ background: 'transparent' }} 
+                    components={mdComponents}
+                    remarkPlugins={[remarkBreaks]}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'grammar' && (
+          <div className="tab-content-grammar">
+            {grammars && grammars.length > 0 ? (
+              <div>
+                {grammars.map((grammar, index) => (
+                  <div key={grammar.id || index} style={{ marginBottom: '30px', background: '#1c2035', padding: '30px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <h4 style={{ fontSize: '1.5rem', color: '#00f2fe', marginBottom: '20px', borderBottom: '1px dashed rgba(255,255,255,0.1)', paddingBottom: '15px' }}>
+                      #{index + 1}. {grammar.title}
+                    </h4>
+                    <div className="markdown-preview-wrapper" style={{ fontSize: '1.1rem', lineHeight: '1.8', whiteSpace: 'pre-wrap' }}>
+                      <MDEditor.Markdown 
+                        source={grammar.contentMarkdown} 
+                        style={{ background: 'transparent' }} 
+                        remarkPlugins={[remarkBreaks]}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '60px 20px', background: '#1c2035', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📝</div>
+                <h3 style={{ color: '#e5e7eb', marginBottom: '10px' }}>Chưa có điểm ngữ pháp</h3>
+                <p style={{ color: '#9ca3af' }}>Bài học này hiện chưa có ngữ pháp bổ trợ nào.</p>
+              </div>
+            )}
           </div>
         )}
 

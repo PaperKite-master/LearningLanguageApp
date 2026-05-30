@@ -20,9 +20,27 @@ export async function exportToQuizletUseCase({ flashcardRepo, userId }) {
   if (flashcards.length === 0) return '';
 
   const lines = flashcards.map((card) => {
+    let parsedNotes = {};
+    try {
+      if (card.notes) parsedNotes = JSON.parse(card.notes);
+    } catch (e) {
+      // ignore
+    }
+
     // Sanitise embedded tabs/newlines so they don't break the TSV structure
-    const front = card.front_text.replace(/[\t\n\r]/g, ' ');
-    const back  = card.back_text.replace(/[\t\n\r]/g, ' ');
+    let front = card.front_text.replace(/[\t\n\r]/g, ' ').trim();
+    const back  = card.back_text.replace(/[\t\n\r]/g, ' ').trim();
+    const kana = (parsedNotes.kana || '').replace(/[\t\n\r]/g, ' ').trim();
+
+    if (kana) {
+      // If user specified no Kanji, use only Kana to avoid duplicate "(Không dùng Kanji)" terms
+      if (front.toLowerCase().includes('không dùng kanji') || front === '-' || front === '') {
+        front = kana;
+      } else {
+        front = `${front} (${kana})`;
+      }
+    }
+
     return `${front}\t${back}`;
   });
 

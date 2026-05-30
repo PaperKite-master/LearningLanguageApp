@@ -1,87 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Key, Lock, Star, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import lessonApi from '../../api/lessonApi';
+import timelineApi from '../../api/timelineApi';
 
 const LearningPath = () => {
   const navigate = useNavigate();
   
   // ---------------------------------------------------------
-  // MOCK DATABASE STATE (Ready for API Integration)
-  // Replace this with a useEffect fetch from your database
+  // DYNAMIC DATABASE STATE
   // ---------------------------------------------------------
-  const [pathData, setPathData] = useState([
-    { id: 'div1', type: 'divider', text: 'NÓI LỜI CHÀO VÀ TẠM BIỆT' },
-    { id: 1, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 2, type: 'node', active: false, offset: 110, progressValue: 0 },
-    { id: 3, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 4, type: 'node', active: false, offset: 110, progressValue: 0 }, 
-    { id: 5, type: 'node', active: false, offset: -110, progressValue: 0 }, 
-    { id: 'ckpt1', type: 'checkpoint', text: 'Kiểm tra thử - 1', num: 1 },
-    
-    { id: 'div2', type: 'divider', text: 'TẠO CÂU PHỦ ĐỊNH VÀ TRẢ LỜI CÂU HỎI' },
-    { id: 6, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 7, type: 'node', active: false, offset: 110, progressValue: 0 },
-    { id: 8, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 9, type: 'node', active: false, offset: 110, progressValue: 0 },
-    { id: 10, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 'ckpt2', type: 'checkpoint', text: 'Kiểm tra thử - 2', num: 2 },
-    
-    { id: 'div3', type: 'divider', text: 'NÓI VỀ ĐỒ DÙNG CÁ NHÂN' },
-    { id: 11, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 12, type: 'node', active: false, offset: 110, progressValue: 0 },
-    { id: 13, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 14, type: 'node', active: false, offset: 110, progressValue: 0 },
-    { id: 15, type: 'node', active: false, offset: -110, progressValue: 0 },
-    { id: 'ckpt3', type: 'checkpoint', text: 'Kiểm tra thử - 3', num: 3 },
-  ]);
+  const [pathData, setPathData] = useState([]);
 
   useEffect(() => {
-    const fetchLessons = async () => {
+    const fetchTimelines = async () => {
       try {
-        const data = await lessonApi.getAll();
-        const rawLessons = data || [];
+        const timelines = await timelineApi.getAll();
         
-        // Sắp xếp bài học theo vị trí order
-        const realLessons = rawLessons.sort((a, b) => {
-          return (a.order || 0) - (b.order || 0);
-        });
+        let dynamicPathData = [];
+        let globalNodeCounter = 1;
+        let checkpointCounter = 1;
         
-        setPathData(prevPath => {
-          return prevPath.map(item => {
-            if (item.type === 'node') {
-              // Tìm bài học có order tương ứng với id của node trên bản đồ
-              const lesson = realLessons.find(l => l.order === item.id);
-              
-              if (lesson) {
-                const userStr = localStorage.getItem('user');
-                const userId = userStr ? JSON.parse(userStr).id : 'guest';
-                const progressKey = `progress_${userId}_lesson_${lesson.id}`;
-                
-                const savedProgress = localStorage.getItem(progressKey);
-                let progressValue = 0;
-                if (savedProgress) {
-                  const parsed = JSON.parse(savedProgress);
-                  progressValue = parsed.percentage || 0;
-                }
-                return {
-                  ...item,
-                  realId: lesson.id,
-                  order: lesson.order,
-                  active: true,
-                  progressValue
-                };
-              }
-            }
-            return item;
+        // Sort timelines by order
+        const sortedTimelines = [...timelines].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        sortedTimelines.forEach((timeline) => {
+          // Add timeline title as divider
+          dynamicPathData.push({
+            id: `div-${timeline.id}`,
+            type: 'divider',
+            text: timeline.title ? timeline.title.toUpperCase() : 'BÀI HỌC'
           });
+          
+          const sortedLessons = (timeline.lessons || []).sort((a, b) => (a.order || 0) - (b.order || 0));
+          
+          sortedLessons.forEach((lesson) => {
+             const userStr = localStorage.getItem('user');
+             const userId = userStr ? JSON.parse(userStr).id : 'guest';
+             const progressKey = `progress_${userId}_lesson_${lesson.id}`;
+             
+             const savedProgress = localStorage.getItem(progressKey);
+             let progressValue = 0;
+             if (savedProgress) {
+               progressValue = JSON.parse(savedProgress).percentage || 0;
+             }
+             
+             dynamicPathData.push({
+                id: lesson.id,
+                realId: lesson.id,
+                order: lesson.order,
+                lessonCode: lesson.lessonCode,
+                type: 'node',
+                active: true, // For now, all fetched lessons are unlocked
+                offset: (globalNodeCounter % 2 === 1) ? -110 : 110,
+                progressValue
+             });
+             globalNodeCounter++;
+          });
+          
+          // Add checkpoint after each timeline
+          dynamicPathData.push({
+             id: `ckpt-${timeline.id}`,
+             type: 'checkpoint',
+             text: `Kiểm tra thử - ${checkpointCounter}`,
+             num: checkpointCounter
+          });
+          checkpointCounter++;
         });
+        
+        setPathData(dynamicPathData);
       } catch (error) {
-        console.error('Failed to load lessons for path:', error);
+        console.error('Failed to load timelines for path:', error);
       }
     };
     
-    fetchLessons();
+    fetchTimelines();
   }, []);
 
   // SVG Connector line helper
@@ -244,7 +236,7 @@ const LearningPath = () => {
                 }}
                 onClick={() => {
                   if (item.realId) {
-                    const displayId = item.order ? `L${String(item.order).padStart(3, '0')}` : item.realId;
+                    const displayId = item.lessonCode ? item.lessonCode : item.realId;
                     navigate(`/lesson/${displayId}`, { state: { realId: item.realId } });
                   }
                 }}

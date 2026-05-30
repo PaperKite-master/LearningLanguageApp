@@ -5,7 +5,7 @@ import {
   BookOpen, 
   WholeWord, // using this for "Bảng chữ cái"
   Layers, 
-  PlaySquare, 
+  Video, 
   TrendingUp,
   UserCircle,
   LogOut
@@ -49,7 +49,7 @@ const Sidebar = () => {
         </NavLink>
         
         <NavLink to="/videos" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
-          <PlaySquare className="nav-icon" size={24} />
+          <Video className="nav-icon" size={24} />
           <span>Videos</span>
         </NavLink>
         

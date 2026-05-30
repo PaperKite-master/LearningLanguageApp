@@ -7,6 +7,8 @@ import LessonDetail from './pages/study/LessonDetail';
 import Alphabet from './pages/alphabet/Alphabet';
 import Progress from './pages/progress/Progress';
 import Profile from './pages/profile/Profile';
+import Flashcard from './pages/flashcard/Flashcard';
+import Video from './pages/video/Video';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminContent from './pages/admin/AdminContent';
@@ -48,6 +50,12 @@ function App() {
 
         {/* Alphabet Page */}
         <Route path="/alphabet" element={<Alphabet />} />
+
+        {/* Flashcard Page */}
+        <Route path="/flashcard" element={<Flashcard />} />
+
+        {/* Video Page */}
+        <Route path="/videos" element={<Video />} />
 
         {/* Progress Page */}
         <Route path="/progress" element={<Progress />} />

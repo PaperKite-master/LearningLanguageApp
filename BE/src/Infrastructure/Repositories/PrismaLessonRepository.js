@@ -16,7 +16,7 @@ export class PrismaLessonRepository {
     });
   }
 
-  async create({ title, timelineId, topic, status, videoUrl, contentMarkdown, order }) {
+  async create({ title, timelineId, topic, status, videoUrl, contentMarkdown, order, lessonCode }) {
     const normalizedTimelineId = normalizeNullableUuid(timelineId);
     const normalizedTopic = normalizeNullableText(topic);
 
@@ -28,12 +28,13 @@ export class PrismaLessonRepository {
         status: status ?? 'published',
         video_url: videoUrl ?? null,
         content_markdown: contentMarkdown ?? null,
-        order: order ?? 0
+        order: order ?? 0,
+        lesson_code: lessonCode ?? null
       }
     });
   }
 
-  async update(id, { title, timelineId, topic, status, videoUrl, contentMarkdown, order }) {
+  async update(id, { title, timelineId, topic, status, videoUrl, contentMarkdown, order, lessonCode }) {
     const normalizedTimelineId = normalizeNullableUuid(timelineId);
     const normalizedTopic = normalizeNullableText(topic);
 
@@ -46,7 +47,8 @@ export class PrismaLessonRepository {
         status,
         video_url: videoUrl,
         content_markdown: contentMarkdown,
-        order
+        order,
+        lesson_code: lessonCode
       }
     });
   }

@@ -13,6 +13,131 @@ import {
 export async function flashcardRoutes(app) {
   await app.register(flashcardRepoPlugin);
 
+  // ─── GET /flashcards/library ───────────────────────────────────────────────
+  app.get(
+    '/library',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Flashcards'],
+        summary: 'List all library (admin) flashcards',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: ListFlashcardsResponseSchema
+        }
+      }
+    },
+    flashcardController.listLibrary
+  );
+
+  // ─── GET /flashcards/me/export/quizlet ─────────────────────────────────────
+  app.get(
+    '/me/export/quizlet',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Flashcards'],
+        summary: 'Export user flashcards as a Quizlet-importable tab-delimited text',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: ExportQuizletResponseSchema
+        }
+      }
+    },
+    // We can reuse exportQuizlet since it uses request.user.sub
+    flashcardController.exportQuizlet
+  );
+
+  // ─── GET /flashcards/me ────────────────────────────────────────────────────
+  app.get(
+    '/me',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Flashcards'],
+        summary: 'List user personal flashcards',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: ListFlashcardsResponseSchema
+        }
+      }
+    },
+    flashcardController.listMyCards
+  );
+
+  // ─── POST /flashcards/me ───────────────────────────────────────────────────
+  app.post(
+    '/me',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Flashcards'],
+        summary: 'Create a personal flashcard',
+        security: [{ bearerAuth: [] }],
+        body: CreateFlashcardBodySchema,
+        response: {
+          201: FlashcardResponseSchema
+        }
+      }
+    },
+    flashcardController.createMyCard
+  );
+
+  // ─── POST /flashcards/me/clone/:id ─────────────────────────────────────────
+  app.post(
+    '/me/clone/:id',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Flashcards'],
+        summary: 'Clone a library flashcard to user personal flashcards',
+        security: [{ bearerAuth: [] }],
+        params: FlashcardIdParamsSchema,
+        response: {
+          201: FlashcardResponseSchema
+        }
+      }
+    },
+    flashcardController.cloneLibraryCard
+  );
+
+  // ─── PATCH /flashcards/me/:id ──────────────────────────────────────────────
+  app.patch(
+    '/me/:id',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Flashcards'],
+        summary: 'Update personal flashcard',
+        security: [{ bearerAuth: [] }],
+        params: FlashcardIdParamsSchema,
+        body: UpdateFlashcardBodySchema,
+        response: {
+          200: FlashcardResponseSchema
+        }
+      }
+    },
+    flashcardController.updateMyCard
+  );
+
+  // ─── DELETE /flashcards/me/:id ─────────────────────────────────────────────
+  app.delete(
+    '/me/:id',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Flashcards'],
+        summary: 'Delete personal flashcard',
+        security: [{ bearerAuth: [] }],
+        params: FlashcardIdParamsSchema,
+        response: {
+          204: {}
+        }
+      }
+    },
+    flashcardController.removeMyCard
+  );
+
   // ─── POST /flashcards ──────────────────────────────────────────────────────
   app.post(
     '/',
@@ -48,24 +173,7 @@ export async function flashcardRoutes(app) {
     flashcardController.list
   );
 
-  // ─── GET /flashcards/export/quizlet ───────────────────────────────────────
-  // NOTE: This route MUST be declared before /:id so Fastify does not treat
-  //       "export" as a UUID parameter.
-  app.get(
-    '/export/quizlet',
-    {
-      preHandler: [authenticate],
-      schema: {
-        tags: ['Flashcards'],
-        summary: 'Export flashcards as a Quizlet-importable tab-delimited text',
-        security: [{ bearerAuth: [] }],
-        response: {
-          200: ExportQuizletResponseSchema
-        }
-      }
-    },
-    flashcardController.exportQuizlet
-  );
+  // Note: /export/quizlet removed because it moved to /me/export/quizlet
 
   // ─── PATCH /flashcards/:id ─────────────────────────────────────────────────
   app.patch(

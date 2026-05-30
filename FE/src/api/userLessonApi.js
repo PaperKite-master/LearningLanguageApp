@@ -3,13 +3,9 @@ import lessonApi from './lessonApi';
 
 const getRealIdFromDisplayId = async (displayId) => {
   if (typeof displayId === 'string' && displayId.startsWith('L')) {
-    const orderStr = displayId.substring(1);
-    const orderNum = parseInt(orderStr, 10);
-    if (!isNaN(orderNum)) {
-      const allLessons = await lessonApi.getAll();
-      const found = allLessons.find(l => l.order === orderNum);
-      if (found) return found.id;
-    }
+    const allLessons = await lessonApi.getAll();
+    const found = (allLessons || []).find(l => l.lessonCode === displayId);
+    if (found) return found.id;
   }
   return displayId;
 };

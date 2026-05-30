@@ -5,6 +5,7 @@ import remarkBreaks from 'remark-breaks';
 import { ArrowLeft, Save, FileText } from 'lucide-react';
 import lessonApi from '../../api/lessonApi';
 import grammarApi from '../../api/grammarApi';
+import timelineApi from '../../api/timelineApi';
 import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
 
 const extractText = (children) => {
@@ -45,26 +46,60 @@ const AdminLessonCreateContent = () => {
   
   const editMode = location.state?.editMode || false;
   const lessonData = location.state?.lessonData || null;
+  const initialType = location.state?.initialContentType || 'lesson';
 
-  const defaultTemplate = `## Mục tiêu\n- \n\n## Nội dung chính\n1. \n\n## Từ vựng mới\n- \n\n## Bài tập luyện tập\n1. `;
-  const [markdownValue, setMarkdownValue] = useState(editMode && lessonData?.contentMarkdown ? lessonData.contentMarkdown : defaultTemplate);
-  const [contentType, setContentType] = useState('lesson'); // 'lesson' or 'grammar'
+  const lessonTemplate = `## Mục tiêu\n- \n\n## Nội dung chính\n1. \n\n## Từ vựng mới\n- \n\n## Bài tập luyện tập\n1. `;
+  const grammarTemplate = `## Cấu trúc\n\`\`\`\n[Cấu trúc]\n\`\`\`\n\n## Cách dùng\n- \n\n## Ví dụ\n1. `;
+  
+  const [lessonMarkdown, setLessonMarkdown] = useState((editMode && initialType === 'lesson') && lessonData?.contentMarkdown ? lessonData.contentMarkdown : lessonTemplate);
+  const [grammarMarkdown, setGrammarMarkdown] = useState((editMode && initialType === 'grammar') && lessonData?.contentMarkdown ? lessonData.contentMarkdown : grammarTemplate);
+  const [contentType, setContentType] = useState(initialType); // 'lesson' or 'grammar'
+
+  // Dynamic markdown value based on toggle
+  const markdownValue = contentType === 'lesson' ? lessonMarkdown : grammarMarkdown;
+  const setMarkdownValue = contentType === 'lesson' ? setLessonMarkdown : setGrammarMarkdown;
   
   // Dữ liệu cho admin/lessons
   const [lessonFormData, setLessonFormData] = useState({
-    title: editMode ? lessonData.title || '' : '',
-    timelineId: editMode ? lessonData.timelineId || '' : '',
-    topic: editMode ? lessonData.topic || '' : '',
-    status: editMode ? lessonData.status || 'published' : 'published',
-    videoUrl: editMode ? lessonData.videoUrl || '' : '',
-    order: editMode ? lessonData.order || '' : ''
+    title: (editMode && initialType === 'lesson') ? lessonData.title || '' : '',
+    timelineId: (editMode && initialType === 'lesson') ? lessonData.timelineId || '' : '',
+    topic: (editMode && initialType === 'lesson') ? lessonData.topic || '' : '',
+    status: (editMode && initialType === 'lesson') ? lessonData.status || 'published' : 'published',
+    videoUrl: (editMode && initialType === 'lesson') ? lessonData.videoUrl || '' : '',
+    lessonCode: (editMode && initialType === 'lesson') ? lessonData.lessonCode || '' : ''
   });
 
   // Dữ liệu cho admin/grammars
   const [grammarFormData, setGrammarFormData] = useState({
-    title: '',
-    lessonId: ''
+    title: (editMode && initialType === 'grammar') ? lessonData.title || '' : '',
+    lessonId: (editMode && initialType === 'grammar') ? lessonData.lessonId : (editMode && lessonData ? lessonData.id : '')
   });
+
+  // Data for dropdowns
+  const [timelines, setTimelines] = useState([]);
+  const [lessons, setLessons] = useState([]);
+  const [lessonGrammars, setLessonGrammars] = useState([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [tlData, lsData] = await Promise.all([
+          timelineApi.getAll(),
+          lessonApi.getAll()
+        ]);
+        setTimelines(tlData || []);
+        setLessons(lsData || []);
+        
+        if (editMode && lessonData?.id) {
+          const lgData = await grammarApi.getByLessonId(lessonData.id);
+          setLessonGrammars(lgData || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch reference data:", error);
+      }
+    };
+    fetchData();
+  }, [editMode, lessonData]);
 
   const handleLessonChange = (e) => {
     const { name, value } = e.target;
@@ -116,16 +151,23 @@ const AdminLessonCreateContent = () => {
     
     try {
       if (contentType === 'lesson') {
-        let finalOrder = parseInt(lessonFormData.order);
+        let finalLessonCode = lessonFormData.lessonCode;
         
-        // Nếu user bỏ trống hoặc nhập số không hợp lệ, tự động tính max(order) + 1
-        if (isNaN(finalOrder)) {
+        // Nếu user bỏ trống, tự động sinh mã
+        if (!finalLessonCode || finalLessonCode.trim() === '') {
           const existingLessons = await lessonApi.getAll();
           if (existingLessons && existingLessons.length > 0) {
-            const maxOrder = Math.max(...existingLessons.map(l => l.order || 0));
-            finalOrder = maxOrder + 1;
+            // Find max index in L00x
+            let maxIndex = 0;
+            existingLessons.forEach(l => {
+              if (l.lessonCode && l.lessonCode.startsWith('L')) {
+                const num = parseInt(l.lessonCode.substring(1), 10);
+                if (!isNaN(num) && num > maxIndex) maxIndex = num;
+              }
+            });
+            finalLessonCode = `L${String(maxIndex + 1).padStart(3, '0')}`;
           } else {
-            finalOrder = 1;
+            finalLessonCode = 'L001';
           }
         }
 
@@ -136,7 +178,7 @@ const AdminLessonCreateContent = () => {
           status: lessonFormData.status,
           videoUrl: lessonFormData.videoUrl,
           contentMarkdown: markdownValue,
-          order: finalOrder
+          lessonCode: finalLessonCode
         };
         
         if (editMode) {
@@ -153,8 +195,13 @@ const AdminLessonCreateContent = () => {
           contentMarkdown: markdownValue,
           order: 0
         };
-        await grammarApi.create(payload);
-        alert('Tạo ngữ pháp thành công!');
+        if (editMode) {
+          await grammarApi.update(lessonData.id, payload);
+          alert('Cập nhật ngữ pháp thành công!');
+        } else {
+          await grammarApi.create(payload);
+          alert('Tạo ngữ pháp thành công!');
+        }
       }
       
       navigate('/admin/content');
@@ -177,7 +224,7 @@ const AdminLessonCreateContent = () => {
             <ArrowLeft size={24} color="#fff" />
           </button>
           <h1 className="admin-heading" style={{ marginBottom: 0 }}>
-            {editMode ? 'CHỈNH SỬA BÀI HỌC' : 'TẠO BÀI HỌC MỚI'}
+            {editMode ? (contentType === 'lesson' ? 'CHỈNH SỬA BÀI HỌC' : 'CHỈNH SỬA NGỮ PHÁP') : (contentType === 'lesson' ? 'TẠO BÀI HỌC MỚI' : 'TẠO NGỮ PHÁP MỚI')}
           </h1>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
@@ -227,17 +274,24 @@ const AdminLessonCreateContent = () => {
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Mã Lộ trình (Timeline ID)</label>
-                <input 
-                  type="text" name="timelineId" value={lessonFormData.timelineId} onChange={handleLessonChange} 
-                  className="modal-input" required placeholder="VD: timeline_n5_01"
-                />
+                <label>Thuộc Lộ trình (Timeline)</label>
+                <select 
+                  name="timelineId" value={lessonFormData.timelineId} onChange={handleLessonChange} 
+                  className="modal-input" required
+                >
+                  <option value="">-- Chọn Lộ trình --</option>
+                  {timelines.map(tl => (
+                    <option key={tl.id} value={tl.id}>
+                      {tl.title} ({tl.description || 'N5'})
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Vị trí Mã bài học (Order)</label>
+                <label>Mã bài học (Lesson Code)</label>
                 <input 
-                  type="number" name="order" value={lessonFormData.order} onChange={handleLessonChange} 
-                  className="modal-input" placeholder="Để trống = Auto"
+                  type="text" name="lessonCode" value={lessonFormData.lessonCode} onChange={handleLessonChange} 
+                  className="modal-input" placeholder="VD: L001 (Để trống = Auto)"
                 />
               </div>
             </div>
@@ -275,11 +329,20 @@ const AdminLessonCreateContent = () => {
               />
             </div>
             <div className="form-group" style={{ flex: 1 }}>
-              <label>Thuộc Bài Học (Lesson ID)</label>
-              <input 
-                type="text" name="lessonId" value={grammarFormData.lessonId} onChange={handleGrammarChange} 
-                className="modal-input" required placeholder="VD: lesson_123"
-              />
+              <label>Thuộc Bài Học (Lesson)</label>
+              <select 
+                name="lessonId" value={grammarFormData.lessonId} onChange={handleGrammarChange} 
+                className="modal-input" required
+                disabled={editMode}
+                style={editMode ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+              >
+                <option value="">-- Chọn Bài học --</option>
+                {lessons.map(ls => (
+                  <option key={ls.id} value={ls.id}>
+                    {ls.title}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         )}
@@ -309,6 +372,27 @@ const AdminLessonCreateContent = () => {
           }}
         />
       </div>
+
+      {/* Grammar List Quick View (Only in Lesson Edit Mode) */}
+      {editMode && contentType === 'lesson' && (
+        <div className="admin-settings-panel" style={{ maxWidth: '100%', marginTop: '24px', padding: '24px' }}>
+          <h3 style={{ margin: '0 0 16px 0', color: '#fff', fontSize: '1.2rem' }}>Danh sách Ngữ pháp của bài học này</h3>
+          {lessonGrammars.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {lessonGrammars.map((g, idx) => (
+                <div key={g.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong style={{ color: '#00f2fe' }}>#{idx + 1}</strong> <span style={{ marginLeft: '10px', color: '#e5e7eb' }}>{g.title}</span>
+                  </div>
+                  <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>ID: {g.id.substring(0, 8)}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: '#9ca3af', fontStyle: 'italic', margin: 0 }}>Chưa có điểm ngữ pháp nào được thêm vào bài học này.</p>
+          )}
+        </div>
+      )}
 
     </div>
   );

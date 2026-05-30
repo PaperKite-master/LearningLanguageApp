@@ -8,8 +8,7 @@ export const AdminUserRoleSchema = Type.Union([
   Type.Literal('ADMIN'),
   Type.Literal('PRO'),
   Type.Literal('USER'),
-  Type.Literal('GUEST')
-]);
+  Type.Literal('GUEST')]);
 
 export const AdminUserStoredRoleSchema = Type.Union([
   Type.Literal('ADMIN'),

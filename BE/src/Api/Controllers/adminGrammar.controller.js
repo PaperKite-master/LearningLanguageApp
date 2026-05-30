@@ -1,8 +1,14 @@
 import { createGrammarUseCase } from '../../Application/UseCases/createGrammar.usecase.js';
 import { updateGrammarUseCase } from '../../Application/UseCases/updateGrammar.usecase.js';
 import { deleteGrammarUseCase } from '../../Application/UseCases/deleteGrammar.usecase.js';
+import { listAdminGrammarsUseCase } from '../../Application/UseCases/listAdminGrammars.usecase.js';
 
 export const adminGrammarController = {
+  list: async (request, reply) => {
+    const grammars = await listAdminGrammarsUseCase({ grammarRepo: request.grammarRepo });
+    return reply.send({ data: grammars });
+  },
+
   create: async (request, reply) => {
     try {
       const grammar = await createGrammarUseCase({
