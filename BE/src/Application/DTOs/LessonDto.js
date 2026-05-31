@@ -8,6 +8,7 @@ export function toLessonDto(lesson) {
     videoUrl: lesson.video_url ?? null,
     contentMarkdown: lesson.content_markdown ?? null,
     order: lesson.order ?? 0,
+    lessonCode: lesson.lesson_code ?? null,
     createdAt: lesson.created_at ?? null
   };
 }

@@ -1,16 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Edit2, Trash2, X } from 'lucide-react';
-
-const INITIAL_MOCK_FLASHCARDS = [
-  { id: 'F001', jp: 'コンピュータ', kana: 'こんぴゅーた', meaning: 'Máy tính', level: 'N5', status: 'Published' },
-  { id: 'F002', jp: 'プログラム', kana: 'ぷろぐらむ', meaning: 'Chương trình', level: 'N5', status: 'Published' },
-  { id: 'F003', jp: 'データベース', kana: 'でーたべーす', meaning: 'Database', level: 'N5', status: 'Draft' },
-  { id: 'F004', jp: '実装する', kana: 'じっそうする', meaning: 'Để thực hiện (Implement)', level: 'N5', status: 'Draft' }
-];
+import flashcardApi from '../../api/flashcardApi';
 
 const AdminFlashcardsContent = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [flashcards, setFlashcards] = useState(INITIAL_MOCK_FLASHCARDS);
+  const [flashcards, setFlashcards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,15 +17,80 @@ const AdminFlashcardsContent = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
 
   const filteredFlashcards = flashcards.filter(item => 
-    item.jp.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    item.meaning.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kana.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.jp && item.jp.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (item.meaning && item.meaning.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.kana && item.kana.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const fetchFlashcards = async () => {
+    try {
+      setLoading(true);
+      const data = await flashcardApi.getAll();
+      
+      // Sort data by createdAt ascending (oldest first)
+      const sortedData = [...data].sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+      
+      // Map BE schema to FE schema and use saved displayId if available
+      const mappedData = sortedData.map((card, index) => {
+        let parsedNotes = {};
+        try {
+          if (card.notes) parsedNotes = JSON.parse(card.notes);
+        } catch (e) {
+          // If notes is not valid JSON, ignore
+        }
+        
+        return {
+          id: card.id,
+          displayId: parsedNotes.displayId || `F${String(index + 1).padStart(3, '0')}`,
+          jp: card.frontText,
+          meaning: card.backText,
+          kana: parsedNotes.kana || '',
+          level: parsedNotes.level || 'N5',
+          status: parsedNotes.status || 'Draft'
+        };
+      });
+      
+      // Sort by displayId descending so that gap-filled IDs appear in their correct numerical position
+      mappedData.sort((a, b) => {
+        const numA = parseInt(a.displayId.replace('F', ''), 10);
+        const numB = parseInt(b.displayId.replace('F', ''), 10);
+        return numB - numA; // Largest first (e.g., F004, F003, F002, F001)
+      });
+      
+      setFlashcards(mappedData);
+    } catch (err) {
+      console.error("Failed to fetch flashcards", err);
+      setError("Không thể tải danh sách Flashcard.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFlashcards();
+  }, []);
 
   const handleOpenAddModal = () => {
     setModalMode('add');
+    
+    // Gap-filling logic: find the lowest missing number
+    const existingNums = flashcards
+      .map(c => parseInt(c.displayId.replace('F', ''), 10))
+      .filter(n => !isNaN(n))
+      .sort((a, b) => a - b);
+      
+    let nextNum = 1;
+    for (let i = 0; i < existingNums.length; i++) {
+      if (existingNums[i] === nextNum) {
+        nextNum++;
+      } else if (existingNums[i] > nextNum) {
+        break; // found the lowest missing gap
+      }
+    }
+
     setFormData({ 
-      id: `F00${flashcards.length + 1}`,
+      id: '',
+      displayId: `F${String(nextNum).padStart(3, '0')}`,
       jp: '', kana: '', meaning: '', level: 'N5', status: 'Draft' 
     });
     setIsModalOpen(true);
@@ -41,19 +102,47 @@ const AdminFlashcardsContent = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (modalMode === 'add') {
-      setFlashcards([...flashcards, formData]);
-    } else {
-      setFlashcards(flashcards.map(item => item.id === formData.id ? formData : item));
+    
+    // Pack extra fields into JSON for the 'notes' field, including the permanent displayId
+    const extraNotes = JSON.stringify({
+      kana: formData.kana,
+      level: formData.level,
+      status: formData.status,
+      displayId: formData.displayId
+    });
+
+    const payload = {
+      frontText: formData.jp,
+      backText: formData.meaning,
+      notes: extraNotes
+    };
+
+    try {
+      if (modalMode === 'add') {
+        await flashcardApi.create(payload);
+      } else {
+        await flashcardApi.update(formData.id, payload);
+      }
+      setIsModalOpen(false);
+      fetchFlashcards(); // Refresh list after success
+    } catch (err) {
+      console.error("Failed to save flashcard", err);
+      alert("Đã xảy ra lỗi khi lưu Flashcard!");
     }
-    setIsModalOpen(false);
   };
 
-  const executeDelete = () => {
-    setFlashcards(flashcards.filter(item => item.id !== itemToDelete.id));
-    setItemToDelete(null);
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await flashcardApi.delete(itemToDelete.id);
+      setItemToDelete(null);
+      fetchFlashcards(); // Refresh list after deletion
+    } catch (err) {
+      console.error("Failed to delete flashcard", err);
+      alert("Đã xảy ra lỗi khi xóa Flashcard!");
+    }
   };
 
   return (
@@ -80,6 +169,11 @@ const AdminFlashcardsContent = () => {
         </div>
 
         {/* Data Table */}
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>Đang tải dữ liệu Flashcard...</div>
+        ) : error ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>{error}</div>
+        ) : (
         <div className="admin-table-wrapper">
           <table className="admin-users-table">
             <thead>
@@ -96,7 +190,7 @@ const AdminFlashcardsContent = () => {
             <tbody>
               {filteredFlashcards.map((item) => (
                 <tr key={item.id}>
-                  <td className="col-id" style={{ color: '#9ca3af', fontFamily: 'monospace' }}>{item.id}</td>
+                  <td className="col-id" style={{ color: '#9ca3af', fontFamily: 'monospace' }}>{item.displayId}</td>
                   <td className="col-name" style={{ textAlign: 'center' }}>{item.jp}</td>
                   <td className="col-email">{item.kana}</td>
                   <td className="col-category">
@@ -130,6 +224,7 @@ const AdminFlashcardsContent = () => {
             <div className="no-data-msg">Không tìm thấy thẻ Flashcard phù hợp</div>
           )}
         </div>
+        )}
         
       </div>
 
@@ -146,10 +241,12 @@ const AdminFlashcardsContent = () => {
             
             <form onSubmit={handleSubmit} className="modal-body-form">
               <div className="form-group-row">
-                <div className="form-group">
-                  <label>Mã thẻ (ID)</label>
-                  <input type="text" value={formData.id} disabled className="modal-input disabled-input" />
-                </div>
+                {modalMode === 'edit' && (
+                  <div className="form-group">
+                    <label>Mã thẻ (ID)</label>
+                    <input type="text" value={formData.displayId} disabled className="modal-input disabled-input" />
+                  </div>
+                )}
                 <div className="form-group">
                   <label>Cấp độ</label>
                   <select 

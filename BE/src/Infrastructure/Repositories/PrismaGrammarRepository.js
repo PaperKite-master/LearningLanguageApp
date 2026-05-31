@@ -3,6 +3,12 @@ export class PrismaGrammarRepository {
     this.prisma = prisma;
   }
 
+  async listAll() {
+    return this.prisma.grammars.findMany({
+      orderBy: [{ created_at: 'desc' }]
+    });
+  }
+
   async listByLessonId(lessonId) {
     return this.prisma.grammars.findMany({
       where: {

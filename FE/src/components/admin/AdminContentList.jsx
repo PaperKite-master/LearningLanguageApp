@@ -19,7 +19,13 @@ const AdminContentList = () => {
     const fetchLessons = async () => {
       try {
         const data = await lessonApi.getAll();
-        const sortedData = (data || []).sort((a, b) => (b.order || 0) - (a.order || 0));
+        const sortedData = [...(data || [])].sort((a, b) => {
+          const codeA = a.lessonCode || '';
+          const codeB = b.lessonCode || '';
+          // Sắp xếp mã L00x giảm dần (L005 nằm trên, L001 nằm dưới cùng)
+          return codeB.localeCompare(codeA, undefined, { numeric: true });
+        });
+        
         setContentList(sortedData);
       } catch (error) {
         console.error("Lỗi tải bài học:", error);
@@ -106,7 +112,7 @@ const AdminContentList = () => {
               {filteredContent.map((item) => (
                 <tr key={item.id}>
                   <td className="col-id">
-                    {item.order ? `L${String(item.order).padStart(3, '0')}` : item.id.substring(0, 8)}
+                    {item.lessonCode || item.id.substring(0, 8)}
                   </td>
                   <td className="col-name">{item.title}</td>
                   <td className="col-email">{item.topic || 'Chưa có'}</td>

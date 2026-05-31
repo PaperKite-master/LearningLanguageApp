@@ -3,6 +3,8 @@ import { listFlashcardsUseCase } from '../../Application/UseCases/flashcard/list
 import { updateFlashcardUseCase } from '../../Application/UseCases/flashcard/updateFlashcard.usecase.js';
 import { deleteFlashcardUseCase } from '../../Application/UseCases/flashcard/deleteFlashcard.usecase.js';
 import { exportToQuizletUseCase } from '../../Application/UseCases/flashcard/exportToQuizlet.usecase.js';
+import { cloneFlashcardUseCase } from '../../Application/UseCases/flashcard/cloneFlashcard.usecase.js';
+import { toFlashcardDto } from '../../Application/DTOs/FlashcardDto.js';
 
 export const flashcardController = {
   /**
@@ -14,7 +16,7 @@ export const flashcardController = {
       const userId = request.user.sub;
       const flashcard = await createFlashcardUseCase({
         flashcardRepo: request.flashcardRepo,
-        userId,
+        userId: undefined, // Admin card (system)
         payload: request.body
       });
       return reply.code(201).send({ data: flashcard });
@@ -31,12 +33,18 @@ export const flashcardController = {
    * List all flashcards for the authenticated user.
    */
   list: async (request, reply) => {
-    const userId = request.user.sub;
-    const flashcards = await listFlashcardsUseCase({
-      flashcardRepo: request.flashcardRepo,
-      userId
-    });
-    return reply.send({ data: flashcards });
+    // Admin list: Get all library cards
+    const flashcards = await request.flashcardRepo.listLibrary();
+    return reply.send({ data: flashcards.map(toFlashcardDto) });
+  },
+
+  /**
+   * GET /flashcards/library
+   * List all library flashcards for the user to view.
+   */
+  listLibrary: async (request, reply) => {
+    const flashcards = await request.flashcardRepo.listLibrary();
+    return reply.send({ data: flashcards.map(toFlashcardDto) });
   },
 
   /**
@@ -49,7 +57,7 @@ export const flashcardController = {
       const flashcard = await updateFlashcardUseCase({
         flashcardRepo: request.flashcardRepo,
         id: request.params.id,
-        userId,
+        userId: undefined, // Admin card
         payload: request.body
       });
       return reply.send({ data: flashcard });
@@ -74,7 +82,7 @@ export const flashcardController = {
       await deleteFlashcardUseCase({
         flashcardRepo: request.flashcardRepo,
         id: request.params.id,
-        userId
+        userId: undefined // Admin card
       });
       return reply.code(204).send();
     } catch (err) {
@@ -99,5 +107,92 @@ export const flashcardController = {
       userId
     });
     return reply.send({ data: text });
+  },
+
+  // ==========================================
+  // USER (MY CARDS) ENDPOINTS
+  // ==========================================
+  
+  /**
+   * POST /flashcards/me
+   */
+  createMyCard: async (request, reply) => {
+    try {
+      const flashcard = await createFlashcardUseCase({
+        flashcardRepo: request.flashcardRepo,
+        userId: request.user.sub,
+        payload: request.body
+      });
+      return reply.code(201).send({ data: flashcard });
+    } catch (err) {
+      if (err?.code === 'P2023') return reply.code(400).send({ error: 'Invalid UUID format' });
+      throw err;
+    }
+  },
+
+  /**
+   * GET /flashcards/me
+   */
+  listMyCards: async (request, reply) => {
+    const flashcards = await listFlashcardsUseCase({
+      flashcardRepo: request.flashcardRepo,
+      userId: request.user.sub
+    });
+    return reply.send({ data: flashcards });
+  },
+
+  /**
+   * PATCH /flashcards/me/:id
+   */
+  updateMyCard: async (request, reply) => {
+    try {
+      const flashcard = await updateFlashcardUseCase({
+        flashcardRepo: request.flashcardRepo,
+        id: request.params.id,
+        userId: request.user.sub,
+        payload: request.body
+      });
+      return reply.send({ data: flashcard });
+    } catch (err) {
+      if (err?.statusCode === 404) return reply.code(404).send({ error: 'Flashcard not found' });
+      if (err?.code === 'P2023') return reply.code(400).send({ error: 'Invalid UUID format' });
+      throw err;
+    }
+  },
+
+  /**
+   * DELETE /flashcards/me/:id
+   */
+  removeMyCard: async (request, reply) => {
+    try {
+      await deleteFlashcardUseCase({
+        flashcardRepo: request.flashcardRepo,
+        id: request.params.id,
+        userId: request.user.sub
+      });
+      return reply.code(204).send();
+    } catch (err) {
+      if (err?.statusCode === 404) return reply.code(404).send({ error: 'Flashcard not found' });
+      if (err?.code === 'P2023') return reply.code(400).send({ error: 'Invalid UUID format' });
+      throw err;
+    }
+  },
+
+  /**
+   * POST /flashcards/me/clone/:id
+   */
+  cloneLibraryCard: async (request, reply) => {
+    try {
+      const flashcard = await cloneFlashcardUseCase({
+        flashcardRepo: request.flashcardRepo,
+        id: request.params.id,
+        userId: request.user.sub
+      });
+      return reply.code(201).send({ data: flashcard });
+    } catch (err) {
+      if (err?.statusCode === 404) return reply.code(404).send({ error: 'Library flashcard not found' });
+      if (err?.code === 'P2023') return reply.code(400).send({ error: 'Invalid UUID format' });
+      throw err;
+    }
   }
 };

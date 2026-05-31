@@ -6,11 +6,26 @@ import {
   CreateGrammarBodySchema,
   GrammarIdParamsSchema,
   GrammarResponseSchema,
-  UpdateGrammarBodySchema
+  UpdateGrammarBodySchema,
+  GrammarListResponseSchema
 } from '../Schemas/adminGrammar.schemas.js';
 
 export async function adminGrammarRoutes(app) {
   await app.register(grammarRepoPlugin);
+
+  app.get(
+    '/',
+    {
+      preHandler: [authenticate, requireAdmin],
+      schema: {
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: GrammarListResponseSchema
+        }
+      }
+    },
+    adminGrammarController.list
+  );
 
   app.post(
     '/',

@@ -1,46 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical, Edit2, Trash2, X } from 'lucide-react';
-
-const INITIAL_TIMELINE_DATA = [
-  {
-    id: "path-1",
-    level: "N5",
-    title: "NGƯỜI MỚI BẮT ĐẦU",
-    items: [
-      { id: "item-1", content: "Nói lời chào và tạm biệt" },
-      { id: "item-2", content: "Tạo câu phủ định và trả lời câu hỏi" },
-      { id: "item-3", content: "Nói về đồ dùng cá nhân" }
-    ]
-  },
-  {
-    id: "path-2",
-    level: "N4",
-    title: "TIỂU HỌC",
-    items: [
-      { id: "item-4", content: "Thuật ngữ phần mềm" },
-      { id: "item-5", content: "Cấu trúc câu: て形" },
-      { id: "item-6", content: "Cụm từ đánh giá mã" }
-    ]
-  },
-  {
-    id: "path-3",
-    level: "N3",
-    title: "TRUNG CẤP",
-    items: [
-      { id: "item-7", content: "Đọc tài liệu" },
-      { id: "item-8", content: "Viết báo cáo" },
-      { id: "item-9", content: "Giao tiếp về kỹ thuật" }
-    ]
-  }
-];
+import timelineApi from '../../api/timelineApi';
+import lessonApi from '../../api/lessonApi';
 
 const AdminTimelineContent = () => {
-  const [paths, setPaths] = useState(INITIAL_TIMELINE_DATA);
+  const [paths, setPaths] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Modal State for adding new path
+  // Modal State for adding/editing new path
   const [isPathModalOpen, setIsPathModalOpen] = useState(false);
+  const [pathModalMode, setPathModalMode] = useState('add');
   const [pathFormData, setPathFormData] = useState({ id: '', title: '', level: 'N5' });
 
   // Modal State for adding/editing an item (Bài học)
@@ -50,11 +21,37 @@ const AdminTimelineContent = () => {
   const [targetPathId, setTargetPathId] = useState('');
 
   useEffect(() => {
-    // Avoid hydration mismatch for DND kit in strict mode
     setIsMounted(true);
+    fetchTimelines();
   }, []);
 
-  const onDragEnd = (result) => {
+  const fetchTimelines = async () => {
+    try {
+      setIsLoading(true);
+      const data = await timelineApi.getAll();
+      
+      const formattedPaths = data.map(timeline => {
+        const sortedLessons = (timeline.lessons || []).sort((a, b) => (a.order || 0) - (b.order || 0));
+        return {
+          id: timeline.id,
+          level: timeline.description || 'N5', // Using description for level as a workaround
+          title: timeline.title,
+          items: sortedLessons.map(lesson => ({
+            id: lesson.id,
+            content: lesson.title
+          }))
+        };
+      });
+      // Sort timelines by order
+      setPaths(formattedPaths);
+    } catch (err) {
+      console.error('Failed to fetch timelines:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onDragEnd = async (result) => {
     if (!result.destination) return;
 
     const { source, destination } = result;
@@ -75,6 +72,24 @@ const AdminTimelineContent = () => {
         if (p.id === destination.droppableId) return { ...p, items: destItems };
         return p;
       }));
+
+      // Background update for the moved item
+      try {
+        await lessonApi.update(removed.id, {
+          timelineId: destination.droppableId,
+          order: destination.index
+        });
+        
+        // Also update order of other items in destination if needed (optional optimization)
+        for (let i = 0; i < destItems.length; i++) {
+          if (destItems[i].id !== removed.id) {
+            await lessonApi.update(destItems[i].id, { order: i });
+          }
+        }
+      } catch (err) {
+        console.error('Drag update failed:', err);
+      }
+
     } else {
       // Reorder within same list
       const path = paths.find(p => p.id === source.droppableId);
@@ -85,25 +100,80 @@ const AdminTimelineContent = () => {
       setPaths(paths.map(p => 
         p.id === source.droppableId ? { ...p, items } : p
       ));
+
+      // Background update
+      try {
+        for (let i = 0; i < items.length; i++) {
+          await lessonApi.update(items[i].id, { order: i });
+        }
+      } catch (err) {
+        console.error('Reorder update failed:', err);
+      }
     }
   };
 
-  const handleAddNewPath = (e) => {
+  const handleSavePath = async (e) => {
     e.preventDefault();
-    const newPath = {
-      id: `path-${Date.now()}`,
-      level: pathFormData.level,
-      title: pathFormData.title,
-      items: []
-    };
-    setPaths([...paths, newPath]);
-    setIsPathModalOpen(false);
+    try {
+      if (pathModalMode === 'add') {
+        const newTimeline = await timelineApi.create({
+          title: pathFormData.title,
+          description: pathFormData.level,
+          order: paths.length
+        });
+        
+        const newPath = {
+          id: newTimeline.id,
+          level: newTimeline.description || pathFormData.level,
+          title: newTimeline.title,
+          items: []
+        };
+        setPaths([...paths, newPath]);
+      } else {
+        const updatedTimeline = await timelineApi.update(pathFormData.id, {
+          title: pathFormData.title,
+          description: pathFormData.level
+        });
+        
+        setPaths(paths.map(p => {
+          if (p.id === pathFormData.id) {
+            return {
+              ...p,
+              title: updatedTimeline.title,
+              level: updatedTimeline.description || pathFormData.level
+            };
+          }
+          return p;
+        }));
+      }
+      setIsPathModalOpen(false);
+    } catch (err) {
+      console.error('Failed to save timeline:', err);
+      alert('Lưu lộ trình thất bại!');
+    }
+  };
+
+  const handleOpenEditPath = (path) => {
+    setPathModalMode('edit');
+    setPathFormData({ id: path.id, title: path.title, level: path.level });
+    setIsPathModalOpen(true);
+  };
+
+  const handleDeletePath = async (pathId) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa TOÀN BỘ lộ trình này và tất cả các bài học bên trong không? Hành động này không thể hoàn tác!')) return;
+    try {
+      await timelineApi.delete(pathId);
+      setPaths(paths.filter(p => p.id !== pathId));
+    } catch (err) {
+      console.error('Failed to delete timeline:', err);
+      alert('Xóa lộ trình thất bại! Có thể do lỗi kết nối.');
+    }
   };
 
   const handleOpenAddItem = (pathId) => {
     setTargetPathId(pathId);
     setItemModalMode('add');
-    setItemFormData({ id: `item-${Date.now()}`, content: '' });
+    setItemFormData({ id: '', content: '' });
     setIsItemModalOpen(true);
   };
 
@@ -114,28 +184,73 @@ const AdminTimelineContent = () => {
     setIsItemModalOpen(true);
   };
 
-  const handleItemSubmit = (e) => {
+  const handleItemSubmit = async (e) => {
     e.preventDefault();
-    setPaths(paths.map(p => {
-      if (p.id === targetPathId) {
-        if (itemModalMode === 'add') {
-          return { ...p, items: [...p.items, itemFormData] };
-        } else {
-          return { ...p, items: p.items.map(i => i.id === itemFormData.id ? itemFormData : i) };
+    try {
+      if (itemModalMode === 'add') {
+        const path = paths.find(p => p.id === targetPathId);
+        
+        // Auto generate lessonCode
+        const existingLessons = await lessonApi.getAll();
+        let finalLessonCode = 'L001';
+        if (existingLessons && existingLessons.length > 0) {
+          let maxIndex = 0;
+          existingLessons.forEach(l => {
+            if (l.lessonCode && l.lessonCode.startsWith('L')) {
+              const num = parseInt(l.lessonCode.substring(1), 10);
+              if (!isNaN(num) && num > maxIndex) maxIndex = num;
+            }
+          });
+          finalLessonCode = `L${String(maxIndex + 1).padStart(3, '0')}`;
         }
+
+        const newLesson = await lessonApi.create({
+          title: itemFormData.content,
+          timelineId: targetPathId,
+          order: path.items.length,
+          status: 'published',
+          lessonCode: finalLessonCode
+        });
+        
+        setPaths(paths.map(p => {
+          if (p.id === targetPathId) {
+            return { ...p, items: [...p.items, { id: newLesson.id, content: newLesson.title }] };
+          }
+          return p;
+        }));
+      } else {
+        const updatedLesson = await lessonApi.update(itemFormData.id, {
+          title: itemFormData.content
+        });
+        
+        setPaths(paths.map(p => {
+          if (p.id === targetPathId) {
+            return { ...p, items: p.items.map(i => i.id === updatedLesson.id ? { id: updatedLesson.id, content: updatedLesson.title } : i) };
+          }
+          return p;
+        }));
       }
-      return p;
-    }));
-    setIsItemModalOpen(false);
+      setIsItemModalOpen(false);
+    } catch (err) {
+      console.error('Failed to save lesson:', err);
+      alert('Lưu thất bại!');
+    }
   };
 
-  const deleteItem = (pathId, itemId) => {
-    setPaths(paths.map(p => {
-      if (p.id === pathId) {
-        return { ...p, items: p.items.filter(item => item.id !== itemId) };
-      }
-      return p;
-    }));
+  const deleteItem = async (pathId, itemId) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa bài học này?')) return;
+    try {
+      await lessonApi.delete(itemId);
+      setPaths(paths.map(p => {
+        if (p.id === pathId) {
+          return { ...p, items: p.items.filter(item => item.id !== itemId) };
+        }
+        return p;
+      }));
+    } catch (err) {
+      console.error('Failed to delete lesson:', err);
+      alert('Xóa thất bại!');
+    }
   };
 
   if (!isMounted) return null;
@@ -145,95 +260,132 @@ const AdminTimelineContent = () => {
       <div className="admin-header flex-header">
         <h1 className="admin-heading">QUẢN LÝ TIMELINE</h1>
         <button className="admin-btn-primary" onClick={() => {
-          setPathFormData({ title: '', level: 'N5' });
+          setPathModalMode('add');
+          setPathFormData({ id: '', title: '', level: 'N5' });
           setIsPathModalOpen(true);
         }}>
           + Thêm lộ trình mới
         </button>
       </div>
 
-      <div className="timeline-dnd-container">
-        <DragDropContext onDragEnd={onDragEnd}>
-          {paths.map((path) => (
-            <div key={path.id} className="timeline-path-block">
-              <div className="timeline-path-header">
-                <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-                  <span className="role-badge role-level">{path.level}</span>
-                  <span className="timeline-path-title">{path.title}</span>
-                  <span className="timeline-path-count">{path.items.length} bài</span>
-                </div>
-                <button 
-                  style={{
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)', 
-                    color: 'var(--white)', 
-                    padding: '6px 12px', 
-                    borderRadius: '6px', 
-                    cursor: 'pointer',
-                    fontSize: '0.85rem'
-                  }}
-                  onClick={() => handleOpenAddItem(path.id)}
-                >
-                  + Thêm bài học
-                </button>
-              </div>
-              
-              <Droppable droppableId={path.id}>
-                {(provided, snapshot) => (
-                  <div 
-                    {...provided.droppableProps} 
-                    ref={provided.innerRef}
-                    className={`timeline-droppable-area ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
-                  >
-                    {path.items.map((item, index) => (
-                      <Draggable key={item.id} draggableId={item.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`timeline-draggable-item ${snapshot.isDragging ? 'is-dragging' : ''}`}
-                          >
-                            <div className="timeline-item-left">
-                              <div {...provided.dragHandleProps} className="timeline-drag-handle">
-                                <GripVertical size={20} color="#6b7280" />
-                              </div>
-                              <span className="timeline-item-content">{item.content}</span>
-                            </div>
-                            
-                            {/* Hidden by default, show on hover via CSS */}
-                            <div className="timeline-item-actions">
-                              <button className="icon-action-btn edit-btn" title="Chỉnh sửa" onClick={() => handleOpenEditItem(path.id, item)}>
-                                <Edit2 size={16} />
-                              </button>
-                              <button className="icon-action-btn delete-btn" title="Xóa" onClick={() => deleteItem(path.id, item.id)}>
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+      {isLoading ? (
+        <div style={{ color: '#fff', padding: '2rem' }}>Đang tải dữ liệu...</div>
+      ) : (
+        <div className="timeline-dnd-container">
+          <DragDropContext onDragEnd={onDragEnd}>
+            {paths.map((path) => (
+              <div key={path.id} className="timeline-path-block">
+                <div className="timeline-path-header">
+                  <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+                    <span className="role-badge role-level">{path.level}</span>
+                    <span className="timeline-path-title">{path.title}</span>
+                    <span className="timeline-path-count">{path.items.length} bài</span>
                   </div>
-                )}
-              </Droppable>
-            </div>
-          ))}
-        </DragDropContext>
-      </div>
+                  <div style={{display: 'flex', gap: '8px'}}>
+                    <button 
+                      style={{
+                        background: 'rgba(255,255,255,0.05)', 
+                        border: '1px solid rgba(255,255,255,0.1)', 
+                        color: 'var(--white)', 
+                        padding: '6px 12px', 
+                        borderRadius: '6px', 
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                      onClick={() => handleOpenAddItem(path.id)}
+                    >
+                      + Thêm bài học
+                    </button>
+                    <button 
+                      style={{
+                        background: 'rgba(59, 130, 246, 0.1)', 
+                        border: '1px solid rgba(59, 130, 246, 0.3)', 
+                        color: '#3b82f6', 
+                        padding: '6px 12px', 
+                        borderRadius: '6px', 
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                      title="Chỉnh sửa lộ trình"
+                      onClick={() => handleOpenEditPath(path)}
+                    >
+                      Sửa
+                    </button>
+                    <button 
+                      style={{
+                        background: 'rgba(239,68,68,0.1)', 
+                        border: '1px solid rgba(239,68,68,0.3)', 
+                        color: '#ef4444', 
+                        padding: '6px 12px', 
+                        borderRadius: '6px', 
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                      title="Xóa lộ trình"
+                      onClick={() => handleDeletePath(path.id)}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+                
+                <Droppable droppableId={path.id}>
+                  {(provided, snapshot) => (
+                    <div 
+                      {...provided.droppableProps} 
+                      ref={provided.innerRef}
+                      className={`timeline-droppable-area ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
+                    >
+                      {path.items.map((item, index) => (
+                        <Draggable key={item.id} draggableId={item.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`timeline-draggable-item ${snapshot.isDragging ? 'is-dragging' : ''}`}
+                            >
+                              <div className="timeline-item-left">
+                                <div {...provided.dragHandleProps} className="timeline-drag-handle">
+                                  <GripVertical size={20} color="#6b7280" />
+                                </div>
+                                <span className="timeline-item-content">{item.content}</span>
+                              </div>
+                              
+                              {/* Hidden by default, show on hover via CSS */}
+                              <div className="timeline-item-actions">
+                                <button className="icon-action-btn edit-btn" title="Chỉnh sửa" onClick={() => handleOpenEditItem(path.id, item)}>
+                                  <Edit2 size={16} />
+                                </button>
+                                <button className="icon-action-btn delete-btn" title="Xóa" onClick={() => deleteItem(path.id, item.id)}>
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            ))}
+          </DragDropContext>
+        </div>
+      )}
 
       {/* CREATE PATH MODAL */}
       {isPathModalOpen && (
         <div className="admin-modal-overlay">
           <div className="admin-modal-box">
             <div className="modal-header">
-              <h2>Thêm Lộ Trình Mới</h2>
+              <h2>{pathModalMode === 'add' ? 'Thêm Lộ Trình Mới' : 'Chỉnh Sửa Lộ Trình'}</h2>
               <button className="modal-close-btn" onClick={() => setIsPathModalOpen(false)}>
                 <X size={24} />
               </button>
             </div>
             
-            <form onSubmit={handleAddNewPath} className="modal-body-form">
+            <form onSubmit={handleSavePath} className="modal-body-form">
               <div className="form-group">
                 <label>Tên Lộ Trình</label>
                 <input 
@@ -263,7 +415,7 @@ const AdminTimelineContent = () => {
 
               <div className="modal-footer">
                 <button type="button" className="modal-btn-cancel" onClick={() => setIsPathModalOpen(false)}>Hủy bỏ</button>
-                <button type="submit" className="admin-btn-primary">Tạo Lộ Trình</button>
+                <button type="submit" className="admin-btn-primary">{pathModalMode === 'add' ? 'Tạo Lộ Trình' : 'Lưu Thay Đổi'}</button>
               </div>
             </form>
           </div>

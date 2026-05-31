@@ -450,10 +450,10 @@ model users {
   flashcards                  flashcards[]
   profiles                    profiles?
   quiz_results                quiz_results[]
+  user_activity_log           user_activity_log[]
   user_lesson_progress        user_lesson_progress[]
   user_mascot_progress        user_mascot_progress?
   user_notifications_config   user_notifications_config?
-  user_activity_log           user_activity_log[]
 
   @@index([created_at(sort: Desc)], map: "idx_users_created_at_desc")
   @@index([email], map: "idx_users_email")
@@ -546,14 +546,15 @@ model lessons {
   id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   timeline_id          String?                @db.Uuid
   title                String
-  topic                String?
-  status               LessonStatus           @default(published)
   video_url            String?
   content_markdown     String?
   order                Int?                   @default(0)
+  lesson_code          String?                @unique @db.VarChar(50)
   created_at           DateTime?              @default(now()) @db.Timestamptz(6)
-  timelines            timelines?             @relation(fields: [timeline_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  status               LessonStatus           @default(published)
+  topic                String?
   grammars             grammars[]
+  timelines            timelines?             @relation(fields: [timeline_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   quizzes              quizzes[]
   user_lesson_progress user_lesson_progress[]
   vocabulary           vocabulary[]
@@ -588,15 +589,15 @@ model mascots {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model profiles {
-  id                   String    @id @db.Uuid
-  full_name            String?
-  avatar_url           String?
-  role                 String?   @default("USER")
-  target_level         String?   @default("N3")
-  total_study_minutes  Int?      @default(0)
-  total_exp            Int?      @default(0)
-  updated_at           DateTime? @default(now()) @db.Timestamptz(6)
-  users                users     @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                  String    @id @db.Uuid
+  full_name           String?
+  avatar_url          String?
+  role                String?   @default("USER")
+  total_exp           Int?      @default(0)
+  updated_at          DateTime? @default(now()) @db.Timestamptz(6)
+  target_level        String?   @default("N3")
+  total_study_minutes Int?      @default(0)
+  users               users     @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -718,6 +719,19 @@ model vocabulary {
   @@schema("public")
 }
 
+model admin_flashcards {
+  id            String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  level         FlashcardLevel
+  japanese_word String
+  pronunciation String
+  meaning_vi    String
+  status        FlashcardStatus @default(DRAFT)
+  created_at    DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?       @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
 enum LessonStatus {
   draft
   published
@@ -793,4 +807,21 @@ enum one_time_token_type {
   phone_change_token
 
   @@schema("auth")
+}
+
+enum FlashcardLevel {
+  N5
+  N4
+  N3
+  N2
+  N1
+
+  @@schema("public")
+}
+
+enum FlashcardStatus {
+  PUBLISHED
+  DRAFT
+
+  @@schema("public")
 }
