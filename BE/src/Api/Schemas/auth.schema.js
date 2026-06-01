@@ -9,6 +9,7 @@ export const RegisterBodySchema = Type.Object({
     Type.Literal('ADMIN'),
     Type.Literal('GUEST')
   ], { description: 'Role of the user (USER, ADMIN, GUEST)', default: 'USER' })),
+  targetLevel: Type.Optional(Type.String({ description: 'Target JLPT level (e.g. N5, N4, N3)', default: 'N5' })),
 });
 
 
@@ -49,6 +50,7 @@ export const LoginResponseSchema = Type.Object({
     fullName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
     avatarUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
     totalExp: Type.Optional(Type.Number()),
+    targetLevel: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   })),
 });
 
@@ -58,6 +60,7 @@ export const ProfileResponseSchema = Type.Object({
   avatar_url: Type.Union([Type.String(), Type.Null()]),
   role: Type.Union([Type.String(), Type.Null()]),
   total_exp: Type.Union([Type.Number(), Type.Null()]),
+  target_level: Type.Union([Type.String(), Type.Null()]),
   updated_at: Type.Union([Type.String(), Type.Null()]),
 });
 

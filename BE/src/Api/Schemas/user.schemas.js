@@ -41,3 +41,18 @@ export const UserErrorResponseSchema = Type.Object({
   error: Type.String(),
   statusCode: Type.Number(),
 });
+
+export const UpdateProfileBodySchema = Type.Object({
+  targetLevel: Type.Optional(Type.String()),
+  fullName: Type.Optional(Type.String()),
+  newPassword: Type.Optional(Type.String()),
+});
+
+export const UpdateProfileResponseSchema = Type.Object({
+  status: Type.Literal('success'),
+  message: Type.String(),
+  data: Type.Object({
+    targetLevel: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    fullName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  }),
+});

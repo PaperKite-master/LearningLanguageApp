@@ -14,6 +14,7 @@ function toAdminUserDto(row, totalLessons) {
     status: row.status,
     progress,
     total_exp: row.total_exp,
+    target_level: row.target_level,
     banned_until: row.banned_until,
     created_at: row.created_at,
     updated_at: row.updated_at
@@ -42,6 +43,7 @@ async function fetchAllAdminUsers(prisma) {
       p.avatar_url,
       p.role,
       p.total_exp,
+      p.target_level,
       u.banned_until,
       u.deleted_at,
       u.created_at,
@@ -82,6 +84,7 @@ async function fetchAdminUserById(prisma, userId) {
       p.avatar_url,
       p.role,
       p.total_exp,
+      p.target_level,
       u.banned_until,
       u.deleted_at,
       u.created_at,

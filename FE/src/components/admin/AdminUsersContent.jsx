@@ -53,7 +53,8 @@ const AdminUsersContent = () => {
           name: user.full_name || 'Người dùng', // Map full_name to name
           uiRole: formatRole(user.role),
           uiStatus: formatStatus(user.status),
-          progress: user.progress || 0
+          progress: user.progress || 0,
+          targetLevel: user.target_level || 'N5'
         };
       });
       
@@ -156,6 +157,7 @@ const AdminUsersContent = () => {
                 <th>Họ và tên</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Mục tiêu</th>
                 <th>Tiến độ</th>
                 <th>Trạng thái</th>
                 <th></th> {/* For Action Menu */}
@@ -172,6 +174,14 @@ const AdminUsersContent = () => {
                     <span className={`role-badge role-${user.uiRole.toLowerCase()}`}>
                       {user.uiRole}
                     </span>
+                  </td>
+                  
+                  <td className="col-target-level">
+                    {user.uiRole.toLowerCase() === 'user' ? (
+                      <span style={{ fontWeight: '500', color: '#00e5ff' }}>{user.targetLevel}</span>
+                    ) : (
+                      <span style={{ color: '#6b7280' }}>-</span>
+                    )}
                   </td>
                   
                   <td className="col-progress">

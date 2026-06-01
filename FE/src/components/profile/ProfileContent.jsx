@@ -22,6 +22,7 @@ const ProfileContent = () => {
     email: '',
     currentPassword: '',
     newPassword: '',
+    targetLevel: 'N5',
     plan: 'PRO',
     stats: {
       streak: 34,
@@ -66,6 +67,7 @@ const ProfileContent = () => {
             ...prev,
             name: userObj.name || prev.name,
             email: localEmail,
+            targetLevel: statsObj.target || 'N5',
             stats: {
               streak: statsObj.streak || 0,
               target: statsObj.target || 'N5',
@@ -98,10 +100,23 @@ const ProfileContent = () => {
   // Handlers for controlled inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUserData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Nếu đổi targetLevel ở dưới form thì cập nhật luôn lên stats badge cho đồng bộ
+    if (name === 'targetLevel') {
+      setUserData(prev => ({
+        ...prev,
+        targetLevel: value,
+        stats: {
+          ...prev.stats,
+          target: value
+        }
+      }));
+    } else {
+      setUserData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const toggleSetting = (settingKey) => {
@@ -114,10 +129,23 @@ const ProfileContent = () => {
     }));
   };
 
-  const handleSave = () => {
-    // API Call to save user changes here
-    console.log("Saving new profile data:", userData);
-    alert('Đã lưu thông tin hồ sơ!');
+  const handleSave = async () => {
+    try {
+      const payload = {
+        fullName: userData.name,
+        targetLevel: userData.targetLevel
+      };
+      
+      if (userData.newPassword) {
+        payload.newPassword = userData.newPassword;
+      }
+      
+      await userApi.updateProfile(payload);
+      alert('Đã lưu thông tin hồ sơ!');
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+      alert('Có lỗi xảy ra khi lưu thay đổi!');
+    }
   };
 
   return (
@@ -194,6 +222,23 @@ const ProfileContent = () => {
             disabled
             autoComplete="off"
           />
+        </div>
+
+        <div className="form-group">
+          <label>Mục tiêu (Target Level)</label>
+          <select 
+            name="targetLevel" 
+            value={userData.targetLevel} 
+            onChange={handleInputChange} 
+            className="profile-input" 
+            style={{ appearance: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: 'var(--white)' }}
+          >
+            <option value="N5" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N5 (Sơ cấp 1)</option>
+            <option value="N4" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N4 (Sơ cấp 2)</option>
+            <option value="N3" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N3 (Trung cấp)</option>
+            <option value="N2" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N2 (Cao cấp 1)</option>
+            <option value="N1" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N1 (Cao cấp 2)</option>
+          </select>
         </div>
 
         <div className="form-group">

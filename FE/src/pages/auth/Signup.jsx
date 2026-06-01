@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Smartphone, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Smartphone, Eye, EyeOff, Target, ChevronDown } from 'lucide-react';
 import CustomLockIcon from '../../components/CustomLockIcon';
 import BackgroundLayer from '../../components/BackgroundLayer';
 import LeftColumn from '../../components/LeftColumn';
@@ -21,13 +21,23 @@ const Signup = () => {
     fullName: '',
     password: '',
     confirmPassword: '',
-    email: ''
+    email: '',
+    targetLevel: 'N5'
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
+
+  const targetOptions = [
+    { value: 'N5', label: 'Mục tiêu: N5 (Sơ cấp 1)' },
+    { value: 'N4', label: 'Mục tiêu: N4 (Sơ cấp 2)' },
+    { value: 'N3', label: 'Mục tiêu: N3 (Trung cấp)' },
+    { value: 'N2', label: 'Mục tiêu: N2 (Cao cấp 1)' },
+    { value: 'N1', label: 'Mục tiêu: N1 (Cao cấp 2)' }
+  ];
 
   const validateForm = () => {
     const newErrors = {};
@@ -58,7 +68,8 @@ const Signup = () => {
           email: formData.email,
           password: formData.password,
           fullName: formData.fullName,
-          role: "USER"
+          role: "USER",
+          targetLevel: formData.targetLevel
         };
         await authApi.register(payload);
         alert('Đăng ký tài khoản thành công!');
@@ -168,6 +179,56 @@ const Signup = () => {
                 {errors.email && <span className="error-text">{errors.email}</span>}
               </div>
 
+              <div className="input-group" style={{ position: 'relative' }}>
+                <Target className="input-icon" size={20} />
+                <div 
+                  className="styled-input pill-element" 
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', paddingRight: '20px' }}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                  <span style={{ color: 'var(--white)', fontSize: '0.95rem' }}>
+                    {targetOptions.find(opt => opt.value === formData.targetLevel)?.label}
+                  </span>
+                  <ChevronDown size={18} color="#9ca3af" style={{ transition: 'transform 0.3s', transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+                </div>
+                
+                {isDropdownOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '110%',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: '#1c2035',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    overflow: 'hidden',
+                    zIndex: 10,
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                  }}>
+                    {targetOptions.map((option) => (
+                      <div 
+                        key={option.value}
+                        style={{
+                          padding: '12px 20px',
+                          color: formData.targetLevel === option.value ? '#00e5ff' : 'var(--white)',
+                          backgroundColor: formData.targetLevel === option.value ? 'rgba(0, 229, 255, 0.1)' : 'transparent',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s',
+                          fontSize: '0.95rem'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = formData.targetLevel === option.value ? 'rgba(0, 229, 255, 0.1)' : 'rgba(255,255,255,0.05)'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = formData.targetLevel === option.value ? 'rgba(0, 229, 255, 0.1)' : 'transparent'}
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, targetLevel: option.value }));
+                          setIsDropdownOpen(false);
+                        }}
+                      >
+                        {option.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               
               <button type="submit" className="login-btn pill-element" disabled={isLoading}>

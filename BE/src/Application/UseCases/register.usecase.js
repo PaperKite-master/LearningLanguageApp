@@ -4,7 +4,7 @@ import { signUp } from '../../Infrastructure/SupabaseAuthClient.js';
  * Register a new user via Supabase Auth and save profile.
  * Sends OTP to user's email if Email Confirm is enabled.
  */
-export async function registerUseCase(prisma, { email, password, fullName, role }) {
+export async function registerUseCase(prisma, { email, password, fullName, role, targetLevel }) {
   // Call standard signup
   const data = await signUp(email, password);
   
@@ -16,11 +16,12 @@ export async function registerUseCase(prisma, { email, password, fullName, role 
     const userRole = role ? role.toUpperCase() : 'USER';
     await prisma.profiles.upsert({
       where: { id: userId },
-      update: { full_name: fullName ?? null, role: userRole },
+      update: { full_name: fullName ?? null, role: userRole, target_level: targetLevel ?? 'N5' },
       create: {
         id: userId,
         full_name: fullName ?? null,
         role: userRole,
+        target_level: targetLevel ?? 'N5'
       },
     });
   }

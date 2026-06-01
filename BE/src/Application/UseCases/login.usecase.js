@@ -12,7 +12,7 @@ export async function loginUseCase(prisma, { email, password }) {
   if (userId) {
     profile = await prisma.profiles.findUnique({
       where: { id: userId },
-      select: { full_name: true, role: true, avatar_url: true, total_exp: true },
+      select: { full_name: true, role: true, avatar_url: true, total_exp: true, target_level: true },
     });
   }
 
@@ -28,6 +28,7 @@ export async function loginUseCase(prisma, { email, password }) {
       fullName: profile?.full_name ?? null,
       avatarUrl: profile?.avatar_url ?? null,
       totalExp: profile?.total_exp ?? 0,
+      targetLevel: profile?.target_level ?? 'N5',
     },
   };
 }

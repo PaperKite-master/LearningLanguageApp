@@ -79,6 +79,7 @@ export const authController = {
         avatar_url: profile.avatar_url,
         role: profile.role,
         total_exp: profile.total_exp,
+        target_level: profile.target_level,
         updated_at: profile.updated_at,
       });
     } catch (err) {

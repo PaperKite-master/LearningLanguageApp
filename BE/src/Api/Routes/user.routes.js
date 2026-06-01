@@ -5,6 +5,8 @@ import {
   StudyTimeBodySchema,
   StudyTimeResponseSchema,
   UserErrorResponseSchema,
+  UpdateProfileBodySchema,
+  UpdateProfileResponseSchema
 } from '../Schemas/user.schemas.js';
 
 export async function userRoutes(app) {
@@ -45,5 +47,25 @@ export async function userRoutes(app) {
       },
     },
     userController.addStudyTime
+  );
+
+  app.patch(
+    '/me',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Users'],
+        summary: 'Update user profile (e.g. targetLevel, fullName)',
+        security: [{ bearerAuth: [] }],
+        body: UpdateProfileBodySchema,
+        response: {
+          200: UpdateProfileResponseSchema,
+          400: UserErrorResponseSchema,
+          401: UserErrorResponseSchema,
+          500: UserErrorResponseSchema,
+        },
+      },
+    },
+    userController.updateProfile
   );
 }

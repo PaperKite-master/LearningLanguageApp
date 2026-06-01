@@ -35,6 +35,16 @@ const userApi = {
     }
   },
 
+  updateProfile: async (payload) => {
+    try {
+      const response = await axiosClient.patch('/users/me', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  },
+
   getDashboardStats: async () => {
     const url = '/users/me/dashboard';
     const response = await axiosClient.get(url);

@@ -30,6 +30,7 @@ export const AdminUserDtoSchema = Type.Object({
   status: AdminUserStatusSchema,
   progress: Type.Integer({ minimum: 0, maximum: 100 }),
   total_exp: Type.Union([Type.Integer(), Type.Null()]),
+  target_level: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   banned_until: Type.Union([Type.String(), Type.Null()]),
   created_at: Type.Union([Type.String(), Type.Null()]),
   updated_at: Type.Union([Type.String(), Type.Null()])
