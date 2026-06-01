@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Smartphone, Eye, EyeOff } from 'lucide-react';
 import CustomLockIcon from '../../components/CustomLockIcon';
 import BackgroundLayer from '../../components/BackgroundLayer';
 import LeftColumn from '../../components/LeftColumn';
+import authApi from '../../api/authApi';
 
 const GoogleIcon = () => (
   <svg className="google-icon" viewBox="0 0 24 24">
@@ -25,12 +26,17 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.fullName.trim()) newErrors.fullName = "Họ và tên không được để trống";
-    if (!formData.password) newErrors.password = "Mật khẩu không được để trống";
-    else if (formData.password.length < 6) newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+    if (!formData.password) {
+      newErrors.password = "Mật khẩu không được để trống";
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,32}$/.test(formData.password)) {
+      newErrors.password = "Mật khẩu phải từ 8-32 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt";
+    }
     
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
@@ -43,17 +49,26 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      const payload = {
-        email: formData.email,
-        password: formData.password,
-        fullName: formData.fullName,
-        role: "USER"
-      };
-      console.log('Form is valid, ready to send:', payload);
-      // Proceed with registration API call
+      setIsLoading(true);
+      try {
+        const payload = {
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+          role: "USER"
+        };
+        await authApi.register(payload);
+        alert('Đăng ký tài khoản thành công!');
+        navigate('/login');
+      } catch (error) {
+        console.error('Registration failed:', error);
+        setErrors({ submit: error.response?.data?.error || 'Đăng ký thất bại. Vui lòng thử lại.' });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -84,6 +99,8 @@ const Signup = () => {
               Đã có tài khoản rồi? <Link to="/login" className="signup-link">Đăng nhập lại.</Link>
             </p>
             
+            {errors.submit && <div className="error-message" style={{ color: '#ef4444', textAlign: 'center', marginBottom: '15px' }}>{errors.submit}</div>}
+
             <form onSubmit={handleSubmit} className="register-form">
               <div className="input-group">
                 <User className="input-icon" size={20} />
@@ -153,8 +170,8 @@ const Signup = () => {
 
 
               
-              <button type="submit" className="login-btn pill-element">
-                Đăng ký
+              <button type="submit" className="login-btn pill-element" disabled={isLoading}>
+                {isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
               </button>
             </form>
             
