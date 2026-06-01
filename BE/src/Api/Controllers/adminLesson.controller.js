@@ -1,8 +1,19 @@
 import { createLessonUseCase } from '../../Application/UseCases/createLesson.usecase.js';
 import { updateLessonUseCase } from '../../Application/UseCases/updateLesson.usecase.js';
 import { deleteLessonUseCase } from '../../Application/UseCases/deleteLesson.usecase.js';
+import { listAdminLessonsUseCase } from '../../Application/UseCases/listAdminLessons.usecase.js';
 
 export const adminLessonController = {
+  list: async (request, reply) => {
+    try {
+      const lessons = await listAdminLessonsUseCase({ lessonRepo: request.lessonRepo });
+      return reply.code(200).send({ data: lessons });
+    } catch (err) {
+      request.log.error(err);
+      throw err;
+    }
+  },
+
   create: async (request, reply) => {
     try {
       const lesson = await createLessonUseCase({

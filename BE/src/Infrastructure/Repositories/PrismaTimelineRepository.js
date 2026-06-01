@@ -8,7 +8,6 @@ export class PrismaTimelineRepository {
       orderBy: [{ order: 'asc' }, { created_at: 'asc' }],
       include: {
         lessons: {
-          where: { status: 'published' },
           orderBy: [{ order: 'asc' }, { created_at: 'asc' }]
         }
       }
@@ -20,7 +19,6 @@ export class PrismaTimelineRepository {
       where: { id },
       include: {
         lessons: {
-          where: { status: 'published' },
           orderBy: [{ order: 'asc' }, { created_at: 'asc' }]
         }
       }
@@ -38,7 +36,6 @@ export class PrismaTimelineRepository {
       },
       include: {
         lessons: {
-          where: { status: 'published' },
           orderBy: [{ order: 'asc' }, { created_at: 'asc' }]
         }
       }
@@ -57,7 +54,6 @@ export class PrismaTimelineRepository {
       },
       include: {
         lessons: {
-          where: { status: 'published' },
           orderBy: [{ order: 'asc' }, { created_at: 'asc' }]
         }
       }

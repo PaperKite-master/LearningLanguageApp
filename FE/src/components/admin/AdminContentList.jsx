@@ -18,7 +18,7 @@ const AdminContentList = () => {
   useEffect(() => {
     const fetchLessons = async () => {
       try {
-        const data = await lessonApi.getAll();
+        const data = await lessonApi.getAllAdmin();
         const sortedData = [...(data || [])].sort((a, b) => {
           const codeA = a.lessonCode || '';
           const codeB = b.lessonCode || '';

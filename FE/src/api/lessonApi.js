@@ -7,6 +7,12 @@ const lessonApi = {
     return response.data.data;
   },
 
+  getAllAdmin: async () => {
+    const url = '/admin/lessons';
+    const response = await axiosClient.get(url);
+    return response.data.data;
+  },
+
   create: async (payload) => {
     const url = '/admin/lessons';
     const response = await axiosClient.post(url, payload);

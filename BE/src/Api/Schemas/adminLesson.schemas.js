@@ -25,3 +25,7 @@ export const LessonResponseSchema = Type.Object({
   data: LessonDtoSchema
 });
 
+export const ListAdminLessonsResponseSchema = Type.Object({
+  data: Type.Array(LessonDtoSchema)
+});
+

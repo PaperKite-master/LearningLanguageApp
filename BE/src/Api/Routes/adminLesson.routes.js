@@ -6,11 +6,26 @@ import {
   CreateLessonBodySchema,
   LessonIdParamsSchema,
   LessonResponseSchema,
-  UpdateLessonBodySchema
+  UpdateLessonBodySchema,
+  ListAdminLessonsResponseSchema
 } from '../Schemas/adminLesson.schemas.js';
 
 export async function adminLessonRoutes(app) {
   await app.register(lessonRepoPlugin);
+
+  app.get(
+    '/',
+    {
+      preHandler: [authenticate, requireAdmin],
+      schema: {
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: ListAdminLessonsResponseSchema
+        }
+      }
+    },
+    adminLessonController.list
+  );
 
   app.post(
     '/',

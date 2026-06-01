@@ -44,13 +44,15 @@ const LearningPath = () => {
                progressValue = JSON.parse(savedProgress).percentage || 0;
              }
              
+             const isDraft = lesson.status === 'draft';
+
              dynamicPathData.push({
                 id: lesson.id,
-                realId: lesson.id,
+                realId: isDraft ? null : lesson.id,
                 order: lesson.order,
                 lessonCode: lesson.lessonCode,
                 type: 'node',
-                active: true, // For now, all fetched lessons are unlocked
+                active: !isDraft, // Locked if it's a draft
                 offset: (globalNodeCounter % 2 === 1) ? -110 : 110,
                 progressValue
              });

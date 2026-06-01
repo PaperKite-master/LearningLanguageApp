@@ -10,6 +10,12 @@ export class PrismaLessonRepository {
     });
   }
 
+  async listAll() {
+    return this.prisma.lessons.findMany({
+      orderBy: [{ order: 'asc' }, { created_at: 'asc' }]
+    });
+  }
+
   async findById(id) {
     return this.prisma.lessons.findFirst({
       where: { id, status: 'published' }
