@@ -16,6 +16,7 @@ import { userRoutes } from './Api/Routes/user.routes.js';
 import { flashcardRoutes } from './Api/Routes/flashcard.routes.js';
 import { adminFlashcardRoutes } from './Api/Routes/adminFlashcard.routes.js';
 import { quizRoutes } from './Api/Routes/quiz.routes.js';
+import { notificationRoutes } from './Api/Routes/notification.routes.js';
 import { prismaPlugin } from './Infrastructure/Persistence/prisma.plugin.js';
 
 export async function buildApp() {
@@ -83,6 +84,7 @@ export async function buildApp() {
   await app.register(adminFlashcardRoutes, { prefix: '/admin/flashcards' });
   await app.register(flashcardRoutes, { prefix: '/flashcards' });
   await app.register(quizRoutes, { prefix: '/quizzes' });
+  await app.register(notificationRoutes, { prefix: '/notifications' });
 
   return app;
 }
