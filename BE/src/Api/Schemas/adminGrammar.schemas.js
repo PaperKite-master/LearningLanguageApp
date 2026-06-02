@@ -10,6 +10,7 @@ export const GrammarDtoSchema = Type.Object({
   title: Type.String(),
   contentMarkdown: Type.Union([Type.String(), Type.Null()]),
   order: Type.Integer(),
+  status: Type.String(),
   createdAt: Type.Union([Type.String(), Type.Null()])
 });
 
@@ -17,7 +18,11 @@ export const CreateGrammarBodySchema = Type.Object({
   lessonId: Type.String({ minLength: 1 }),
   title: Type.String({ minLength: 1 }),
   contentMarkdown: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  order: Type.Optional(Type.Integer({ minimum: 0 }))
+  order: Type.Optional(Type.Integer({ minimum: 0 })),
+  status: Type.Optional(Type.Union([
+    Type.Literal('draft'),
+    Type.Literal('published')
+  ], { default: 'published' }))
 });
 
 export const UpdateGrammarBodySchema = Type.Partial(CreateGrammarBodySchema);

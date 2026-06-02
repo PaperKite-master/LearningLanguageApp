@@ -72,7 +72,8 @@ const AdminLessonCreateContent = () => {
   // Dữ liệu cho admin/grammars
   const [grammarFormData, setGrammarFormData] = useState({
     title: (editMode && initialType === 'grammar') ? lessonData.title || '' : '',
-    lessonId: (editMode && initialType === 'grammar') ? lessonData.lessonId : (editMode && lessonData ? lessonData.id : '')
+    lessonId: (editMode && initialType === 'grammar') ? lessonData.lessonId : (editMode && lessonData ? lessonData.id : ''),
+    status: (editMode && initialType === 'grammar') ? lessonData.status || 'published' : 'published'
   });
 
   // Data for dropdowns
@@ -193,7 +194,8 @@ const AdminLessonCreateContent = () => {
           lessonId: grammarFormData.lessonId,
           title: grammarFormData.title,
           contentMarkdown: markdownValue,
-          order: 0
+          order: 0,
+          status: grammarFormData.status
         };
         if (editMode) {
           await grammarApi.update(lessonData.id, payload);
@@ -320,7 +322,7 @@ const AdminLessonCreateContent = () => {
             </div>
           </>
         ) : (
-          <div className="form-group-row" style={{ marginBottom: 0 }}>
+          <div className="form-group-row" style={{ marginBottom: '15px' }}>
             <div className="form-group" style={{ flex: 2 }}>
               <label>Tiêu đề Ngữ Pháp</label>
               <input 
@@ -342,6 +344,13 @@ const AdminLessonCreateContent = () => {
                     {ls.title}
                   </option>
                 ))}
+              </select>
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>Trạng thái</label>
+              <select name="status" value={grammarFormData.status} onChange={handleGrammarChange} className="modal-input">
+                <option value="published">Đã xuất bản (Published)</option>
+                <option value="draft">Bản nháp (Draft)</option>
               </select>
             </div>
           </div>

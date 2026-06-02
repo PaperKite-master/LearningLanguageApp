@@ -5,6 +5,7 @@ export function toGrammarDto(grammar) {
     title: grammar.title,
     contentMarkdown: grammar.content_markdown ?? null,
     order: grammar.order ?? 0,
+    status: grammar.status ?? 'published',
     createdAt: grammar.created_at ?? null
   };
 }

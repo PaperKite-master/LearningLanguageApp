@@ -13,6 +13,7 @@ export class PrismaGrammarRepository {
     return this.prisma.grammars.findMany({
       where: {
         lesson_id: lessonId,
+        status: 'published',
         lessons: {
           status: 'published'
         }
@@ -21,26 +22,29 @@ export class PrismaGrammarRepository {
     });
   }
 
-  async create({ lessonId, title, contentMarkdown, order }) {
+  async create({ lessonId, title, contentMarkdown, order, status }) {
     return this.prisma.grammars.create({
       data: {
         lesson_id: lessonId,
         title,
         content_markdown: contentMarkdown ?? null,
-        order: order ?? 0
+        order: order ?? 0,
+        status: status ?? 'published'
       }
     });
   }
 
-  async update(id, { lessonId, title, contentMarkdown, order }) {
+  async update(id, { lessonId, title, contentMarkdown, order, status }) {
+    const data = {};
+    if (lessonId !== undefined) data.lesson_id = lessonId;
+    if (title !== undefined) data.title = title;
+    if (contentMarkdown !== undefined) data.content_markdown = contentMarkdown;
+    if (order !== undefined) data.order = order;
+    if (status !== undefined) data.status = status;
+
     return this.prisma.grammars.update({
       where: { id },
-      data: {
-        lesson_id: lessonId,
-        title,
-        content_markdown: contentMarkdown,
-        order
-      }
+      data
     });
   }
 

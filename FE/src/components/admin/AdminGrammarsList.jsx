@@ -102,6 +102,7 @@ const AdminGrammarsList = () => {
                 <th>Tiêu đề Ngữ Pháp</th>
                 <th>Thuộc Bài Học (Lesson ID)</th>
                 <th>Order</th>
+                <th>Trạng thái</th>
                 <th></th> {/* For Actions */}
               </tr>
             </thead>
@@ -118,6 +119,11 @@ const AdminGrammarsList = () => {
                   <td className="col-role">
                     <span className="role-badge role-level">
                       {item.order || 0}
+                    </span>
+                  </td>
+                  <td className="col-status">
+                    <span className={`status-badge status-${(item.status || 'published').toLowerCase()}`}>
+                      {item.status === 'draft' ? 'Draft' : 'Published'}
                     </span>
                   </td>
                   
