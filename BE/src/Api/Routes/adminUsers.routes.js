@@ -5,6 +5,7 @@ import {
   AdminUserIdParamsSchema,
   AdminUserResponseSchema,
   AdminUsersListResponseSchema,
+  DeleteAdminUserResponseSchema,
   UpdateAdminUserRoleBodySchema,
   UpdateAdminUserStatusBodySchema
 } from '../Schemas/adminUsers.schemas.js';
@@ -60,5 +61,22 @@ export async function adminUsersRoutes(app) {
       }
     },
     adminUsersController.updateStatus
+  );
+
+  app.delete(
+    '/:id',
+    {
+      preHandler: [authenticate, requireAdmin],
+      schema: {
+        tags: ['Admin Users'],
+        summary: 'Delete a user permanently',
+        security: [{ bearerAuth: [] }],
+        params: AdminUserIdParamsSchema,
+        response: {
+          200: DeleteAdminUserResponseSchema
+        }
+      }
+    },
+    adminUsersController.remove
   );
 }

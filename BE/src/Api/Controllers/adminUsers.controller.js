@@ -1,3 +1,5 @@
+import { deleteAdminUserUseCase } from '../../Application/UseCases/deleteAdminUser.usecase.js';
+
 const INACTIVE_BANNED_UNTIL = new Date('2999-12-31T23:59:59.999Z');
 
 function toAdminUserDto(row, totalLessons) {
@@ -161,6 +163,21 @@ export const adminUsersController = {
       }
 
       return reply.code(200).send({ data: toAdminUserDto(user, user.total_lessons) });
+    } catch (err) {
+      if (err?.code === 'P2025') {
+        return reply.code(404).send({ error: 'User not found' });
+      }
+      if (err?.code === 'P2023') {
+        return reply.code(400).send({ error: 'Invalid UUID format in request params' });
+      }
+      throw err;
+    }
+  },
+
+  remove: async (request, reply) => {
+    try {
+      await deleteAdminUserUseCase(request.server.prisma, request.params.id);
+      return reply.code(200).send({ message: 'Deleted successfully' });
     } catch (err) {
       if (err?.code === 'P2025') {
         return reply.code(404).send({ error: 'User not found' });

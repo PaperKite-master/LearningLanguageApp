@@ -44,6 +44,10 @@ export const AdminUserResponseSchema = Type.Object({
   data: AdminUserDtoSchema
 });
 
+export const DeleteAdminUserResponseSchema = Type.Object({
+  message: Type.String()
+});
+
 export const UpdateAdminUserRoleBodySchema = Type.Object({
   role: AdminUserRoleSchema
 });
