@@ -2325,14 +2325,15 @@ Actually, I'll stick to sliding it right! */
   font-weight: 700;
   text-align: center;
   min-width: 80px;
+  text-transform: capitalize;
 }
 
-.status-active {
+.status-active, .status-published {
   background-color: #00ff66; /* Vibrant green */
   color: #000;
 }
 
-.status-inactive {
+.status-inactive, .status-draft {
   background-color: transparent;
   color: #9ca3af;
   border: 1px solid rgba(255, 255, 255, 0.1);

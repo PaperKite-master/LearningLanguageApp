@@ -1,4 +1,6 @@
 const playSound = (type) => {
+  if (localStorage.getItem('soundEffects') === 'false') return;
+
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;

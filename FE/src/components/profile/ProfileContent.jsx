@@ -31,10 +31,14 @@ const ProfileContent = () => {
       weeklyProgress: '+ 12%'
     },
     settings: {
-      soundEffects: true,
+      soundEffects: localStorage.getItem('soundEffects') !== 'false',
       encouragement: true,
-      listeningExercises: true,
-      personalizedAds: true
+      listeningExercises: true
+    },
+    notificationConfig: {
+      is_enabled: true,
+      preferred_time: '08:00',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Ho_Chi_Minh'
     }
   });
 
@@ -58,10 +62,17 @@ const ProfileContent = () => {
         }
 
         const response = await userApi.getDashboardStats();
+        const notifConfig = await userApi.getNotificationConfig().catch(() => null);
+
         if (response) {
           const payload = response.data && response.data.stats ? response.data : response;
           const userObj = payload.user || {};
           const statsObj = payload.stats || {};
+          
+          let preferredTime = '08:00';
+          if (notifConfig?.reminder_time) {
+            preferredTime = notifConfig.reminder_time.substring(0, 5); // Format HH:mm
+          }
           
           setUserData(prev => ({
             ...prev,
@@ -73,6 +84,11 @@ const ProfileContent = () => {
               target: statsObj.target || 'N5',
               hoursLearned: `${statsObj.totalHours || 0}H`,
               weeklyProgress: statsObj.weeklyGrowth != null ? (statsObj.weeklyGrowth >= 0 ? `+ ${statsObj.weeklyGrowth}%` : `${statsObj.weeklyGrowth}%`) : '+ 0%'
+            },
+            notificationConfig: {
+              is_enabled: notifConfig?.is_enabled ?? true,
+              preferred_time: preferredTime,
+              timezone: notifConfig?.timezone ?? (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Ho_Chi_Minh')
             }
           }));
         }
@@ -120,13 +136,64 @@ const ProfileContent = () => {
   };
 
   const toggleSetting = (settingKey) => {
+    if (settingKey === 'soundEffects') {
+      const newVal = !userData.settings.soundEffects;
+      localStorage.setItem('soundEffects', newVal);
+      setUserData(prev => ({
+        ...prev,
+        settings: { ...prev.settings, soundEffects: newVal }
+      }));
+    } else {
+      setUserData(prev => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          [settingKey]: !prev.settings[settingKey]
+        }
+      }));
+    }
+  };
+
+  const toggleNotification = async () => {
+    const newVal = !userData.notificationConfig.is_enabled;
     setUserData(prev => ({
       ...prev,
-      settings: {
-        ...prev.settings,
-        [settingKey]: !prev.settings[settingKey]
-      }
+      notificationConfig: { ...prev.notificationConfig, is_enabled: newVal }
     }));
+    try {
+      await userApi.updateNotificationConfig({ is_enabled: newVal });
+    } catch (e) {
+      console.error(e);
+      setUserData(prev => ({
+        ...prev,
+        notificationConfig: { ...prev.notificationConfig, is_enabled: !newVal }
+      }));
+    }
+  };
+
+  const updateNotificationTime = async (e) => {
+    const newTime = e.target.value;
+    setUserData(prev => ({
+      ...prev,
+      notificationConfig: { ...prev.notificationConfig, preferred_time: newTime }
+    }));
+    try {
+      await userApi.updateNotificationConfig({ 
+        preferred_time: newTime,
+        timezone: userData.notificationConfig.timezone
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    try {
+      await userApi.sendTestNotification();
+      alert('Đã gửi email nhắc nhở thử nghiệm thành công! Vui lòng kiểm tra hòm thư của bạn.');
+    } catch (error) {
+      alert('Có lỗi khi gửi email thử nghiệm.');
+    }
   };
 
   const handleSave = async () => {
@@ -310,30 +377,43 @@ const ProfileContent = () => {
         </div>
 
         <div className="toggle-row">
-          <span className="toggle-label">Thông báo khích lệ</span>
+          <span className="toggle-label">Thông báo nhắc nhở học tập</span>
           <div 
-            className={`custom-toggle ${userData.settings.encouragement ? 'active' : ''}`}
-            onClick={() => toggleSetting('encouragement')}
+            className={`custom-toggle ${userData.notificationConfig.is_enabled ? 'active' : ''}`}
+            onClick={toggleNotification}
           >
             <div className="toggle-thumb"></div>
           </div>
         </div>
+
+        {userData.notificationConfig.is_enabled && (
+          <div className="form-group" style={{ marginTop: '10px' }}>
+            <label>Thời gian nhận thông báo</label>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <input 
+                type="time" 
+                value={userData.notificationConfig.preferred_time} 
+                onChange={updateNotificationTime}
+                className="profile-input" 
+                style={{ width: 'fit-content' }}
+              />
+              <button 
+                type="button"
+                className="btn-save"
+                style={{ padding: '8px 16px', margin: 0, width: 'auto', backgroundColor: '#3b82f6' }}
+                onClick={handleSendTestNotification}
+              >
+                Gửi thử email ngay
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="toggle-row">
           <span className="toggle-label">Bài tập nghe</span>
           <div 
             className={`custom-toggle ${userData.settings.listeningExercises ? 'active' : ''}`}
             onClick={() => toggleSetting('listeningExercises')}
-          >
-            <div className="toggle-thumb"></div>
-          </div>
-        </div>
-
-        <div className="toggle-row">
-          <span className="toggle-label">Cá nhân hóa quảng cáo (Pro)</span>
-          <div 
-            className={`custom-toggle ${userData.settings.personalizedAds ? 'active' : ''}`}
-            onClick={() => toggleSetting('personalizedAds')}
           >
             <div className="toggle-thumb"></div>
           </div>

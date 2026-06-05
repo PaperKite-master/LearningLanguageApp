@@ -24,7 +24,9 @@ const Sidebar = () => {
   return (
     <aside className="dashboard-sidebar">
       <div className="sidebar-logo">
-        <img src={logo} alt="HiNa" />
+        <NavLink to="/">
+          <img src={logo} alt="HiNa" />
+        </NavLink>
       </div>
 
       <nav className="sidebar-nav">

@@ -6,7 +6,9 @@ const Header = () => {
   return (
     <header className="main-header">
       <div className="header-logo">
-        <img src={logo} alt="HiNa Logo" />
+        <Link to="/">
+          <img src={logo} alt="HiNa Logo" />
+        </Link>
       </div>
       <div className="header-actions">
         <Link to="/signup" className="register-link">Đăng ký</Link>

@@ -20,7 +20,7 @@ export const FlashcardIdParamsSchema = Type.Object({
 // ─── Body Schemas ────────────────────────────────────────────────────────────
 
 export const CreateFlashcardBodySchema = Type.Object({
-  frontText: Type.String({ minLength: 1, description: 'Front side of the card (e.g. Kanji/word)' }),
+  frontText: Type.String({ description: 'Front side of the card (e.g. Kanji/word)' }),
   backText: Type.String({ minLength: 1, description: 'Back side of the card (e.g. meaning)' }),
   notes: Type.Optional(Type.Union([Type.String(), Type.Null()], { description: 'Optional personal notes' }))
 });

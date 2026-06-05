@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { hiraganaData, katakanaData } from '../../data/kana';
+import AlphabetPractice from './AlphabetPractice';
 
 const AlphabetContent = () => {
   const [activeTab, setActiveTab] = useState('hiragana');
+  const [isPracticing, setIsPracticing] = useState(false);
   
   const currentData = activeTab === 'hiragana' ? hiraganaData : katakanaData;
+
+  if (isPracticing) {
+    return <AlphabetPractice kanaData={currentData} onBack={() => setIsPracticing(false)} />;
+  }
 
   return (
     <div className="alphabet-content">
@@ -49,7 +55,7 @@ const AlphabetContent = () => {
 
       {/* Action Button */}
       <div className="alphabet-footer">
-        <button className="start-practice-btn">
+        <button className="start-practice-btn" onClick={() => setIsPracticing(true)}>
           Bắt đầu luyện tập →
         </button>
       </div>

@@ -637,7 +637,9 @@ model quizzes {
   timeline_id   String?        @db.Uuid
   title         String
   type          String?
-  passing_score Int?           @default(80)
+  passing_score Int?           @default(50)
+  status        LessonStatus   @default(draft)
+  level         QuizLevel?
   created_at    DateTime?      @default(now()) @db.Timestamptz(6)
   questions     questions[]
   quiz_results  quiz_results[]
@@ -720,9 +722,28 @@ model vocabulary {
   @@schema("public")
 }
 
+model system_settings {
+  id                     String    @id @default("singleton")
+  study_reminder_enabled Boolean   @default(true)
+  email_reminder_enabled Boolean   @default(true)
+  updated_at             DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
 enum LessonStatus {
   draft
   published
+
+  @@schema("public")
+}
+
+enum QuizLevel {
+  N5
+  N4
+  N3
+  N2
+  N1
 
   @@schema("public")
 }

@@ -19,6 +19,28 @@ export class PrismaQuizRepository extends QuizRepository {
     });
   }
 
+  async getQuizByTimelineId(timelineId) {
+    return this.prisma.quizzes.findFirst({
+      where: { timeline_id: timelineId, status: 'published' },
+      include: {
+        questions: {
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+  }
+
+  async getQuizByLessonId(lessonId) {
+    return this.prisma.quizzes.findFirst({
+      where: { lesson_id: lessonId, status: 'published' },
+      include: {
+        questions: {
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+  }
+
   async saveResult({ userId, quizId, score, isPassed }) {
     return this.prisma.quiz_results.create({
       data: {

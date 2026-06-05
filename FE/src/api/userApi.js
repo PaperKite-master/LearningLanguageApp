@@ -26,13 +26,8 @@ const userApi = {
 
   deleteUser: async (id) => {
     const url = `/admin/users/${id}`;
-    try {
-      const response = await axiosClient.delete(url);
-      return response.data;
-    } catch (error) {
-      console.warn(`API DELETE /users/${id} failed, mock success.`);
-      return { success: true };
-    }
+    const response = await axiosClient.delete(url);
+    return response.data;
   },
 
   updateProfile: async (payload) => {
@@ -54,6 +49,36 @@ const userApi = {
   addStudyTime: async (minutes) => {
     const url = '/users/me/study-time';
     const response = await axiosClient.post(url, { minutes });
+    return response.data;
+  },
+
+  getAdminSettings: async () => {
+    const url = '/admin/settings';
+    const response = await axiosClient.get(url);
+    return response.data.data;
+  },
+
+  updateAdminSettings: async (payload) => {
+    const url = '/admin/settings';
+    const response = await axiosClient.put(url, payload);
+    return response.data.data;
+  },
+
+  getNotificationConfig: async () => {
+    const url = '/notifications/config';
+    const response = await axiosClient.get(url);
+    return response.data.data;
+  },
+
+  updateNotificationConfig: async (payload) => {
+    const url = '/notifications/config';
+    const response = await axiosClient.put(url, payload);
+    return response.data.data;
+  },
+
+  sendTestNotification: async () => {
+    const url = '/notifications/send-test';
+    const response = await axiosClient.post(url);
     return response.data;
   }
 };

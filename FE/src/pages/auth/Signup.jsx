@@ -92,6 +92,11 @@ const Signup = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    const redirectUrl = `${window.location.origin}/`;
+    window.location.href = `https://ohhddvagmhlylklypknj.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`;
+  };
+
   return (
     <div className="app-container">
       <BackgroundLayer />
@@ -240,7 +245,7 @@ const Signup = () => {
               <span className="divider-text">HOẶC</span>
             </div>
             
-            <button type="button" className="social-btn pill-element">
+            <button type="button" className="social-btn pill-element" onClick={handleGoogleLogin}>
               <GoogleIcon />
               <span>Tiếp tục qua google</span>
             </button>

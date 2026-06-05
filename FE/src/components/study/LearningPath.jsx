@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, Key, Lock, Star, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import timelineApi from '../../api/timelineApi';
+import quizApi from '../../api/quizApi';
 
 const LearningPath = () => {
   const navigate = useNavigate();
@@ -62,13 +63,26 @@ const LearningPath = () => {
           // Add checkpoint after each timeline
           dynamicPathData.push({
              id: `ckpt-${timeline.id}`,
+             timelineId: timeline.id,
              type: 'checkpoint',
              text: `Kiểm tra thử - ${checkpointCounter}`,
-             num: checkpointCounter
+             num: checkpointCounter,
+             quizId: null // will be populated below
           });
           checkpointCounter++;
         });
         
+        // Fetch quizzes for each timeline to see if checkpoint is active
+        const checkpoints = dynamicPathData.filter(d => d.type === 'checkpoint');
+        await Promise.all(checkpoints.map(async (ckpt) => {
+          try {
+            const q = await quizApi.getQuizByTimeline(ckpt.timelineId);
+            if (q && q.id) ckpt.quizId = q.id;
+          } catch (e) {
+            // No quiz found, ignore
+          }
+        }));
+
         setPathData(dynamicPathData);
       } catch (error) {
         console.error('Failed to load timelines for path:', error);
@@ -196,13 +210,25 @@ const LearningPath = () => {
           }
 
           if (item.type === 'checkpoint') {
+            const hasQuiz = !!item.quizId;
             return (
               <div key={item.id} className="checkpoint-container">
-                <div className="checkpoint-card">
-                  <div className="key-icon-wrapper">
-                    <Key size={20} />
+                <div 
+                  className={`checkpoint-card ${hasQuiz ? 'active-checkpoint' : 'locked-checkpoint'}`}
+                  style={{
+                    cursor: hasQuiz ? 'pointer' : 'not-allowed',
+                    opacity: hasQuiz ? 1 : 0.6,
+                    border: hasQuiz ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
+                    background: hasQuiz ? 'rgba(59, 130, 246, 0.1)' : '#1c2035',
+                  }}
+                  onClick={() => {
+                    if (hasQuiz) navigate(`/quiz/${item.quizId}`);
+                  }}
+                >
+                  <div className="key-icon-wrapper" style={{ background: hasQuiz ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255,255,255,0.05)' }}>
+                    <Key size={20} color={hasQuiz ? '#fbbf24' : '#9ca3af'} />
                   </div>
-                  <span>{item.text}</span>
+                  <span style={{ color: hasQuiz ? '#fff' : '#9ca3af', fontWeight: hasQuiz ? 'bold' : 'normal' }}>{item.text}</span>
                 </div>
               </div>
             );

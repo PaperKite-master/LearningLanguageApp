@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminContentList from '../../components/admin/AdminContentList';
 import AdminGrammarsList from '../../components/admin/AdminGrammarsList';
+import AdminQuizzesContent from '../../components/admin/AdminQuizzesContent';
 
 const AdminContent = () => {
-  const [activeTab, setActiveTab] = useState('lessons'); // 'lessons' or 'grammars'
+  const [activeTab, setActiveTab] = useState('lessons'); // 'lessons', 'grammars', or 'tests'
 
   return (
     <div className="dashboard-layout">

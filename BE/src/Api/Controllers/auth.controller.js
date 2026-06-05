@@ -65,12 +65,21 @@ export const authController = {
   async getProfile(req, reply) {
     try {
       // req.user is populated by earlier auth middleware
-      const profile = await req.server.prisma.profiles.findUnique({
+      let profile = await req.server.prisma.profiles.findUnique({
         where: { id: req.user.sub },
       });
 
       if (!profile) {
-        return reply.code(404).send({ error: 'Profile not found', statusCode: 404 });
+        // If profile is not found (e.g., first time login via Google OAuth), create one automatically
+        profile = await req.server.prisma.profiles.create({
+          data: {
+            id: req.user.sub,
+            full_name: req.user.user_metadata?.full_name || null,
+            avatar_url: req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture || null,
+            role: 'USER',
+            target_level: 'N5',
+          }
+        });
       }
 
       return reply.code(200).send({

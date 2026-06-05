@@ -200,13 +200,15 @@ const FlashcardContent = () => {
                         <div className="fc-card-hint">Nhấn để xem đáp án</div>
                       </div>
                       <div className="fc-card-back">
-                        <div className="fc-type-label">Kanji / Tiếng Nhật</div>
-                        <div className="fc-card-text">{currentCard?.jp}</div>
+                        {currentCard?.jp && currentCard.jp.trim() !== '' && (
+                          <div className="fc-card-text">{currentCard?.jp}</div>
+                        )}
                         
                         {currentCard?.kana && (
-                          <div className="fc-kana-group">
-                            <div className="fc-type-label">Hiragana (Cách đọc)</div>
-                            <div className="fc-card-subtext">{currentCard?.kana}</div>
+                          <div className={currentCard?.jp && currentCard.jp.trim() !== '' ? "fc-kana-group" : ""}>
+                            <div className={currentCard?.jp && currentCard.jp.trim() !== '' ? "fc-card-subtext" : "fc-card-text"}>
+                              {currentCard?.kana}
+                            </div>
                           </div>
                         )}
                         <div className="fc-card-hint">Nhấn để quay lại</div>

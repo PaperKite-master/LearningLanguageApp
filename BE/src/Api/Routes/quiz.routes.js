@@ -1,6 +1,8 @@
 import { quizController } from '../Controllers/quiz.controller.js';
 import {
   GetQuizParamsSchema,
+  GetQuizByTimelineParamsSchema,
+  GetQuizByLessonParamsSchema,
   SubmitQuizBodySchema,
   GenericMessageResponseSchema,
   ErrorResponseSchema,
@@ -8,6 +10,44 @@ import {
 import { authenticate } from '../Middlewares/authenticate.js';
 
 export async function quizRoutes(fastify, options) {
+  // GET /quizzes/by-timeline/:timelineId
+  fastify.get(
+    '/by-timeline/:timelineId',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Quizzes'],
+        summary: 'Get a quiz by Timeline ID',
+        security: [{ bearerAuth: [] }],
+        params: GetQuizByTimelineParamsSchema,
+        response: {
+          404: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    quizController.getQuizByTimeline
+  );
+
+  // GET /quizzes/by-lesson/:lessonId
+  fastify.get(
+    '/by-lesson/:lessonId',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Quizzes'],
+        summary: 'Get a quiz by Lesson ID',
+        security: [{ bearerAuth: [] }],
+        params: GetQuizByLessonParamsSchema,
+        response: {
+          404: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    quizController.getQuizByLesson
+  );
+
   // GET /quizzes/:id - Get a quiz with its questions
   fastify.get(
     '/:id',

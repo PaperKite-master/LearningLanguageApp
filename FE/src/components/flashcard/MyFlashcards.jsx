@@ -287,8 +287,7 @@ const MyFlashcards = () => {
                     value={formData.jp} 
                     onChange={e => setFormData({...formData, jp: e.target.value})} 
                     className="modal-input" 
-                    required 
-                    placeholder="VD: コンピュータ"
+                    placeholder="VD: コンピュータ (có thể để trống)"
                   />
                 </div>
                 <div className="form-group">

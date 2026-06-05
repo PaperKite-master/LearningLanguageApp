@@ -4,6 +4,14 @@ export const GetQuizParamsSchema = Type.Object({
   id: Type.String({ format: 'uuid', description: 'Quiz ID' }),
 });
 
+export const GetQuizByTimelineParamsSchema = Type.Object({
+  timelineId: Type.String({ format: 'uuid', description: 'Timeline ID' }),
+});
+
+export const GetQuizByLessonParamsSchema = Type.Object({
+  lessonId: Type.String({ format: 'uuid', description: 'Lesson ID' }),
+});
+
 export const SubmitQuizBodySchema = Type.Object({
   answers: Type.Array(
     Type.Object({

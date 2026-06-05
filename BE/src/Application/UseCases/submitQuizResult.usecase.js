@@ -14,14 +14,29 @@ export async function submitQuizResultUseCase(prisma, userId, quizId, answers) {
   let correctCount = 0;
   const totalQuestions = quiz.questions.length;
 
+  const questionResults = [];
+
   for (const answer of answers) {
     const question = quiz.questions.find(q => q.id === answer.questionId);
+    let isCorrect = false;
+    let correctOptionIndex = -1;
+
     if (question && Array.isArray(question.options)) {
+      correctOptionIndex = question.options.findIndex(opt => opt.isCorrect);
+      
       const selectedOption = question.options[answer.answerIndex];
       if (selectedOption && selectedOption.isCorrect) {
         correctCount++;
+        isCorrect = true;
       }
     }
+
+    questionResults.push({
+      questionId: answer.questionId,
+      isCorrect,
+      correctOptionIndex,
+      userAnswerIndex: answer.answerIndex,
+    });
   }
 
   // Example: score is percentage (0-100)
@@ -44,5 +59,6 @@ export async function submitQuizResultUseCase(prisma, userId, quizId, answers) {
     correctCount,
     totalQuestions,
     completedAt: result.completed_at,
+    questionResults,
   };
 }

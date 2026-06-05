@@ -46,7 +46,7 @@ export const AdminFlashcardDtoSchema = Type.Object({
 
 export const CreateAdminFlashcardBodySchema = Type.Object({
   level: FlashcardLevelEnum,
-  japaneseWord: Type.String({ minLength: 1, description: 'Japanese word (Kanji/Kana)' }),
+  japaneseWord: Type.Optional(Type.String({ description: 'Japanese word (Kanji/Kana)' })),
   pronunciation: Type.String({ minLength: 1, description: 'Pronunciation (Hiragana)' }),
   meaningVi: Type.String({ minLength: 1, description: 'Vietnamese meaning' }),
   status: Type.Optional(FlashcardStatusEnum)

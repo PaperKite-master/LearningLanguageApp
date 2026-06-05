@@ -24,7 +24,9 @@ const AdminSidebar = () => {
   return (
     <aside className="dashboard-sidebar admin-sidebar">
       <div className="sidebar-logo">
-        <img src={logo} alt="HiNa" />
+        <NavLink to="/">
+          <img src={logo} alt="HiNa" />
+        </NavLink>
       </div>
       
       <nav className="sidebar-nav">

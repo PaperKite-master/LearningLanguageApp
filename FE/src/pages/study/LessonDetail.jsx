@@ -5,6 +5,7 @@ import MDEditor from '@uiw/react-md-editor';
 import remarkBreaks from 'remark-breaks';
 import userLessonApi from '../../api/userLessonApi';
 import lessonApi from '../../api/lessonApi';
+import quizApi from '../../api/quizApi';
 import Sidebar from '../../components/dashboard/Sidebar';
 import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
 
@@ -62,7 +63,8 @@ const LessonDetail = () => {
   const [error, setError] = useState('');
   const [totalExercises, setTotalExercises] = useState(0);
   const [completedIds, setCompletedIds] = useState([]);
-  const [activeTab, setActiveTab] = useState('lesson'); // 'lesson' or 'grammar'
+  const [activeTab, setActiveTab] = useState('lesson'); // 'lesson' | 'grammar' | 'quiz'
+  const [lessonQuiz, setLessonQuiz] = useState(null);
 
   const countExercises = (markdown) => {
     if (!markdown) return 0;
@@ -111,6 +113,14 @@ const LessonDetail = () => {
           setGrammars(grammarData || []);
         } catch (grammarErr) {
           console.log('Không tải được ngữ pháp hoặc bài học không có ngữ pháp:', grammarErr);
+        }
+
+        // Lấy bài kiểm tra của bài học (nếu có)
+        try {
+          const q = await quizApi.getQuizByLesson(realId);
+          if (q && q.id) setLessonQuiz(q);
+        } catch (quizErr) {
+          // No quiz found, ignore
         }
       } catch (err) {
         setError('Không thể tải dữ liệu bài học. Vui lòng thử lại sau.');
@@ -244,6 +254,19 @@ const LessonDetail = () => {
           >
             ✍️ Sổ tay Ngữ Pháp {grammars && grammars.length > 0 && <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>{grammars.length}</span>}
           </button>
+
+          <button 
+            style={{ 
+              background: 'none', border: 'none', color: activeTab === 'quiz' ? '#00f2fe' : '#9ca3af', 
+              padding: '12px 0', fontSize: '1.2rem', fontWeight: activeTab === 'quiz' ? 'bold' : 'normal',
+              borderBottom: activeTab === 'quiz' ? '3px solid #00f2fe' : '3px solid transparent',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px'
+            }}
+            onClick={() => setActiveTab('quiz')}
+          >
+            📝 Bài Kiểm Tra
+          </button>
         </div>
 
         {activeTab === 'lesson' && (
@@ -310,6 +333,30 @@ const LessonDetail = () => {
                 <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📝</div>
                 <h3 style={{ color: '#e5e7eb', marginBottom: '10px' }}>Chưa có điểm ngữ pháp</h3>
                 <p style={{ color: '#9ca3af' }}>Bài học này hiện chưa có ngữ pháp bổ trợ nào.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'quiz' && (
+          <div className="tab-content-quiz">
+            {lessonQuiz ? (
+              <div style={{ textAlign: 'center', padding: '60px 20px', background: '#1c2035', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🎯</div>
+                <h3 style={{ color: '#e5e7eb', marginBottom: '10px', fontSize: '1.8rem' }}>Bài Kiểm Tra: {lessonQuiz.title}</h3>
+                <p style={{ color: '#9ca3af', marginBottom: '30px' }}>Số lượng câu hỏi: {lessonQuiz.questions?.length || 0} câu<br/>Điểm để qua môn: {lessonQuiz.passingScore}%</p>
+                <button 
+                  onClick={() => navigate(`/quiz/${lessonQuiz.id}`)}
+                  style={{ background: 'linear-gradient(to right, #3b82f6, #8b5cf6)', color: '#fff', border: 'none', padding: '14px 40px', borderRadius: '30px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}
+                >
+                  Bắt đầu làm bài
+                </button>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '60px 20px', background: '#1c2035', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📝</div>
+                <h3 style={{ color: '#e5e7eb', marginBottom: '10px' }}>Chưa có bài kiểm tra</h3>
+                <p style={{ color: '#9ca3af' }}>Bài học này hiện chưa có bài kiểm tra nào được giao.</p>
               </div>
             )}
           </div>
