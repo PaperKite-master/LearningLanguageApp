@@ -714,6 +714,19 @@ model system_settings {
   @@schema("public")
 }
 
+model otp_codes {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email      String
+  code       String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  expires_at DateTime @db.Timestamptz(6)
+  used       Boolean  @default(false)
+
+  @@index([email])
+  @@schema("public")
+}
+
+
 enum FlashcardLevel {
   N5
   N4

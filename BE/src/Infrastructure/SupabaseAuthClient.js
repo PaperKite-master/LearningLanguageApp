@@ -66,3 +66,11 @@ export async function updateUserPassword(accessToken, password) {
     'Authorization': `Bearer ${accessToken}`
   });
 }
+
+/**
+ * Send OTP (passwordless sign-in or registration confirmation)
+ */
+export async function sendOtp(email, createUser = true) {
+  return supabaseRequest('/otp', { email, create_user: createUser });
+}
+
