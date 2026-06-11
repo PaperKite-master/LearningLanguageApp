@@ -33,6 +33,13 @@ export const paymentController = {
       // Get return URL from env or fallback to a default localhost page
       const returnUrl = process.env.VNP_RETURN_URL || 'http://localhost:3000/payment/result';
 
+      // Format current time as yyyyMMddHHmmss in GMT+7 to avoid library timezone offset bugs
+      const pad = (n) => (n < 10 ? `0${n}` : n).toString();
+      const now = new Date();
+      const gmt7Offset = now.getTime() + (7 * 60 * 60 * 1000);
+      const gmt7Date = new Date(gmt7Offset);
+      const vnpCreateDate = `${gmt7Date.getUTCFullYear()}${pad(gmt7Date.getUTCMonth() + 1)}${pad(gmt7Date.getUTCDate())}${pad(gmt7Date.getUTCHours())}${pad(gmt7Date.getUTCMinutes())}${pad(gmt7Date.getUTCSeconds())}`;
+
       const paymentUrl = vnpay.buildPaymentUrl({
         vnp_Amount: amount, // VNPay SDK automatically multiplies by 100 internally
         vnp_IpAddr: ipAddr,
@@ -42,6 +49,7 @@ export const paymentController = {
         vnp_ReturnUrl: returnUrl,
         vnp_Locale: VnpLocale.VN,
         vnp_BankCode: bankCode || undefined,
+        vnp_CreateDate: vnpCreateDate,
       });
 
       return reply.code(200).send({
