@@ -17,11 +17,19 @@ export function getAllowedOrigins() {
   return [...new Set(fromEnv)];
 }
 
-/** Vercel preview URLs: https://<project>-<hash>-<team>.vercel.app */
+/** 
+ * Vercel preview URLs: https://<project>-<hash>-<team>.vercel.app 
+ * @param {string} origin
+ */
 function isVercelPreview(origin) {
   return /^https:\/\/[\w-]+\.vercel\.app$/.test(origin);
 }
 
+/**
+ * CORS Origin Delegate
+ * @param {string | undefined} origin
+ * @param {(err: Error | null, allow?: boolean) => void} callback
+ */
 export function corsOriginDelegate(origin, callback) {
   const allowed = getAllowedOrigins();
 

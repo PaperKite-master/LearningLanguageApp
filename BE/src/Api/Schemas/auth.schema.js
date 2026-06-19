@@ -73,4 +73,21 @@ export const ProfileResponseSchema = Type.Object({
 export const ErrorResponseSchema = Type.Object({
   error: Type.String(),
   statusCode: Type.Number(),
+  message: Type.Optional(Type.String()),
 });
+
+export const SendOtpBodySchema = Type.Object({
+  email: Type.String({ format: 'email', maxLength: 255, description: 'User email address' }),
+  createUser: Type.Optional(Type.Boolean({ default: true, description: 'Whether to create user if they do not exist' })),
+});
+
+export const VerifyOtpBodySchema = Type.Object({
+  email: Type.String({ format: 'email', maxLength: 255, description: 'User email address' }),
+  token: Type.String({ minLength: 6, maxLength: 8, description: 'OTP code' }),
+  type: Type.Union([
+    Type.Literal('email'),
+    Type.Literal('signup'),
+    Type.Literal('recovery')
+  ], { description: 'Verification type: email (login), signup, recovery' }),
+});
+

@@ -11,6 +11,8 @@ import {
   GenericMessageResponseSchema,
   ProfileResponseSchema,
   ErrorResponseSchema,
+  SendOtpBodySchema,
+  VerifyOtpBodySchema,
 } from '../Schemas/auth.schema.js';
 
 export async function authRoutes(fastify, options) {
@@ -107,5 +109,35 @@ export async function authRoutes(fastify, options) {
       },
     },
     handler: authController.getProfile,
+  });
+
+  fastify.post('/send-otp', {
+    schema: {
+      tags: ['Auth'],
+      summary: 'Send an OTP to email',
+      description: 'Triggers sending a 6-digit OTP code to the provided email address.',
+      body: SendOtpBodySchema,
+      response: {
+        200: GenericMessageResponseSchema,
+        400: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: authController.sendOtp,
+  });
+
+  fastify.post('/verify-otp', {
+    schema: {
+      tags: ['Auth'],
+      summary: 'Verify OTP code',
+      description: 'Verifies the OTP code for signup, login (type: email), or recovery, and returns JWT tokens + user profile (if type is signup/email).',
+      body: VerifyOtpBodySchema,
+      response: {
+        200: LoginResponseSchema,
+        400: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: authController.verifyOtp,
   });
 }

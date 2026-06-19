@@ -3,6 +3,7 @@ import { loginUseCase } from '../../Application/UseCases/login.usecase.js';
 import { verifyOtpUseCase } from '../../Application/UseCases/verifyOtp.usecase.js';
 import { forgotPasswordUseCase } from '../../Application/UseCases/forgotPassword.usecase.js';
 import { resetPasswordUseCase } from '../../Application/UseCases/resetPassword.usecase.js';
+import { sendOtpUseCase } from '../../Application/UseCases/sendOtp.usecase.js';
 
 export const authController = {
   async register(req, reply) {
@@ -109,6 +110,32 @@ export const authController = {
       return reply.code(500).send({
         error: 'Internal Server Error',
         statusCode: 500,
+      });
+    }
+  },
+
+  async sendOtp(req, reply) {
+    try {
+      const result = await sendOtpUseCase(req.server.prisma, req.body);
+      return reply.code(200).send(result);
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(err.statusCode || 500).send({
+        error: err.message,
+        statusCode: err.statusCode || 500,
+      });
+    }
+  },
+
+  async verifyOtp(req, reply) {
+    try {
+      const result = await verifyOtpUseCase(req.server.prisma, req.body);
+      return reply.code(200).send(result);
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(err.statusCode || 400).send({
+        error: err.message,
+        statusCode: err.statusCode || 400,
       });
     }
   },

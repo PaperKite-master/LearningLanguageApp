@@ -1,42 +1,21 @@
-import { signUp } from '../../Infrastructure/SupabaseAuthClient.js';
 import { sendEmail } from '../../Infrastructure/MailClient.js';
 
 /**
- * Register a new user via Supabase Auth, save profile, and send verification OTP code.
+ * Send OTP use case - generates a random 6-digit code, stores it, and sends via SMTP
  * 
  * @param {import('@prisma/client').PrismaClient} prisma
  * @param {object} payload
  * @param {string} payload.email
- * @param {string} payload.password
- * @param {string} [payload.fullName]
- * @param {string} [payload.role]
- * @param {string} [payload.targetLevel]
+ * @param {boolean} [payload.createUser]
  */
-export async function registerUseCase(prisma, { email, password, fullName, role, targetLevel }) {
-  // 1. Call standard Supabase signup (creates the user in Supabase Auth)
-  const data = await signUp(email, password);
-  const userId = data.user?.id;
-
-  if (userId) {
-    // 2. Upsert profile in public.profiles
-    const userRole = role ? role.toUpperCase() : 'USER';
-    await prisma.profiles.upsert({
-      where: { id: userId },
-      update: { full_name: fullName ?? null, role: userRole, target_level: targetLevel ?? 'N5' },
-      create: {
-        id: userId,
-        full_name: fullName ?? null,
-        role: userRole,
-        target_level: targetLevel ?? 'N5',
-      },
-    });
-  }
-
-  // 3. Generate random 6-digit OTP code for registration confirmation
+export async function sendOtpUseCase(prisma, { email, createUser }) {
+  // Generate random 6-digit code
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
 
-  // Store OTP in database
+  // Create expiration timestamp (5 minutes from now)
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  // Store in database
   await prisma.otp_codes.create({
     data: {
       email,
@@ -45,7 +24,7 @@ export async function registerUseCase(prisma, { email, password, fullName, role,
     },
   });
 
-  // Prepare HTML email template
+  // Prepare premium HTML email
   const html = `
     <div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #0b0f19; color: #ffffff; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
       <div style="text-align: center; margin-bottom: 30px;">
@@ -53,8 +32,8 @@ export async function registerUseCase(prisma, { email, password, fullName, role,
         <p style="color: #9ca3af; font-size: 14px; margin: 5px 0 0 0;">Japanese for IT Professionals</p>
       </div>
       <div style="background-color: rgba(255, 255, 255, 0.02); border-radius: 12px; padding: 30px; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
-        <h2 style="font-size: 20px; font-weight: 600; margin-top: 0; color: #ffffff;">Xác Nhận Đăng Ký Tài Khoản</h2>
-        <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">Cảm ơn bạn đã đăng ký học tập tại HiNa! Vui lòng nhập mã OTP dưới đây để xác thực email và kích hoạt tài khoản của bạn. Mã này có hiệu lực trong vòng 5 phút.</p>
+        <h2 style="font-size: 20px; font-weight: 600; margin-top: 0; color: #ffffff;">Mã Xác Thực OTP</h2>
+        <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">Vui lòng sử dụng mã OTP dưới đây để xác thực đăng nhập hoặc đăng ký tài khoản của bạn. Mã này có hiệu lực trong vòng 5 phút.</p>
         <div style="background: linear-gradient(135deg, #A855F7 0%, #3B0764 100%); padding: 15px 40px; border-radius: 8px; display: inline-block; margin-bottom: 20px;">
           <span style="font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: 6px; font-family: monospace;">${code}</span>
         </div>
@@ -68,15 +47,12 @@ export async function registerUseCase(prisma, { email, password, fullName, role,
 
   // Send the email
   try {
-    await sendEmail(email, `${code} là mã xác nhận đăng ký tài khoản HiNa`, html);
+    await sendEmail(email, `${code} là mã xác thực HiNa của bạn`, html);
   } catch (error) {
-    throw new Error(`Failed to send verification email: ${error.message}`);
+    throw new Error(`Failed to send email: ${error.message}`);
   }
 
   return {
-    id: userId || null,
-    email: data.user?.email || email,
-    message: 'Register successful. Please check your email for the verification code.',
+    message: 'OTP sent successfully. Please check your email.',
   };
 }
-

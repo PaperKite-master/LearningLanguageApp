@@ -21,6 +21,7 @@ import { adminFlashcardRoutes } from './Api/Routes/adminFlashcard.routes.js';
 import adminFlashcardDeckRoutes from './Api/Routes/adminFlashcardDeck.routes.js';
 import { quizRoutes } from './Api/Routes/quiz.routes.js';
 import { notificationRoutes } from './Api/Routes/notification.routes.js';
+import { paymentRoutes } from './Api/Routes/payment.routes.js';
 import { prismaPlugin } from './Infrastructure/Persistence/prisma.plugin.js';
 
 export async function buildApp() {
@@ -93,6 +94,7 @@ export async function buildApp() {
   await app.register(flashcardRoutes, { prefix: '/flashcards' });
   await app.register(quizRoutes, { prefix: '/quizzes' });
   await app.register(notificationRoutes, { prefix: '/notifications' });
+  await app.register(paymentRoutes, { prefix: '/payment' });
 
   return app;
 }
