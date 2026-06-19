@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, PlayCircle, BookOpen } from 'lucide-react';
+import { ArrowLeft, PlayCircle, BookOpen, FileText, ArrowRight, Edit2, Lock, ClipboardList, Database, CheckCircle2 } from 'lucide-react';
 import MDEditor from '@uiw/react-md-editor';
 import remarkBreaks from 'remark-breaks';
 import userLessonApi from '../../api/userLessonApi';
 import lessonApi from '../../api/lessonApi';
 import quizApi from '../../api/quizApi';
 import Sidebar from '../../components/dashboard/Sidebar';
+import DashboardTopBar from '../../components/dashboard/DashboardTopBar';
 import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
+import VocabPractice from '../../components/study/VocabPractice';
+import './LessonDetailNew.css';
 
 const extractText = (children) => {
   if (typeof children === 'string') return children;
@@ -21,30 +24,24 @@ const getMarkdownComponents = (onComplete) => ({
     const text = extractText(children);
     const match = /language-(\w+)/.exec(className || '');
     
-    // Tạo ID duy nhất cho exercise, ưu tiên dùng node offset nếu có, nếu không thì dùng text
     const exerciseId = node?.position?.start?.offset ? `ex_${node.position.start.offset}` : text;
     
-    // Xử lý game ghép từ (code block dạng: ```match)
     if (!inline && match && match[1] === 'match') {
       return <InteractiveMatching text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
     }
     
-    // Xử lý nối từ (code block dạng: ```connect)
     if (!inline && match && match[1] === 'connect') {
       return <InteractiveConnect text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
     }
 
-    // Xử lý trắc nghiệm (code block dạng: ```mcq)
     if (!inline && match && match[1] === 'mcq') {
       return <InteractiveMultipleChoice text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
     }
     
-    // Xử lý sắp xếp câu (code block dạng: ```reorder)
     if (!inline && match && match[1] === 'reorder') {
       return <InteractiveReorder text={text} onComplete={() => onComplete && onComplete(exerciseId)} />;
     }
     
-    // Xử lý điền từ (inline code dạng: `ans:TỪ_KHÓA`)
     if (text.startsWith('ans:')) {
       const answer = text.replace('ans:', '');
       return <InteractiveFillBlank correctAnswer={answer} onComplete={() => onComplete && onComplete(exerciseId)} />;
@@ -63,8 +60,25 @@ const LessonDetail = () => {
   const [error, setError] = useState('');
   const [totalExercises, setTotalExercises] = useState(0);
   const [completedIds, setCompletedIds] = useState([]);
-  const [activeTab, setActiveTab] = useState('lesson'); // 'lesson' | 'grammar' | 'quiz'
+  
+  // 'overview' | 'grammar' | 'exercise' | 'quiz'
+  const [viewMode, setViewMode] = useState('overview'); 
+  const [selectedGrammar, setSelectedGrammar] = useState(null);
+  
   const [lessonQuiz, setLessonQuiz] = useState(null);
+
+  const { parsedLessonContent } = useMemo(() => {
+    if (!lesson?.contentMarkdown) return { parsedLessonContent: '' };
+    // Legacy support for markdown vocab if exists, but we mainly rely on lesson.vocabularies now
+    const regex = /(?:^|\n)###\s*(Từ vựng|Từ Vựng|TỪ VỰNG|Vocabulary)[\s\S]*?(?=\n#{1,3} |$)/i;
+    const match = lesson.contentMarkdown.match(regex);
+    if (match && lesson.vocabularies && lesson.vocabularies.length > 0) {
+      return { parsedLessonContent: lesson.contentMarkdown.replace(match[0], '').trim() };
+    }
+    return { parsedLessonContent: lesson.contentMarkdown };
+  }, [lesson?.contentMarkdown, lesson?.vocabularies]);
+
+  const hasVocab = lesson?.vocabularies && lesson.vocabularies.length > 0;
 
   const countExercises = (markdown) => {
     if (!markdown) return 0;
@@ -81,14 +95,12 @@ const LessonDetail = () => {
     const fetchLessonData = async () => {
       try {
         setLoading(true);
-        // Lấy chi tiết bài học
         const lessonData = await userLessonApi.getLessonById(id);
         setLesson(lessonData);
         
         const total = countExercises(lessonData.contentMarkdown);
         setTotalExercises(total);
         
-        // Khôi phục tiến độ từ localStorage
         const realId = lessonData.id || id;
         const userStr = localStorage.getItem('user');
         const userId = userStr ? JSON.parse(userStr).id : 'guest';
@@ -100,31 +112,21 @@ const LessonDetail = () => {
           setCompletedIds(parsed.completedIds || []);
         }
 
-        // Gọi API backend báo mở bài
         try {
           await lessonApi.saveProgress(realId, 'OPEN');
-        } catch (apiErr) {
-          console.log('Không thể lưu tiến độ mở bài lên server:', apiErr);
-        }
+        } catch (apiErr) {}
 
-        // Lấy danh sách ngữ pháp liên quan (không bắt buộc, nếu API lỗi thì có thể bỏ qua)
         try {
           const grammarData = await userLessonApi.getGrammarsByLessonId(id);
           setGrammars(grammarData || []);
-        } catch (grammarErr) {
-          console.log('Không tải được ngữ pháp hoặc bài học không có ngữ pháp:', grammarErr);
-        }
+        } catch (grammarErr) {}
 
-        // Lấy bài kiểm tra của bài học (nếu có)
         try {
           const q = await quizApi.getQuizByLesson(realId);
           if (q && q.id) setLessonQuiz(q);
-        } catch (quizErr) {
-          // No quiz found, ignore
-        }
+        } catch (quizErr) {}
       } catch (err) {
         setError('Không thể tải dữ liệu bài học. Vui lòng thử lại sau.');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -133,13 +135,12 @@ const LessonDetail = () => {
     fetchLessonData();
   }, [id]);
 
-  const handleExerciseComplete = React.useCallback((exerciseId) => {
+  const handleExerciseComplete = useCallback((exerciseId) => {
     setCompletedIds(prev => {
       if (prev.includes(exerciseId)) return prev;
 
       const newIds = [...prev, exerciseId];
       const realId = lesson?.id || id;
-      // Tránh việc phần trăm vượt quá 100 nếu admin sửa bài làm tăng số lượng
       const safeTotal = totalExercises > 0 ? totalExercises : 1;
       const percentage = Math.min(100, Math.round((newIds.length / safeTotal) * 100));
       
@@ -154,20 +155,16 @@ const LessonDetail = () => {
         percentage
       }));
 
-      // Gọi API báo hoàn thành
       if (percentage === 100) {
-        lessonApi.saveProgress(realId, 'COMPLETE').catch(err => {
-          console.error('Không thể lưu tiến độ hoàn thành:', err);
-        });
+        lessonApi.saveProgress(realId, 'COMPLETE').catch(err => {});
       }
 
       return newIds;
     });
   }, [id, lesson?.id, totalExercises]);
 
-  const mdComponents = React.useMemo(() => getMarkdownComponents(handleExerciseComplete), [handleExerciseComplete]);
+  const mdComponents = useMemo(() => getMarkdownComponents(handleExerciseComplete), [handleExerciseComplete]);
 
-  // Hàm chuyển đổi link Youtube sang định dạng nhúng (embed)
   const getEmbedUrl = (url) => {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -175,7 +172,37 @@ const LessonDetail = () => {
     if (match && match[2].length === 11) {
       return `https://www.youtube.com/embed/${match[2]}`;
     }
-    return url; // Fallback
+    return url;
+  };
+
+  const renderGrammarContent = (markdown) => {
+    if (!markdown) return null;
+    // Tách bằng thẻ heading level 3 (###)
+    const parts = markdown.split(/(?=\n### )|(?=^### )/).filter(p => p.trim());
+    
+    return (
+      <div className="grammar-detail-layout">
+        {parts.map((part, idx) => {
+          const match = part.match(/^###\s+(.*)\n([\s\S]*)/);
+          const isFullWidth = parts.length === 1 || (idx === parts.length - 1 && parts.length % 2 !== 0);
+          
+          if (match) {
+            return (
+              <div key={idx} className={`grammar-detail-card ${isFullWidth ? 'grammar-full-width' : ''}`}>
+                <h4>{match[1]}</h4>
+                <MDEditor.Markdown source={match[2]} style={{ background: 'transparent' }} remarkPlugins={[remarkBreaks]} />
+              </div>
+            );
+          } else {
+            return (
+              <div key={idx} className={`grammar-detail-card ${isFullWidth ? 'grammar-full-width' : ''}`}>
+                <MDEditor.Markdown source={part} style={{ background: 'transparent' }} remarkPlugins={[remarkBreaks]} />
+              </div>
+            );
+          }
+        })}
+      </div>
+    );
   };
 
   if (loading) {
@@ -183,7 +210,7 @@ const LessonDetail = () => {
       <div className="dashboard-layout">
         <Sidebar />
         <main className="dashboard-main-area" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <h2>Đang tải bài học...</h2>
+          <h2>Đang tải...</h2>
         </main>
       </div>
     );
@@ -196,7 +223,7 @@ const LessonDetail = () => {
         <main className="dashboard-main-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h2>Oops!</h2>
           <p>{error || 'Bài học không tồn tại.'}</p>
-          <button className="pill-element" onClick={() => navigate('/study')} style={{ marginTop: '20px', padding: '10px 20px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+          <button className="practice-btn" onClick={() => navigate('/study')} style={{ marginTop: '20px' }}>
             Quay lại Lộ trình
           </button>
         </main>
@@ -204,163 +231,195 @@ const LessonDetail = () => {
     );
   }
 
-  const embedUrl = getEmbedUrl(lesson.videoUrl);
+  const isExerciseCompleted = totalExercises > 0 && completedIds.length === totalExercises;
 
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <main className="dashboard-main-area study-area" data-color-mode="dark" style={{ padding: '30px', overflowY: 'auto' }}>
+      <main className="dashboard-main-area lesson-detail-new" data-color-mode="light">
+        <DashboardTopBar />
         
-        {/* Nút quay lại */}
-        <button 
-          onClick={() => navigate('/study')} 
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', marginBottom: '20px', fontSize: '1rem' }}
-        >
-          <ArrowLeft size={20} /> Quay lại lộ trình
-        </button>
-
-        {/* Tiêu đề bài học */}
-        <div style={{ marginBottom: '30px' }}>
-          <span style={{ display: 'inline-block', padding: '4px 12px', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '12px' }}>
-            {lesson.topic || 'Bài học'}
-          </span>
-          <h1 style={{ fontSize: '2.5rem', color: '#fff', margin: 0 }}>{lesson.title}</h1>
-        </div>
-
-        {/* Tabs Điều hướng */}
-        <div style={{ marginBottom: '30px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '30px' }}>
-          <button 
-            style={{ 
-              background: 'none', border: 'none', color: activeTab === 'lesson' ? '#00f2fe' : '#9ca3af', 
-              padding: '12px 0', fontSize: '1.2rem', fontWeight: activeTab === 'lesson' ? 'bold' : 'normal',
-              borderBottom: activeTab === 'lesson' ? '3px solid #00f2fe' : '3px solid transparent',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px'
-            }}
-            onClick={() => setActiveTab('lesson')}
-          >
-            📚 Bài Học & Luyện Tập
-          </button>
-          
-          <button 
-            style={{ 
-              background: 'none', border: 'none', color: activeTab === 'grammar' ? '#00f2fe' : '#9ca3af', 
-              padding: '12px 0', fontSize: '1.2rem', fontWeight: activeTab === 'grammar' ? 'bold' : 'normal',
-              borderBottom: activeTab === 'grammar' ? '3px solid #00f2fe' : '3px solid transparent',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px'
-            }}
-            onClick={() => setActiveTab('grammar')}
-          >
-            ✍️ Sổ tay Ngữ Pháp {grammars && grammars.length > 0 && <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.9rem' }}>{grammars.length}</span>}
-          </button>
-
-          <button 
-            style={{ 
-              background: 'none', border: 'none', color: activeTab === 'quiz' ? '#00f2fe' : '#9ca3af', 
-              padding: '12px 0', fontSize: '1.2rem', fontWeight: activeTab === 'quiz' ? 'bold' : 'normal',
-              borderBottom: activeTab === 'quiz' ? '3px solid #00f2fe' : '3px solid transparent',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px'
-            }}
-            onClick={() => setActiveTab('quiz')}
-          >
-            📝 Bài Kiểm Tra
-          </button>
-        </div>
-
-        {activeTab === 'lesson' && (
-          <div className="tab-content-lesson">
-            {/* Khu vực Video */}
-            {embedUrl && (
-              <div style={{ marginBottom: '40px', background: '#1c2035', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', marginBottom: '15px' }}>
-                  <PlayCircle size={20} color="#3b82f6" /> Video Bài Giảng
-                </h3>
-                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px' }}>
-                  <iframe 
-                    src={embedUrl} 
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                    title="Lesson Video"
-                  />
+        <div className="study-columns">
+          <div className="study-main-col">
+            
+            {/* OVERVIEW MODE */}
+            {viewMode === 'overview' && (
+              <>
+                <div className="lesson-header-new">
+                  <button className="back-btn-new" onClick={() => navigate('/study')}>
+                    <ArrowLeft size={24} />
+                  </button>
+                  <h2>{lesson.title.toUpperCase()}</h2>
                 </div>
-              </div>
-            )}
 
-            {/* Khu vực Nội dung Bài học (Markdown) */}
-            {lesson.contentMarkdown && (
-              <div style={{ marginBottom: '40px', background: '#1c2035', padding: '30px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="markdown-preview-wrapper" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Tiến độ luyện tập:</span>
-                    <span style={{ color: '#10b981', fontWeight: 'bold' }}>{completedIds.length} / {totalExercises} Hoàn thành</span>
-                  </div>
-                  <MDEditor.Markdown 
-                    source={lesson.contentMarkdown} 
-                    style={{ background: 'transparent' }} 
-                    components={mdComponents}
-                    remarkPlugins={[remarkBreaks]}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'grammar' && (
-          <div className="tab-content-grammar">
-            {grammars && grammars.length > 0 ? (
-              <div>
-                {grammars.map((grammar, index) => (
-                  <div key={grammar.id || index} style={{ marginBottom: '30px', background: '#1c2035', padding: '30px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <h4 style={{ fontSize: '1.5rem', color: '#00f2fe', marginBottom: '20px', borderBottom: '1px dashed rgba(255,255,255,0.1)', paddingBottom: '15px' }}>
-                      #{index + 1}. {grammar.title}
-                    </h4>
-                    <div className="markdown-preview-wrapper" style={{ fontSize: '1.1rem', lineHeight: '1.8', whiteSpace: 'pre-wrap' }}>
-                      <MDEditor.Markdown 
-                        source={grammar.contentMarkdown} 
-                        style={{ background: 'transparent' }} 
-                        remarkPlugins={[remarkBreaks]}
-                      />
+                {grammars && grammars.length > 0 && (
+                  <div>
+                    <span className="pill-badge grammar-badge">Ngữ pháp</span>
+                    <div className="card-list">
+                      {grammars.map((g, index) => (
+                        <div className="item-card" key={g.id || index} onClick={() => { setSelectedGrammar(g); setViewMode('grammar'); }}>
+                          <div className="item-icon-left grammar-icon">
+                            <FileText size={24} color="#3b82f6" strokeWidth={1.5} />
+                          </div>
+                          <div className="item-info">
+                            <h4>Bài {index + 1}</h4>
+                            <p>{g.title}</p>
+                          </div>
+                          <div className="item-icon-right">
+                            <ArrowRight size={20} color="#3b82f6" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '60px 20px', background: '#1c2035', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📝</div>
-                <h3 style={{ color: '#e5e7eb', marginBottom: '10px' }}>Chưa có điểm ngữ pháp</h3>
-                <p style={{ color: '#9ca3af' }}>Bài học này hiện chưa có ngữ pháp bổ trợ nào.</p>
-              </div>
-            )}
-          </div>
-        )}
+                )}
 
-        {activeTab === 'quiz' && (
-          <div className="tab-content-quiz">
-            {lessonQuiz ? (
-              <div style={{ textAlign: 'center', padding: '60px 20px', background: '#1c2035', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🎯</div>
-                <h3 style={{ color: '#e5e7eb', marginBottom: '10px', fontSize: '1.8rem' }}>Bài Kiểm Tra: {lessonQuiz.title}</h3>
-                <p style={{ color: '#9ca3af', marginBottom: '30px' }}>Số lượng câu hỏi: {lessonQuiz.questions?.length || 0} câu<br/>Điểm để qua môn: {lessonQuiz.passingScore}%</p>
-                <button 
-                  onClick={() => navigate(`/quiz/${lessonQuiz.id}`)}
-                  style={{ background: 'linear-gradient(to right, #3b82f6, #8b5cf6)', color: '#fff', border: 'none', padding: '14px 40px', borderRadius: '30px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}
-                >
-                  Bắt đầu làm bài
-                </button>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '60px 20px', background: '#1c2035', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📝</div>
-                <h3 style={{ color: '#e5e7eb', marginBottom: '10px' }}>Chưa có bài kiểm tra</h3>
-                <p style={{ color: '#9ca3af' }}>Bài học này hiện chưa có bài kiểm tra nào được giao.</p>
-              </div>
+                <div>
+                  <span className="pill-badge exercise-badge">Làm bài tập</span>
+                  <div className="card-list">
+                    <div className="item-card" onClick={() => setViewMode('exercise')}>
+                      <div className="item-icon-left exercise-icon">
+                        <Edit2 size={24} color="#ffffff" strokeWidth={1.5} />
+                      </div>
+                      <div className="item-info">
+                        <h4>Bài Học & Thực Hành</h4>
+                        <p>{totalExercises > 0 ? `${totalExercises} câu hỏi` : 'Đọc hiểu'}</p>
+                      </div>
+                      <div className="item-icon-right">
+                        {isExerciseCompleted ? <CheckCircle2 size={24} color="#10b981" /> : <Lock size={24} color="#94a3b8" />}
+                      </div>
+                    </div>
+
+                    {lessonQuiz && (
+                      <div className="item-card" onClick={() => navigate(`/quiz/${lessonQuiz.id}`)}>
+                        <div className="item-icon-left exercise-icon">
+                          <ClipboardList size={24} color="#ffffff" strokeWidth={1.5} />
+                        </div>
+                        <div className="item-info">
+                          <h4>Bài Kiểm Tra</h4>
+                          <p>{lessonQuiz.questions?.length || 0} câu hỏi</p>
+                        </div>
+                        <div className="item-icon-right">
+                          <ArrowRight size={24} color="#a855f7" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
+
+            {/* GRAMMAR DETAIL MODE */}
+            {viewMode === 'grammar' && selectedGrammar && (
+              <>
+                <div className="lesson-header-new">
+                  <button className="back-btn-new" onClick={() => { setSelectedGrammar(null); setViewMode('overview'); }}>
+                    <ArrowLeft size={24} />
+                  </button>
+                  <h2>NGỮ PHÁP</h2>
+                </div>
+                
+                {renderGrammarContent(selectedGrammar.contentMarkdown)}
+                
+                <div className="practice-btn-container">
+                  <button className="practice-btn" onClick={() => setViewMode('exercise')}>
+                    Luyện tập
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* VOCAB MODE */}
+            {viewMode === 'vocab' && hasVocab && (
+              <>
+                <div className="lesson-header-new">
+                  <button className="back-btn-new" onClick={() => setViewMode('overview')}>
+                    <ArrowLeft size={24} />
+                  </button>
+                  <h2>TỪ VỰNG ({lesson.vocabularies.length} từ)</h2>
+                </div>
+                
+                <div className="lesson-exercise-content vocab-grid">
+                  {lesson.vocabularies.map((vocab, index) => (
+                    <div key={vocab.id || index} className="student-vocab-card">
+                      <div className="vocab-jp-group">
+                        <div className="vocab-hiragana">{vocab.hiragana}</div>
+                        {vocab.kanji && <div className="vocab-kanji">{vocab.kanji}</div>}
+                        {vocab.romaji && <div className="vocab-romaji">[{vocab.romaji}]</div>}
+                      </div>
+                      <div className="vocab-meaning-group">
+                        <div className="vocab-meaning">{vocab.meaning}</div>
+                      </div>
+                      {vocab.questions && vocab.questions.length > 0 && (
+                        <VocabPractice questions={vocab.questions} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* EXERCISE / LESSON MODE */}
+            {viewMode === 'exercise' && (
+              <>
+                <div className="lesson-header-new">
+                  <button className="back-btn-new" onClick={() => setViewMode('overview')}>
+                    <ArrowLeft size={24} />
+                  </button>
+                  <h2>THỰC HÀNH</h2>
+                </div>
+                
+                <div className="lesson-exercise-content">
+                  {getEmbedUrl(lesson.videoUrl) && (
+                    <div style={{ marginBottom: '30px', background: '#f8fafc', padding: '15px', borderRadius: '16px' }}>
+                      <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e293b', marginBottom: '15px' }}>
+                        <PlayCircle size={20} color="#a855f7" /> Video Bài Giảng
+                      </h3>
+                      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px' }}>
+                        <iframe 
+                          src={getEmbedUrl(lesson.videoUrl)} 
+                          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                          allowFullScreen
+                          title="Lesson Video"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {totalExercises > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #f1f5f9' }}>
+                      <span style={{ color: '#64748b', fontWeight: 'bold' }}>Tiến độ:</span>
+                      <span style={{ color: '#10b981', fontWeight: 'bold' }}>{completedIds.length} / {totalExercises} Hoàn thành</span>
+                    </div>
+                  )}
+
+                  <div className="wmde-markdown-var">
+                    <MDEditor.Markdown 
+                      source={parsedLessonContent} 
+                      components={mdComponents}
+                      remarkPlugins={[remarkBreaks]}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
           </div>
-        )}
+
+          <div className="study-side-col">
+            <div 
+              className="vocab-card"
+              style={{ cursor: hasVocab ? 'pointer' : 'default', opacity: hasVocab ? 1 : 0.6 }}
+              onClick={() => { if (hasVocab) setViewMode('vocab'); }}
+            >
+              <h3>TỪ VỰNG</h3>
+              <div className="vocab-icon">
+                <Database size={60} color="#2e156f" strokeWidth={1.5} />
+              </div>
+              {!hasVocab && <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '10px' }}>Chưa có dữ liệu</p>}
+            </div>
+          </div>
+        </div>
 
       </main>
     </div>

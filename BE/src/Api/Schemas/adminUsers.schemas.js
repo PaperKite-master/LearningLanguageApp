@@ -31,6 +31,8 @@ export const AdminUserDtoSchema = Type.Object({
   progress: Type.Integer({ minimum: 0, maximum: 100 }),
   total_exp: Type.Union([Type.Integer(), Type.Null()]),
   target_level: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  spent: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  last_activity_at: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   banned_until: Type.Union([Type.String(), Type.Null()]),
   created_at: Type.Union([Type.String(), Type.Null()]),
   updated_at: Type.Union([Type.String(), Type.Null()])
@@ -54,4 +56,19 @@ export const UpdateAdminUserRoleBodySchema = Type.Object({
 
 export const UpdateAdminUserStatusBodySchema = Type.Object({
   status: AdminUserStatusSchema
+});
+
+export const AdminUserLessonProgressSchema = Type.Object({
+  id: Type.String(),
+  title: Type.String(),
+  is_completed: Type.Boolean()
+});
+
+export const AdminUserLevelProgressSchema = Type.Object({
+  level: Type.String(),
+  lessons: Type.Array(AdminUserLessonProgressSchema)
+});
+
+export const AdminUserProgressDetailsResponseSchema = Type.Object({
+  data: Type.Array(AdminUserLevelProgressSchema)
 });

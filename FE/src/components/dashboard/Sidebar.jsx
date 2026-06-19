@@ -1,25 +1,16 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
   BookOpen, 
-  WholeWord, // using this for "Bảng chữ cái"
+  WholeWord,
   Layers, 
   Video, 
-  TrendingUp,
-  UserCircle,
-  LogOut
+  UserSquare
 } from 'lucide-react';
 import logo from '../../assets/logo.png'; // Assuming logo can be reused
-import authApi from '../../api/authApi';
 
 const Sidebar = () => {
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    authApi.logout();
-    navigate('/login');
-  };
 
   return (
     <aside className="dashboard-sidebar">
@@ -30,10 +21,6 @@ const Sidebar = () => {
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink to="/dashboard" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
-          <LayoutDashboard className="nav-icon" size={24} />
-          <span>Dashboard</span>
-        </NavLink>
         
         <NavLink to="/study" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
           <BookOpen className="nav-icon" size={24} />
@@ -55,20 +42,11 @@ const Sidebar = () => {
           <span>Videos</span>
         </NavLink>
         
-        <NavLink to="/progress" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
-          <TrendingUp className="nav-icon" size={24} />
-          <span>Tiến Độ</span>
+        <NavLink to="/profile" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+          <UserSquare className="nav-icon" size={24} />
+          <span>Hồ sơ</span>
         </NavLink>
       </nav>
-
-      <div className="sidebar-bottom">
-        <NavLink to="/profile" className={({isActive}) => isActive ? "bottom-btn active" : "bottom-btn"}>
-          <UserCircle size={36} strokeWidth={2.5} />
-        </NavLink>
-        <button className="bottom-btn" onClick={handleLogout} title="Đăng xuất">
-          <LogOut size={36} strokeWidth={2.5} />
-        </button>
-      </div>
     </aside>
   );
 };

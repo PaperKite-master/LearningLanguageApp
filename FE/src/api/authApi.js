@@ -22,6 +22,23 @@ const authApi = {
     return response.data;
   },
 
+  verifyOtp: async (payload) => {
+    const url = '/auth/verify-otp';
+    const response = await axiosClient.post(url, payload);
+    
+    // verifyOtp returns the tokens inside response.data.data or response.data depending on the backend response.
+    // auth.controller sends reply.code(200).send(result) directly where result has accessToken.
+    const { accessToken, refreshToken } = response.data;
+    if (accessToken) {
+      localStorage.setItem('accessToken', accessToken);
+    }
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
+    
+    return response.data;
+  },
+
   getMe: async () => {
     const url = '/auth/me';
     const response = await axiosClient.get(url);

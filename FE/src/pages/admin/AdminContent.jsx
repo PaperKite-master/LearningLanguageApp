@@ -10,14 +10,25 @@ const AdminContent = () => {
   return (
     <div className="dashboard-layout">
       <AdminSidebar />
-      <main className="dashboard-main-area admin-dashboard-area">
-        <div style={{ marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '20px' }}>
+      <main className="dashboard-main-area" style={{ backgroundColor: '#f1f5f9' }}>
+        <div style={{ 
+          padding: '40px 60px 0 60px', 
+          backgroundColor: '#f1f5f9',
+          display: 'flex', 
+          gap: '12px' 
+        }}>
           <button 
             style={{ 
-              background: 'none', border: 'none', color: activeTab === 'lessons' ? '#00f2fe' : '#9ca3af', 
-              padding: '10px 0', fontSize: '1.1rem', fontWeight: activeTab === 'lessons' ? 'bold' : 'normal',
-              borderBottom: activeTab === 'lessons' ? '2px solid #00f2fe' : '2px solid transparent',
-              cursor: 'pointer'
+              padding: '10px 24px',
+              backgroundColor: activeTab === 'lessons' ? '#0f172a' : '#ffffff',
+              color: activeTab === 'lessons' ? '#ffffff' : '#64748b',
+              border: activeTab === 'lessons' ? 'none' : '1px solid #e2e8f0',
+              borderRadius: '24px',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: activeTab === 'lessons' ? '0 4px 6px -1px rgba(0,0,0,0.1)' : '0 1px 2px rgba(0,0,0,0.05)'
             }}
             onClick={() => setActiveTab('lessons')}
           >
@@ -25,10 +36,16 @@ const AdminContent = () => {
           </button>
           <button 
             style={{ 
-              background: 'none', border: 'none', color: activeTab === 'grammars' ? '#00f2fe' : '#9ca3af', 
-              padding: '10px 0', fontSize: '1.1rem', fontWeight: activeTab === 'grammars' ? 'bold' : 'normal',
-              borderBottom: activeTab === 'grammars' ? '2px solid #00f2fe' : '2px solid transparent',
-              cursor: 'pointer'
+              padding: '10px 24px',
+              backgroundColor: activeTab === 'grammars' ? '#0f172a' : '#ffffff',
+              color: activeTab === 'grammars' ? '#ffffff' : '#64748b',
+              border: activeTab === 'grammars' ? 'none' : '1px solid #e2e8f0',
+              borderRadius: '24px',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: activeTab === 'grammars' ? '0 4px 6px -1px rgba(0,0,0,0.1)' : '0 1px 2px rgba(0,0,0,0.05)'
             }}
             onClick={() => setActiveTab('grammars')}
           >
@@ -36,7 +53,13 @@ const AdminContent = () => {
           </button>
         </div>
 
-        {activeTab === 'lessons' ? <AdminContentList /> : <AdminGrammarsList />}
+        {/* Both AdminContentList and AdminGrammarsList handle their own padding now, but AdminContentList has padding built into .admin-courses-area. We will wrap them if necessary, but currently they have padding: 40px 60px.
+            Wait, we added padding-top here. We should check if AdminContentList has padding.
+            AdminContentList has .admin-courses-area { padding: 40px 60px; }. We should change AdminContent padding.
+        */}
+        <div>
+          {activeTab === 'lessons' ? <AdminContentList /> : <AdminGrammarsList />}
+        </div>
       </main>
     </div>
   );

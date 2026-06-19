@@ -82,6 +82,12 @@ export async function getUserDashboardUseCase({ prisma, userId }) {
       full_name: true,
       target_level: true,
       total_study_minutes: true,
+      avatar_url: true,
+      visibility: true,
+      phone: true,
+      address: true,
+      bio: true,
+      preferred_contact: true,
     },
   });
 
@@ -144,6 +150,12 @@ export async function getUserDashboardUseCase({ prisma, userId }) {
   return {
     user: {
       name: profile.full_name ?? 'User',
+      avatarUrl: profile.avatar_url ?? null,
+      visibility: profile.visibility ?? true,
+      phone: profile.phone ?? null,
+      address: profile.address ?? null,
+      bio: profile.bio ?? null,
+      preferredContact: profile.preferred_contact ?? null,
     },
     stats: {
       streak,

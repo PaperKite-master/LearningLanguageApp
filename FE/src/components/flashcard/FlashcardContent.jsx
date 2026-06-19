@@ -147,23 +147,21 @@ const FlashcardContent = () => {
 
   return (
     <div className="flashcard-content-area">
-      <h1 className="flashcard-gradient-title">FLASH CARDS</h1>
+      <h1 className="flashcard-main-title">FLASH CARDS</h1>
 
-      <div className="flashcard-tabs">
-        <div className="flashcard-tab-container">
-          <button 
-            className={`fc-tab-btn ${activeTab === 'library' ? 'active' : ''}`}
-            onClick={() => setActiveTab('library')}
-          >
-            Thư viện thẻ
-          </button>
-          <button 
-            className={`fc-tab-btn ${activeTab === 'mycards' ? 'active' : ''}`}
-            onClick={() => setActiveTab('mycards')}
-          >
-            Thẻ của tôi
-          </button>
-        </div>
+      <div className="flashcard-tabs-header">
+        <button 
+          className={`fc-tab-line-btn ${activeTab === 'library' ? 'active' : ''}`}
+          onClick={() => setActiveTab('library')}
+        >
+          Thư viện thẻ
+        </button>
+        <button 
+          className={`fc-tab-line-btn ${activeTab === 'mycards' ? 'active' : ''}`}
+          onClick={() => setActiveTab('mycards')}
+        >
+          Thẻ của tôi
+        </button>
       </div>
 
       {activeTab === 'library' && (
@@ -171,14 +169,14 @@ const FlashcardContent = () => {
           {loading ? (
             <div className="fc-loading">Đang tải dữ liệu...</div>
           ) : !selectedLevel ? (
-            <div className="fc-levels-grid">
+            <div className="fc-levels-list">
               {jlptLevels.map((level) => {
                 // Count published cards for this level
                 const cardCount = flashcards.filter(c => c.level === level && c.status === 'Published').length;
                 return (
-                  <div key={level} className="fc-level-box" onClick={() => handleSelectLevel(level)}>
-                    <div className="fc-level-title">{level}</div>
-                    <div className="fc-level-count">{cardCount} từ vựng</div>
+                  <div key={level} className="fc-level-card-long" onClick={() => handleSelectLevel(level)}>
+                    <div className="fc-level-card-count">{cardCount} thẻ</div>
+                    <div className="fc-level-card-title">Từ vựng {level}</div>
                   </div>
                 );
               })}

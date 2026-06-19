@@ -10,10 +10,11 @@ export const adminFlashcardController = {
    * List all admin flashcards with optional search and pagination.
    */
   list: async (request, reply) => {
-    const { search, page, limit } = request.query;
+    const { search, deckId, page, limit } = request.query;
     const result = await listAdminFlashcardsUseCase({
       adminFlashcardRepo: request.adminFlashcardRepo,
       search,
+      deckId,
       page,
       limit
     });

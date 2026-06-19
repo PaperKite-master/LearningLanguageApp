@@ -4,6 +4,7 @@
 export function toAdminFlashcardDto(flashcard) {
   return {
     id: flashcard.id,
+    deckId: flashcard.deck_id,
     level: flashcard.level,
     japaneseWord: flashcard.japanese_word,
     pronunciation: flashcard.pronunciation,

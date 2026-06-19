@@ -7,7 +7,8 @@ import {
   AdminUsersListResponseSchema,
   DeleteAdminUserResponseSchema,
   UpdateAdminUserRoleBodySchema,
-  UpdateAdminUserStatusBodySchema
+  UpdateAdminUserStatusBodySchema,
+  AdminUserProgressDetailsResponseSchema
 } from '../Schemas/adminUsers.schemas.js';
 
 /**
@@ -78,5 +79,22 @@ export async function adminUsersRoutes(app) {
       }
     },
     adminUsersController.remove
+  );
+
+  app.get(
+    '/:id/progress-details',
+    {
+      preHandler: [authenticate, requireAdmin],
+      schema: {
+        tags: ['Admin Users'],
+        summary: 'Get user progress grouped by timelines (levels)',
+        security: [{ bearerAuth: [] }],
+        params: AdminUserIdParamsSchema,
+        response: {
+          200: AdminUserProgressDetailsResponseSchema
+        }
+      }
+    },
+    adminUsersController.getProgressDetails
   );
 }

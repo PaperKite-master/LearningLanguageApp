@@ -1,0 +1,238 @@
+/* ========================================================================= */
+/* ADMIN TIMELINE REDESIGN                                                   */
+/* ========================================================================= */
+
+.timeline-dnd-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+}
+
+.timeline-path-block {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: box-shadow 0.3s ease;
+}
+
+.timeline-path-block:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.03);
+}
+
+.timeline-path-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 16px;
+}
+
+.timeline-path-title {
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-path-count {
+  background-color: #f1f5f9;
+  color: #64748b;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeline-droppable-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 80px;
+  border-radius: 16px;
+  padding: 8px;
+  background-color: #f8fafc;
+  border: 2px dashed transparent;
+  transition: all 0.2s ease;
+}
+
+.timeline-droppable-area.dragging-over {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.timeline-draggable-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  /* DND Kit / React Beautiful DND Warning: Never use "all" or "transform" for transition, as it intercepts the inline JS transforms and ruins dragging animation */
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.timeline-draggable-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-draggable-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.04);
+}
+
+.timeline-draggable-item.is-dragging {
+  background-color: #ffffff;
+  box-shadow: 0 15px 30px rgba(59, 130, 246, 0.15);
+  border: 2px solid #3b82f6;
+  z-index: 100;
+}
+
+.timeline-item-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.timeline-drag-handle {
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin-left: -8px;
+  color: #94a3b8;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.timeline-drag-handle:hover {
+  background-color: #f1f5f9;
+  color: #3b82f6;
+}
+
+.timeline-drag-handle:active {
+  cursor: grabbing;
+}
+
+.timeline-item-content {
+  color: #1e293b;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.timeline-item-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.2s ease;
+}
+
+.timeline-draggable-item:hover .timeline-item-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Action buttons */
+.icon-action-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-action-btn:hover.edit-btn {
+  background: #eff6ff;
+  color: #3b82f6;
+  border-color: #bfdbfe;
+}
+
+.icon-action-btn:hover.delete-btn {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+/* Role Badges */
+.role-badge.role-level {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+/* Header Buttons */
+.timeline-header-btn {
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-add-lesson {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.btn-add-lesson:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-edit-path {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.btn-edit-path:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.btn-delete-path {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.btn-delete-path:hover {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Edit2, Trash2 } from 'lucide-react';
 import grammarApi from '../../api/grammarApi';
+import './AdminGrammarsList.css';
 
 const AdminGrammarsList = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const AdminGrammarsList = () => {
   const [grammarsList, setGrammarsList] = useState([]);
   const [lessonsMap, setLessonsMap] = useState({});
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [selectedGrammarIds, setSelectedGrammarIds] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +35,8 @@ const AdminGrammarsList = () => {
         }
       } catch (error) {
         console.error("Lỗi tải dữ liệu ngữ pháp:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -61,6 +66,7 @@ const AdminGrammarsList = () => {
       if (itemToDelete && itemToDelete.id) {
         await grammarApi.delete(itemToDelete.id);
         setGrammarsList(grammarsList.filter(item => item.id !== itemToDelete.id));
+        setSelectedGrammarIds(prev => prev.filter(id => id !== itemToDelete.id));
         alert('Xóa ngữ pháp thành công!');
       }
     } catch (error) {
@@ -71,83 +77,147 @@ const AdminGrammarsList = () => {
     }
   };
 
+  const toggleGrammarSelection = (grammarId) => {
+    setSelectedGrammarIds(prev => 
+      prev.includes(grammarId) ? prev.filter(id => id !== grammarId) : [...prev, grammarId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedGrammarIds.length === filteredGrammars.length && filteredGrammars.length > 0) {
+      setSelectedGrammarIds([]);
+    } else {
+      setSelectedGrammarIds(filteredGrammars.map(g => g.id));
+    }
+  };
+
+  const executeBulkDelete = async () => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedGrammarIds.length} ngữ pháp đã chọn? Hành động này không thể hoàn tác.`)) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await Promise.all(selectedGrammarIds.map(id => grammarApi.delete(id)));
+      
+      const data = await grammarApi.getAll();
+      setGrammarsList(data || []);
+      
+      setSelectedGrammarIds([]);
+      alert(`Đã xóa thành công ${selectedGrammarIds.length} ngữ pháp!`);
+    } catch (error) {
+      console.error('Failed to bulk delete grammars:', error);
+      alert('Có lỗi xảy ra khi xóa danh sách ngữ pháp. Một số ngữ pháp có thể chưa được xóa.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="admin-content-area" style={{ paddingTop: 0 }}>
-      <div className="admin-header flex-header" style={{ padding: '0 0 20px 0' }}>
-        <h1 className="admin-heading" style={{ margin: 0 }}>QUẢN LÝ NGỮ PHÁP</h1>
+    <div className="admin-grammars-area">
+      <div className="admin-grammars-header">
+        <h1 className="admin-grammars-title">Grammars</h1>
         <button className="admin-btn-primary" onClick={handleOpenAddModal}>
-          + Thêm ngữ pháp mới
+          + Create New Grammar
         </button>
       </div>
 
-      <div className="admin-panel-container">
-        
-        {/* Search Bar */}
-        <div className="admin-search-wrapper">
-          <Search size={20} className="admin-search-icon" color="#9ca3af" />
+      <div className="admin-grammars-toolbar">
+        <div className="admin-grammars-search-wrapper">
+          <Search size={20} className="admin-grammars-search-icon" />
           <input 
             type="text" 
             placeholder="Tìm kiếm ngữ pháp hoặc theo Mã bài học..." 
-            className="admin-search-input"
+            className="admin-grammars-search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        {/* Data Table */}
-        <div className="admin-table-wrapper">
-          <table className="admin-users-table">
-            <thead>
-              <tr>
-                <th>Tiêu đề Ngữ Pháp</th>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {selectedGrammarIds.length > 0 && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: '#f1f5f9', padding: '6px 16px', borderRadius: '24px' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#475569' }}>Đã chọn {selectedGrammarIds.length}</span>
+              <button 
+                className="icon-action-btn delete-btn" 
+                onClick={executeBulkDelete}
+                title="Xóa ngữ pháp đã chọn"
+                style={{ padding: '4px', backgroundColor: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Trash2 size={16} color="#ef4444" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="admin-grammars-table-wrapper">
+        <table className="admin-grammars-table">
+          <thead>
+            <tr>
+              <th className="col-checkbox">
+                <input 
+                  type="checkbox" 
+                  checked={filteredGrammars.length > 0 && selectedGrammarIds.length === filteredGrammars.length}
+                  onChange={toggleSelectAll}
+                />
+              </th>
+              <th>Tiêu đề Ngữ Pháp</th>
                 <th>Thuộc Bài Học (Lesson ID)</th>
                 <th>Order</th>
                 <th>Trạng thái</th>
-                <th></th> {/* For Actions */}
+                <th>{/* For Actions */}</th>
               </tr>
             </thead>
             <tbody>
-              {filteredGrammars.map((item) => (
-                <tr key={item.id}>
-                  <td className="col-name">{item.title}</td>
-                  <td style={{ color: '#9ca3af', fontSize: '0.95rem', minWidth: '220px' }}>
-                    {lessonsMap[item.lessonId] ? 
-                      `${lessonsMap[item.lessonId].lessonCode || item.lessonId.substring(0, 8)} - ${lessonsMap[item.lessonId].title}` 
-                      : item.lessonId.substring(0, 8)
-                    }
-                  </td>
-                  <td className="col-role">
-                    <span className="role-badge role-level">
+              {loading ? (
+                <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>Đang tải...</td></tr>
+              ) : filteredGrammars.length === 0 ? (
+                <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>Không tìm thấy ngữ pháp phù hợp</td></tr>
+              ) : (
+                filteredGrammars.map((item) => (
+                  <tr key={item.id} style={{ backgroundColor: selectedGrammarIds.includes(item.id) ? '#f8fafc' : 'transparent' }}>
+                    <td className="col-checkbox">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedGrammarIds.includes(item.id)}
+                        onChange={() => toggleGrammarSelection(item.id)}
+                      />
+                    </td>
+                    <td className="col-title">{item.title}</td>
+                    <td className="col-lesson">
+                      {lessonsMap[item.lessonId] ? 
+                        `${lessonsMap[item.lessonId].lessonCode || item.lessonId.substring(0, 8)} - ${lessonsMap[item.lessonId].title}` 
+                        : item.lessonId.substring(0, 8)
+                      }
+                    </td>
+                    <td className="col-order">
                       {item.order || 0}
-                    </span>
-                  </td>
-                  <td className="col-status">
-                    <span className={`status-badge status-${(item.status || 'published').toLowerCase()}`}>
-                      {item.status === 'draft' ? 'Draft' : 'Published'}
-                    </span>
-                  </td>
-                  
-                  <td className="col-action">
-                    <div className="col-action-group">
-                      <button className="icon-action-btn edit-btn" title="Chỉnh sửa" onClick={() => handleOpenEditModal(item)}>
-                        <Edit2 size={18} />
-                      </button>
-                      <button className="icon-action-btn delete-btn" title="Xóa" onClick={() => setItemToDelete(item)}>
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="col-status">
+                      <span className={`grammar-status-pill ${(item.status || 'published').toLowerCase()}`}>
+                        <span className="status-dot"></span>
+                        {item.status === 'draft' ? 'Draft' : 'Published'}
+                      </span>
+                    </td>
+                    
+                    <td className="col-actions">
+                      <div className="action-buttons">
+                        <button className="icon-action-btn edit-btn" title="Chỉnh sửa" onClick={() => handleOpenEditModal(item)}>
+                          <Edit2 size={16} />
+                        </button>
+                        <button className="icon-action-btn delete-btn" title="Xóa" onClick={() => setItemToDelete(item)}>
+                          <Trash2 size={16} color="#ef4444" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-          
-          {filteredGrammars.length === 0 && (
-            <div className="no-data-msg">Không tìm thấy ngữ pháp phù hợp</div>
-          )}
         </div>
-        
-      </div>
+
 
       {/* DELETE CONFIRMATION MODAL */}
       {itemToDelete && (

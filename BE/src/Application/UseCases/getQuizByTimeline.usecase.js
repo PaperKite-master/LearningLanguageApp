@@ -3,8 +3,8 @@ import { PrismaQuizRepository } from '../../Infrastructure/Repositories/PrismaQu
 export async function getQuizByTimelineUseCase(prisma, timelineId) {
   const quizRepo = new PrismaQuizRepository(prisma);
   const quiz = await quizRepo.getQuizByTimelineId(timelineId);
-  if (!quiz) {
-    return null; // Return null if not found
+  if (!quiz || quiz.status === 'draft') {
+    return null; // Return null if not found or draft
   }
 
   return {
@@ -12,6 +12,7 @@ export async function getQuizByTimelineUseCase(prisma, timelineId) {
     title: quiz.title,
     type: quiz.type,
     passingScore: quiz.passing_score,
+    time_limit: quiz.time_limit,
     questions: quiz.questions.map((q) => ({
       id: q.id,
       questionText: q.question_text,

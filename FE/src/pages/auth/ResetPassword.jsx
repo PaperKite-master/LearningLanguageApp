@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import CustomLockIcon from '../../components/CustomLockIcon';
-import BackgroundLayer from '../../components/BackgroundLayer';
-import LeftColumn from '../../components/LeftColumn';
+import { ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import authApi from '../../api/authApi';
+import Header from '../../components/Header';
+import computer from '../../assets/computer.png';
+import './Auth.css';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -13,6 +13,8 @@ const ResetPassword = () => {
   const [status, setStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
   const [errorMessage, setErrorMessage] = useState('');
   const [token, setToken] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     // Supabase usually sends the access token in the URL hash like #access_token=xyz&type=recovery
@@ -70,68 +72,100 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="app-container">
-      <BackgroundLayer />
-      <main className="main-content">
-        <LeftColumn />
-        <div className="right-column">
-          <div className="login-form-container">
-            <Link to="/login" className="back-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#fff', textDecoration: 'none', opacity: 0.7, marginBottom: '20px' }}>
+    <div className="auth-page-container">
+      <Header hideActions />
+      
+      <main className="auth-main-content">
+        {/* Left Column - Illustration */}
+        <div className="auth-left-column">
+          <img 
+            src={computer} 
+            alt="HiNa Digital Learning" 
+            className="auth-illustration" 
+          />
+        </div>
+        
+        {/* Right Column - Form */}
+        <div className="auth-right-column">
+          <div className="auth-form-container">
+            <Link to="/login" className="auth-forgot-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '30px', color: '#6b7280', textDecoration: 'none' }}>
               <ArrowLeft size={16} /> Về đăng nhập
             </Link>
             
-            <h1 className="login-heading">ĐẶT LẠI MẬT KHẨU</h1>
+            <h1 className="auth-heading">ĐẶT LẠI MẬT KHẨU</h1>
             
-            <p className="login-desc">
+            <div className="auth-desc">
               Vui lòng nhập mật khẩu mới của bạn bên dưới.
-            </p>
+            </div>
             
             {status === 'success' ? (
-              <div className="success-message" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '15px', borderRadius: '12px', marginTop: '20px', border: '1px solid rgba(16, 185, 129, 0.3)', textAlign: 'center' }}>
+              <div style={{ background: '#ecfdf5', color: '#10b981', padding: '15px', borderRadius: '12px', marginTop: '20px', border: '1px solid #a7f3d0', textAlign: 'center' }}>
                 <h3 style={{ margin: '0 0 10px 0' }}>Đổi mật khẩu thành công!</h3>
                 <p style={{ margin: 0, fontSize: '14px', opacity: 0.8 }}>Hệ thống sẽ chuyển hướng về trang Đăng nhập trong giây lát...</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ marginTop: '30px' }}>
-                <div className="input-group">
-                  <CustomLockIcon className="input-icon" size={20} />
-                  <input 
-                    type="password" 
-                    name="newPassword"
-                    value={passwords.newPassword}
-                    onChange={handleChange}
-                    className="styled-input pill-element" 
-                    placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" 
-                    required
-                    disabled={!token || status === 'loading'}
-                  />
+                <div className="auth-input-group">
+                  <label className="auth-input-label">Mật khẩu mới</label>
+                  <div className="auth-input-wrapper">
+                    <Lock className="auth-input-icon" size={20} />
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      name="newPassword"
+                      value={passwords.newPassword}
+                      onChange={handleChange}
+                      className="auth-input" 
+                      placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" 
+                      required
+                      disabled={!token || status === 'loading'}
+                    />
+                    <button 
+                      type="button" 
+                      className="auth-password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex="-1"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
                 
-                <div className="input-group">
-                  <CustomLockIcon className="input-icon" size={20} />
-                  <input 
-                    type="password" 
-                    name="confirmPassword"
-                    value={passwords.confirmPassword}
-                    onChange={handleChange}
-                    className="styled-input pill-element" 
-                    placeholder="Xác nhận mật khẩu mới" 
-                    required
-                    disabled={!token || status === 'loading'}
-                  />
+                <div className="auth-input-group">
+                  <label className="auth-input-label">Xác nhận mật khẩu mới</label>
+                  <div className="auth-input-wrapper">
+                    <Lock className="auth-input-icon" size={20} />
+                    <input 
+                      type={showConfirmPassword ? "text" : "password"} 
+                      name="confirmPassword"
+                      value={passwords.confirmPassword}
+                      onChange={handleChange}
+                      className="auth-input" 
+                      placeholder="Xác nhận mật khẩu mới" 
+                      required
+                      disabled={!token || status === 'loading'}
+                    />
+                    <button 
+                      type="button" 
+                      className="auth-password-toggle"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      tabIndex="-1"
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
                 
                 {status === 'error' && (
-                  <div className="error-message" style={{ color: '#ef4444', fontSize: '14px', marginTop: '10px', marginBottom: '10px' }}>
+                  <div style={{ color: '#ef4444', fontSize: '14px', marginTop: '10px', marginBottom: '10px' }}>
                     {errorMessage}
                   </div>
                 )}
                 
                 <button 
                   type="submit" 
-                  className="login-btn pill-element"
+                  className="auth-submit-btn"
                   disabled={!token || status === 'loading'}
-                  style={{ marginTop: status === 'error' ? '10px' : '25px', opacity: (!token || status === 'loading') ? 0.7 : 1, whiteSpace: 'nowrap' }}
+                  style={{ marginTop: status === 'error' ? '10px' : '15px', opacity: (!token || status === 'loading') ? 0.7 : 1 }}
                 >
                   {status === 'loading' ? 'Đang xử lý...' : 'Xác nhận thay đổi'}
                 </button>

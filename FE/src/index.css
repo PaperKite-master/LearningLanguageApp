@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --font-main: 'Be Vietnam Pro', sans-serif;
+  --font-main: 'Inter', sans-serif;
   --bg-color-dark: #1e114f; /* Deep purple background */
   --bg-gradient: linear-gradient(135deg, #211252 0%, #15093a 100%);
   --white: #ffffff;
@@ -2198,22 +2198,23 @@ Actually, I'll stick to sliding it right! */
 
 .admin-search-input {
   width: 100%;
-  background-color: #111424;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 30px;
   padding: 14px 20px 14px 50px;
-  color: var(--white);
+  color: #1e293b;
   font-size: 0.95rem;
   transition: all 0.3s;
 }
 
 .admin-search-input::placeholder {
-  color: #6b7280; /* match placeholder color */
+  color: #94a3b8;
 }
 
 .admin-search-input:focus {
   outline: none;
-  border-color: rgba(0, 229, 255, 0.5);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .admin-table-wrapper {
@@ -2439,7 +2440,7 @@ Actually, I'll stick to sliding it right! */
 }
 
 /* ========================================================================= */
-/* ADMIN MODAL SYSTEM STYLES                                                 */
+/* ADMIN MODAL SYSTEM STYLES (Light Theme)                                   */
 /* ========================================================================= */
 
 .admin-modal-overlay {
@@ -2448,7 +2449,7 @@ Actually, I'll stick to sliding it right! */
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
@@ -2458,14 +2459,14 @@ Actually, I'll stick to sliding it right! */
 }
 
 .admin-modal-box {
-  background-color: #1a1d2e;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 20px;
   width: 100%;
-  max-width: 600px;
-  padding: 30px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease-out forwards;
+  max-width: 500px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .delete-confirm-box {
@@ -2484,25 +2485,33 @@ Actually, I'll stick to sliding it right! */
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .modal-header h2 {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--white);
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
 }
 
 .modal-close-btn {
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: #94a3b8;
   cursor: pointer;
-  transition: color 0.2s;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-right: -8px;
 }
 
 .modal-close-btn:hover {
-  color: var(--white);
+  background-color: #f1f5f9;
+  color: #1e293b;
 }
 
 .form-group-row {
@@ -2511,8 +2520,13 @@ Actually, I'll stick to sliding it right! */
   gap: 20px;
 }
 
+.modal-body-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .form-group {
-  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -2520,30 +2534,55 @@ Actually, I'll stick to sliding it right! */
 }
 
 .form-group label {
-  color: #9ca3af;
+  color: #475569;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .modal-input {
   width: 100%;
-  background-color: #111424;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
   padding: 12px 16px;
-  color: var(--white);
-  font-size: 0.95rem;
-  transition: all 0.3s;
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.modal-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
 }
 
 .modal-input:focus {
   outline: none;
-  border-color: rgba(139, 92, 246, 0.8); /* Purple focus matching Admin identity */
+  background-color: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+select.modal-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+select.modal-input:focus {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+select.modal-input option {
+  background-color: #ffffff;
+  color: #1e293b;
 }
 
 .disabled-input {
-  background-color: rgba(0, 0, 0, 0.3);
-  color: #6b7280;
+  background-color: #f1f5f9;
+  color: #94a3b8;
   cursor: not-allowed;
 }
 
@@ -2557,18 +2596,19 @@ Actually, I'll stick to sliding it right! */
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--white);
+  color: #1e293b;
   font-size: 0.95rem;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .delete-confirm-box .modal-footer {
@@ -2577,162 +2617,43 @@ Actually, I'll stick to sliding it right! */
 
 .modal-btn-cancel {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--white);
-  padding: 12px 24px;
-  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  padding: 10px 20px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .modal-btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background-color: #f1f5f9;
+  color: #1e293b;
 }
 
 .modal-btn-danger {
   background-color: #ef4444;
   border: none;
-  color: var(--white);
-  padding: 12px 24px;
-  border-radius: 8px;
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
   transition: all 0.2s;
 }
 
 .modal-btn-danger:hover {
   background-color: #dc2626;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 10px -1px rgba(239, 68, 68, 0.3);
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ========================================================================= */
-/* TIMELINE DRAG & DROP STYLES                                               */
-/* ========================================================================= */
-
-.timeline-dnd-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  width: 100%;
-}
-
-.timeline-path-block {
-  background-color: #151828;
-  border-radius: 12px;
-  padding: 24px;
-}
-
-.timeline-path-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.timeline-path-title {
-  color: var(--white);
-  font-size: 1.1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.timeline-path-count {
-  color: #6b7280;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.timeline-droppable-area {
-  display: flex;
-  flex-direction: column;
-  min-height: 50px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.timeline-droppable-area.dragging-over {
-  background-color: rgba(255, 255, 255, 0.02);
-}
-
-.timeline-draggable-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #1c2035;
-  padding: 16px 20px;
-  border-radius: 30px; /* Deep rounded pill shape */
-  border: 1px solid transparent;
-  margin-bottom: 12px;
-  /* DND Kit Warning: Never use "all" for transition, as it intercepts the inline JS transforms and ruins dragging animation */
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.timeline-draggable-item:last-child {
-  margin-bottom: 0;
-}
-
-.timeline-draggable-item:hover {
-  background-color: #232741;
-}
-
-.timeline-draggable-item.is-dragging {
-  background-color: #2a2f4c;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(139, 92, 246, 0.4);
-}
-
-.timeline-item-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.timeline-drag-handle {
-  cursor: grab;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.timeline-drag-handle:hover {
-  opacity: 1;
-  color: var(--white);
-}
-
-.timeline-drag-handle:active {
-  cursor: grabbing;
-}
-
-.timeline-item-content {
-  color: var(--white);
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.timeline-item-actions {
-  display: flex;
-  gap: 8px;
-  opacity: 0;
-  transform: translateX(10px);
-  transition: all 0.2s ease;
-}
-
-.timeline-draggable-item:hover .timeline-item-actions {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* ========================================================================= */
 /* ADMIN SETTINGS STYLES                                                     */
 /* ========================================================================= */
 
@@ -3054,3 +2975,21 @@ Actually, I'll stick to sliding it right! */
 
 .connect-success { margin-bottom: 24px; text-align: center; padding: 24px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: rgba(16,185,129,0.1); border-radius: 16px; border: 2px dashed #10b981; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .connect-success span { color: #10b981; font-size: 1.2rem; font-weight: bold; }
+.admin-btn-secondary {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.admin-btn-secondary:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}

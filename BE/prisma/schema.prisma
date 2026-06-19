@@ -448,6 +448,7 @@ model users {
   webauthn_challenges         webauthn_challenges[]
   webauthn_credentials        webauthn_credentials[]
   flashcards                  flashcards[]
+  payment_transactions        payment_transactions[]
   profiles                    profiles?
   quiz_results                quiz_results[]
   user_activity_log           user_activity_log[]
@@ -511,8 +512,20 @@ model flashcards {
   @@schema("public")
 }
 
+model flashcard_decks {
+  id               String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name             String
+  description      String?
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  admin_flashcards admin_flashcards[]
+
+  @@schema("public")
+}
+
 model admin_flashcards {
   id            String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  deck_id       String?         @db.Uuid
   level         FlashcardLevel
   japanese_word String
   pronunciation String
@@ -520,6 +533,7 @@ model admin_flashcards {
   status        FlashcardStatus @default(DRAFT)
   created_at    DateTime?       @default(now()) @db.Timestamptz(6)
   updated_at    DateTime?       @default(now()) @db.Timestamptz(6)
+  flashcard_decks flashcard_decks? @relation(fields: [deck_id], references: [id], onDelete: Cascade)
 
   @@schema("public")
 }
@@ -576,6 +590,11 @@ model profiles {
   id                  String    @id @db.Uuid
   full_name           String?
   avatar_url          String?
+  visibility          Boolean?  @default(true)
+  phone               String?
+  address             String?
+  bio                 String?
+  preferred_contact   String?   @default("Email")
   role                String?   @default("USER")
   total_exp           Int?      @default(0)
   updated_at          DateTime? @default(now()) @db.Timestamptz(6)
@@ -590,12 +609,14 @@ model profiles {
 model questions {
   id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   quiz_id       String?  @db.Uuid
+  vocabulary_id String?  @db.Uuid
   question_text String
   question_type String?
   options       Json?
   explanation   String?
   order         Int?     @default(0)
   quizzes       quizzes? @relation(fields: [quiz_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  vocabulary    vocabulary? @relation(fields: [vocabulary_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -621,6 +642,8 @@ model quizzes {
   title         String
   type          String?
   passing_score Int?           @default(50)
+  time_limit    Int?           @default(0)
+  tags          String[]       @default([])
   created_at    DateTime?      @default(now()) @db.Timestamptz(6)
   level         QuizLevel?
   status        LessonStatus   @default(draft)
@@ -697,10 +720,12 @@ model vocabulary {
   lesson_id        String?  @db.Uuid
   kanji            String?
   hiragana         String
+  romaji           String?
   meaning          String
   example_sentence String?
   example_meaning  String?
   lessons          lessons? @relation(fields: [lesson_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  questions        questions[]
 
   @@schema("public")
 }
@@ -711,6 +736,35 @@ model system_settings {
   email_reminder_enabled Boolean   @default(true)
   updated_at             DateTime? @default(now()) @db.Timestamptz(6)
 
+  @@schema("public")
+}
+
+model otp_codes {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email      String
+  code       String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  expires_at DateTime @db.Timestamptz(6)
+  used       Boolean  @default(false)
+
+  @@index([email])
+  @@schema("public")
+}
+
+model payment_transactions {
+  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id        String?  @db.Uuid
+  order_id       String   @unique
+  amount         Int
+  order_info     String
+  bank_code      String?
+  transaction_no String?
+  status         String   @default("PENDING")
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
+  users          users?   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id])
   @@schema("public")
 }
 
@@ -734,6 +788,7 @@ enum FlashcardStatus {
 enum LessonStatus {
   draft
   published
+  archived
 
   @@schema("public")
 }
@@ -817,3 +872,5 @@ enum one_time_token_type {
 
   @@schema("auth")
 }
+
+

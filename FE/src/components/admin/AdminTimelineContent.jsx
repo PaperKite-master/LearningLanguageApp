@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical, Edit2, Trash2, X } from 'lucide-react';
 import timelineApi from '../../api/timelineApi';
 import lessonApi from '../../api/lessonApi';
+import './AdminTimelineContent.css';
 
 const AdminTimelineContent = () => {
   const [paths, setPaths] = useState([]);
@@ -258,69 +259,45 @@ const AdminTimelineContent = () => {
   return (
     <div className="admin-content-area">
       <div className="admin-header flex-header">
-        <h1 className="admin-heading">QUẢN LÝ TIMELINE</h1>
+        <h1 className="admin-heading" style={{ color: '#111827', fontSize: '28px', fontWeight: 700, margin: 0 }}>Timelines</h1>
         <button className="admin-btn-primary" onClick={() => {
           setPathModalMode('add');
           setPathFormData({ id: '', title: '', level: 'N5' });
           setIsPathModalOpen(true);
         }}>
-          + Thêm lộ trình mới
+          + Create New Timeline
         </button>
       </div>
 
       {isLoading ? (
-        <div style={{ color: '#fff', padding: '2rem' }}>Đang tải dữ liệu...</div>
+        <div style={{ color: '#1e293b', padding: '2rem', textAlign: 'center', fontWeight: '500' }}>Đang tải dữ liệu...</div>
       ) : (
         <div className="timeline-dnd-container">
           <DragDropContext onDragEnd={onDragEnd}>
             {paths.map((path) => (
               <div key={path.id} className="timeline-path-block">
                 <div className="timeline-path-header">
-                  <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+                  <div style={{display: 'flex', alignItems: 'center', gap: '16px', flex: 1, minWidth: 0}}>
                     <span className="role-badge role-level">{path.level}</span>
                     <span className="timeline-path-title">{path.title}</span>
                     <span className="timeline-path-count">{path.items.length} bài</span>
                   </div>
-                  <div style={{display: 'flex', gap: '8px'}}>
+                  <div style={{display: 'flex', gap: '8px', flexShrink: 0}}>
                     <button 
-                      style={{
-                        background: 'rgba(255,255,255,0.05)', 
-                        border: '1px solid rgba(255,255,255,0.1)', 
-                        color: 'var(--white)', 
-                        padding: '6px 12px', 
-                        borderRadius: '6px', 
-                        cursor: 'pointer',
-                        fontSize: '0.85rem'
-                      }}
+                      className="timeline-header-btn btn-add-lesson"
                       onClick={() => handleOpenAddItem(path.id)}
                     >
-                      + Thêm bài học
+                      + Add Lesson
                     </button>
                     <button 
-                      style={{
-                        background: 'rgba(59, 130, 246, 0.1)', 
-                        border: '1px solid rgba(59, 130, 246, 0.3)', 
-                        color: '#3b82f6', 
-                        padding: '6px 12px', 
-                        borderRadius: '6px', 
-                        cursor: 'pointer',
-                        fontSize: '0.85rem'
-                      }}
+                      className="timeline-header-btn btn-edit-path"
                       title="Chỉnh sửa lộ trình"
                       onClick={() => handleOpenEditPath(path)}
                     >
                       Sửa
                     </button>
                     <button 
-                      style={{
-                        background: 'rgba(239,68,68,0.1)', 
-                        border: '1px solid rgba(239,68,68,0.3)', 
-                        color: '#ef4444', 
-                        padding: '6px 12px', 
-                        borderRadius: '6px', 
-                        cursor: 'pointer',
-                        fontSize: '0.85rem'
-                      }}
+                      className="timeline-header-btn btn-delete-path"
                       title="Xóa lộ trình"
                       onClick={() => handleDeletePath(path.id)}
                     >
@@ -379,7 +356,7 @@ const AdminTimelineContent = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal-box">
             <div className="modal-header">
-              <h2>{pathModalMode === 'add' ? 'Thêm Lộ Trình Mới' : 'Chỉnh Sửa Lộ Trình'}</h2>
+              <h2>{pathModalMode === 'add' ? 'Create New Timeline' : 'Edit Timeline'}</h2>
               <button className="modal-close-btn" onClick={() => setIsPathModalOpen(false)}>
                 <X size={24} />
               </button>
@@ -427,7 +404,7 @@ const AdminTimelineContent = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal-box">
             <div className="modal-header">
-              <h2>{itemModalMode === 'add' ? 'Thêm Bài Học Mới' : 'Chỉnh Sửa Bài Học'}</h2>
+              <h2>{itemModalMode === 'add' ? 'Create New Lesson' : 'Edit Lesson'}</h2>
               <button className="modal-close-btn" onClick={() => setIsItemModalOpen(false)}>
                 <X size={24} />
               </button>

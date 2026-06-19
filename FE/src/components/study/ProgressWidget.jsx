@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Target, Rocket } from 'lucide-react';
 
 import lessonApi from '../../api/lessonApi';
+import userApi from '../../api/userApi';
 
 const ProgressWidget = () => {
   const [progressData, setProgressData] = useState({
     overallPercentage: 0,
-    streak: 34,
+    streak: 0,
     achievements: { current: 0, total: 0 }
   });
 
@@ -39,9 +40,23 @@ const ProgressWidget = () => {
 
         const overall = Math.round(totalPercentageSum / totalLessons);
 
+        // Fetch streak from BE
+        let streakFromBE = 0;
+        try {
+          const statsRes = await userApi.getDashboardStats();
+          if (statsRes) {
+            const payload = statsRes.data && statsRes.data.stats ? statsRes.data : statsRes;
+            const statsObj = payload.stats || {};
+            streakFromBE = statsObj.streak || 0;
+          }
+        } catch (e) {
+          console.error("Failed to fetch streak:", e);
+        }
+
         setProgressData(prev => ({
           ...prev,
           overallPercentage: overall,
+          streak: streakFromBE,
           achievements: { current: fullyCompletedCount, total: totalLessons }
         }));
       } catch (error) {

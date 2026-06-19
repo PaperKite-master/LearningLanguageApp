@@ -17,6 +17,12 @@ const userApi = {
     const response = await axiosClient.put(url, { role: newRole });
     return response.data;
   },
+
+  getProgressDetails: async (id) => {
+    const url = `/admin/users/${id}/progress-details`;
+    const response = await axiosClient.get(url);
+    return response.data.data;
+  },
   
   updateStatus: async (id, newStatus) => {
     const url = `/admin/users/${id}/status`;
@@ -79,6 +85,18 @@ const userApi = {
   sendTestNotification: async () => {
     const url = '/notifications/send-test';
     const response = await axiosClient.post(url);
+    return response.data;
+  },
+
+  changePassword: async (payload) => {
+    const url = '/users/me/change-password';
+    const response = await axiosClient.post(url, payload);
+    return response.data;
+  },
+
+  deleteAccount: async () => {
+    const url = '/users/me/account';
+    const response = await axiosClient.delete(url);
     return response.data;
   }
 };

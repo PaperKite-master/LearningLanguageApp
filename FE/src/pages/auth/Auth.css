@@ -1,0 +1,336 @@
+/* CSS for Auth Pages (Login, Signup, Forgot Password) */
+
+.auth-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--lp-white, #FFFFFF);
+
+  color: var(--lp-text-dark, #1F174D);
+}
+
+.auth-main-content {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* --- Left Column --- */
+.auth-left-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  position: relative;
+  background-color: transparent;
+  overflow: hidden;
+}
+
+/* Add some subtle decorative shapes to left column */
+.auth-left-column::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(221, 118, 247, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.auth-left-column::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.auth-illustration {
+  max-width: 100%;
+  max-height: 80vh;
+  z-index: 2;
+  /* Add subtle floating animation */
+  animation: float 6s ease-in-out infinite;
+}
+
+/* --- Right Column (Form) --- */
+.auth-right-column {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  background-color: var(--lp-white, #FFFFFF);
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 480px;
+}
+
+.auth-heading {
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #DD76F7, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-desc {
+  text-align: center;
+  color: var(--lp-text-muted, #6b7280);
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+/* --- Social Buttons --- */
+.auth-social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.auth-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  position: relative;
+}
+
+.auth-social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.auth-social-btn .social-icon {
+  position: absolute;
+  left: 20px;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
+
+.auth-social-btn.google {
+  background-color: #0ea5e9; /* Sky blue */
+}
+
+.auth-social-btn.facebook {
+  background-color: #1d4ed8; /* Dark blue */
+}
+
+.auth-social-btn.apple {
+  background-color: #000000; /* Black */
+}
+
+/* --- Divider --- */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.auth-divider:not(:empty)::before {
+  margin-right: 15px;
+}
+
+.auth-divider:not(:empty)::after {
+  margin-left: 15px;
+}
+
+.auth-divider-text {
+  color: var(--lp-text-muted, #6b7280);
+  font-size: 0.9rem;
+}
+
+/* --- Form Inputs --- */
+.auth-input-group {
+  margin-bottom: 20px;
+}
+
+.auth-input-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: var(--lp-text-dark, #1F174D);
+}
+
+.auth-input-wrapper {
+  position: relative;
+}
+
+.auth-input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--lp-text-muted, #6b7280);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--lp-text-dark, #1F174D);
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--lp-light-purple, #DD76F7);
+  box-shadow: 0 0 0 3px rgba(221, 118, 247, 0.1);
+}
+
+.auth-input::placeholder {
+  color: #cbd5e1;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--lp-text-muted, #6b7280);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+
+/* --- Form Actions --- */
+.auth-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+}
+
+.auth-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--lp-text-dark, #1F174D);
+}
+
+.auth-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--lp-primary-purple, #371089);
+}
+
+.auth-forgot-link {
+  color: #ef4444; /* Red color for forgot password */
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* --- Submit Button --- */
+.auth-submit-btn {
+  width: 100%;
+  background-color: var(--lp-footer-purple, #2E156F);
+  color: white;
+  padding: 16px;
+  border-radius: 30px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 24px;
+}
+
+.auth-submit-btn:hover {
+  background-color: var(--lp-primary-purple, #371089);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(46, 21, 111, 0.3);
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* --- Footer Text --- */
+.auth-footer-text {
+  text-align: center;
+  color: var(--lp-text-dark, #1F174D);
+  font-size: 0.95rem;
+}
+
+.auth-footer-link {
+  color: #0ea5e9; /* Sky blue */
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-footer-link:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .auth-main-content {
+    flex-direction: column;
+  }
+  
+  .auth-left-column {
+    display: none; /* Hide illustration on small screens */
+  }
+  
+  .auth-right-column {
+    padding: 20px;
+  }
+}
+
+.auth-page-container .main-header {
+  background-color: var(--lp-primary-purple, #371089);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 20;
+}

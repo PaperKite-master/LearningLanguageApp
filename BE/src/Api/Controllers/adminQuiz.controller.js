@@ -8,18 +8,24 @@ export const adminQuizController = {
             select: { questions: true },
           },
           quiz_results: {
-            select: { score: true },
+            select: { score: true, is_passed: true },
           },
         },
         orderBy: { created_at: 'desc' },
       });
 
-      // Map data to calculate Avg Score
+      // Map data to calculate Avg Score, Pass Rate, and Attempts
       const mappedData = quizzes.map((q) => {
         let avg_score = 0;
+        let pass_rate = 0;
+        let attempts = 0;
+
         if (q.quiz_results && q.quiz_results.length > 0) {
+          attempts = q.quiz_results.length;
           const totalScore = q.quiz_results.reduce((acc, curr) => acc + curr.score, 0);
-          avg_score = Math.round(totalScore / q.quiz_results.length);
+          const passedCount = q.quiz_results.filter(r => r.is_passed).length;
+          avg_score = Math.round(totalScore / attempts);
+          pass_rate = Math.round((passedCount / attempts) * 100);
         }
 
         return {
@@ -31,9 +37,13 @@ export const adminQuizController = {
           level: q.level,
           lesson_id: q.lesson_id,
           timeline_id: q.timeline_id,
+          time_limit: q.time_limit,
+          tags: q.tags || [],
           created_at: q.created_at,
           question_count: q._count.questions,
           avg_score: avg_score,
+          pass_rate: pass_rate,
+          attempts: attempts,
         };
       });
 

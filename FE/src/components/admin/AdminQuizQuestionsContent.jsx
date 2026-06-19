@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, Shuffle, X } from 'lucide-react';
 import adminQuizApi from '../../api/adminQuizApi';
+import './AdminExams.css';
 
 const AdminQuizQuestionsContent = () => {
   const { id: quizId } = useParams();
@@ -13,6 +14,8 @@ const AdminQuizQuestionsContent = () => {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  const [activeTab, setActiveTab] = useState('multiple_choice');
+
   const [formData, setFormData] = useState({
     question_text: '',
     explanation: '',
@@ -21,6 +24,11 @@ const AdminQuizQuestionsContent = () => {
       { text: '', isCorrect: false },
       { text: '', isCorrect: false },
       { text: '', isCorrect: false },
+    ],
+    fillBlankAnswer: '',
+    matchingPairs: [
+      { left: '', right: '' },
+      { left: '', right: '' }
     ]
   });
 
@@ -42,16 +50,36 @@ const AdminQuizQuestionsContent = () => {
 
   const handleOpenModal = (question = null) => {
     if (question) {
+      const qType = question.question_type || 'multiple_choice';
       setEditingQuestion(question);
+      setActiveTab(qType);
+      
+      let fillAns = '';
+      let matchPairs = [
+        { left: '', right: '' },
+        { left: '', right: '' }
+      ];
+      let mcOptions = [
+        { text: '', isCorrect: true },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false }
+      ];
+
+      if (qType === 'multiple_choice' && question.options) {
+        mcOptions = [...question.options];
+      } else if (qType === 'typing' && question.options) {
+        fillAns = question.options[0]?.correctAnswer || '';
+      } else if (qType === 'matching' && question.options) {
+        matchPairs = [...question.options];
+      }
+
       setFormData({
         question_text: question.question_text || '',
         explanation: question.explanation || '',
-        options: question.options || [
-          { text: '', isCorrect: true },
-          { text: '', isCorrect: false },
-          { text: '', isCorrect: false },
-          { text: '', isCorrect: false },
-        ]
+        options: mcOptions,
+        fillBlankAnswer: fillAns,
+        matchingPairs: matchPairs
       });
     } else {
       setEditingQuestion(null);
@@ -63,6 +91,11 @@ const AdminQuizQuestionsContent = () => {
           { text: '', isCorrect: false },
           { text: '', isCorrect: false },
           { text: '', isCorrect: false },
+        ],
+        fillBlankAnswer: '',
+        matchingPairs: [
+          { left: '', right: '' },
+          { left: '', right: '' }
         ]
       });
     }
@@ -88,25 +121,60 @@ const AdminQuizQuestionsContent = () => {
     setFormData({ ...formData, options: newOptions });
   };
 
-  const handleSave = async () => {
+  const handleMatchingChange = (index, side, value) => {
+    const newPairs = [...formData.matchingPairs];
+    newPairs[index][side] = value;
+    setFormData({ ...formData, matchingPairs: newPairs });
+  };
+
+  const addMatchingPair = (e) => {
+    e.preventDefault();
+    setFormData({ ...formData, matchingPairs: [...formData.matchingPairs, { left: '', right: '' }] });
+  };
+
+  const removeMatchingPair = (index) => {
+    const newPairs = formData.matchingPairs.filter((_, i) => i !== index);
+    setFormData({ ...formData, matchingPairs: newPairs });
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
     if (!formData.question_text.trim()) {
       alert("Vui lòng nhập nội dung câu hỏi.");
       return;
     }
     
-    const validOptions = formData.options.every(opt => opt.text.trim() !== '');
-    if (!validOptions) {
-      alert("Vui lòng nhập đầy đủ 4 đáp án.");
-      return;
+    let optionsToSave = [];
+
+    if (activeTab === 'multiple_choice') {
+      const validOptions = formData.options.every(opt => opt.text.trim() !== '');
+      if (!validOptions) {
+        alert("Vui lòng nhập đầy đủ 4 đáp án.");
+        return;
+      }
+      optionsToSave = formData.options;
+    } else if (activeTab === 'typing') {
+      if (!formData.fillBlankAnswer.trim()) {
+        alert("Vui lòng nhập đáp án đúng.");
+        return;
+      }
+      optionsToSave = [{ correctAnswer: formData.fillBlankAnswer.trim() }];
+    } else if (activeTab === 'matching') {
+      const validPairs = formData.matchingPairs.filter(p => p.left.trim() && p.right.trim());
+      if (validPairs.length < 2) {
+        alert("Vui lòng nhập ít nhất 2 cặp từ hợp lệ.");
+        return;
+      }
+      optionsToSave = validPairs;
     }
 
     try {
       const payload = {
         question_text: formData.question_text,
-        question_type: 'multiple_choice',
-        options: formData.options,
+        question_type: activeTab,
+        options: optionsToSave,
         explanation: formData.explanation,
-        order: questions.length + 1
+        order: editingQuestion ? editingQuestion.order : questions.length + 1
       };
 
       if (editingQuestion) {
@@ -134,153 +202,246 @@ const AdminQuizQuestionsContent = () => {
     }
   };
 
-  return (
-    <div className="admin-content-area">
-      <div className="admin-header flex-header" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <button 
-          className="admin-btn-secondary" 
-          onClick={() => navigate('/admin/tests')}
-          style={{ padding: '8px', display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer' }}
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className="admin-heading" style={{ margin: 0 }}>QUẢN LÝ CÂU HỎI</h1>
-        <div style={{ marginLeft: 'auto' }}>
-          <button className="admin-btn-primary" onClick={() => handleOpenModal()}>
-            + Thêm câu hỏi
-          </button>
+  const renderQuestionPreview = (q) => {
+    const qType = q.question_type || 'multiple_choice';
+    
+    if (qType === 'multiple_choice') {
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          {(q.options || []).map((opt, i) => (
+            <div key={i} style={{ 
+              padding: '12px 16px', 
+              background: opt.isCorrect ? '#f0fdf4' : '#f8fafc',
+              border: opt.isCorrect ? '1px solid #86efac' : '1px solid #e2e8f0',
+              borderRadius: '8px',
+              color: opt.isCorrect ? '#166534' : '#475569',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontWeight: 'bold' }}>{String.fromCharCode(65 + i)}.</span> {opt.text}
+            </div>
+          ))}
         </div>
+      );
+    } else if (qType === 'typing') {
+      const correctAns = q.options?.[0]?.correctAnswer || '';
+      return (
+        <div style={{ padding: '12px 16px', background: '#f0fdf4', border: '1px dashed #86efac', borderRadius: '8px', color: '#166534', fontSize: '14px' }}>
+          <span style={{ fontWeight: 'bold', marginRight: '8px' }}>ab</span> {correctAns}
+        </div>
+      );
+    } else if (qType === 'matching') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {(q.options || []).map((pair, i) => (
+            <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ flex: 1, padding: '12px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#475569', fontSize: '14px' }}>
+                {pair.left}
+              </div>
+              <Shuffle size={16} color="#94a3b8" />
+              <div style={{ flex: 1, padding: '12px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#475569', fontSize: '14px' }}>
+                {pair.right}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="admin-exams-page">
+      <div className="admin-question-list-header">
+        <button 
+          className="exam-modal-close" 
+          onClick={() => navigate('/admin/tests')}
+          style={{ width: '40px', height: '40px', background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className="admin-question-list-title">Quản lý câu hỏi</h1>
+        
+        <button className="btn-new-exam" onClick={() => handleOpenModal()} style={{ marginLeft: 'auto' }}>
+          <Plus size={18} /> Add Question
+        </button>
       </div>
 
-      <div className="admin-panel-container">
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {loading ? (
           <div className="no-data-msg">Đang tải câu hỏi...</div>
         ) : questions.length === 0 ? (
-          <div className="no-data-msg" style={{ padding: '40px 20px', textAlign: 'center' }}>
-            Chưa có câu hỏi nào trong bài kiểm tra này. Hãy tạo câu hỏi đầu tiên!
+          <div className="admin-question-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <p style={{ color: '#64748b', marginBottom: '16px' }}>Chưa có câu hỏi nào. Hãy tạo câu hỏi đầu tiên!</p>
+            <button className="btn-new-exam" onClick={() => handleOpenModal()} style={{ margin: '0 auto' }}>
+              <Plus size={18} /> Create Question
+            </button>
           </div>
         ) : (
-          <div className="questions-list" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {questions.map((q, index) => (
-              <div key={q.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                  <h3 style={{ margin: 0, color: '#00f2fe' }}>Câu {index + 1}: {q.question_text}</h3>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="icon-action-btn edit-btn" onClick={() => handleOpenModal(q)} title="Sửa">
-                      <Edit2 size={18} />
+          questions.map((q, index) => {
+            const typeLabels = {
+              'multiple_choice': 'Multiple choice',
+              'typing': 'Fill in the blank',
+              'matching': 'Matching'
+            };
+            
+            return (
+              <div className="admin-question-card" key={q.id}>
+                <div className="admin-question-card-header">
+                  <span className="admin-question-type-badge">{typeLabels[q.question_type || 'multiple_choice']}</span>
+                  <div className="admin-question-card-actions">
+                    <button onClick={() => handleOpenModal(q)} title="Edit">
+                      <Edit2 size={16} />
                     </button>
-                    <button className="icon-action-btn delete-btn" onClick={() => handleDelete(q.id)} title="Xóa">
-                      <Trash2 size={18} />
+                    <button className="delete" onClick={() => handleDelete(q.id)} title="Delete">
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  {(q.options || []).map((opt, i) => (
-                    <div 
-                      key={i} 
-                      style={{ 
-                        padding: '10px 15px', 
-                        background: opt.isCorrect ? 'rgba(0, 255, 102, 0.1)' : 'rgba(255,255,255,0.05)',
-                        border: opt.isCorrect ? '1px solid #00ff66' : '1px solid transparent',
-                        borderRadius: '8px',
-                        color: opt.isCorrect ? '#00ff66' : '#fff'
-                      }}
-                    >
-                      {String.fromCharCode(65 + i)}. {opt.text}
-                    </div>
-                  ))}
+                <div className="admin-question-text">
+                  {index + 1}. {q.question_text}
                 </div>
-
-                {q.explanation && (
-                  <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', borderLeft: '4px solid #0ea5e9', color: '#9ca3af' }}>
-                    <strong>Giải thích:</strong> {q.explanation}
-                  </div>
-                )}
+                
+                {renderQuestionPreview(q)}
               </div>
-            ))}
-          </div>
+            );
+          })
         )}
       </div>
 
-      {/* Modal */}
+      {/* QUESTION BUILDER MODAL */}
       {showModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-        }}>
-          <div style={{
-            background: '#1a1f2e', padding: '30px', borderRadius: '16px',
-            width: '90%', maxWidth: '600px', border: '1px solid rgba(255,255,255,0.1)',
-            maxHeight: '90vh', overflowY: 'auto'
-          }}>
-            <h2 style={{ margin: '0 0 20px 0', color: '#fff' }}>
-              {editingQuestion ? 'Sửa câu hỏi' : 'Thêm câu hỏi mới'}
-            </h2>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', color: '#9ca3af', marginBottom: '8px' }}>Nội dung câu hỏi *</label>
-              <textarea 
-                value={formData.question_text}
-                onChange={(e) => setFormData({...formData, question_text: e.target.value})}
-                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', minHeight: '80px', resize: 'vertical' }}
-                placeholder="Nhập nội dung câu hỏi..."
-              />
+        <div className="exam-modal-overlay">
+          <div className="exam-modal-box" style={{ maxWidth: '700px' }}>
+            <div className="exam-modal-header" style={{ padding: '24px 32px' }}>
+              <h2>{editingQuestion ? 'Edit Question' : 'Create Question'}</h2>
+              <button className="exam-modal-close" onClick={handleCloseModal}>
+                <X size={20} />
+              </button>
             </div>
+            
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div className="exam-modal-body" style={{ padding: '24px 32px' }}>
+                
+                <div className="qb-tabs">
+                  <button 
+                    type="button"
+                    className={`qb-tab-btn ${activeTab === 'multiple_choice' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('multiple_choice')}
+                  >
+                    Multiple choice
+                  </button>
+                  <button 
+                    type="button"
+                    className={`qb-tab-btn ${activeTab === 'typing' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('typing')}
+                  >
+                    Fill in the blank
+                  </button>
+                  <button 
+                    type="button"
+                    className={`qb-tab-btn ${activeTab === 'matching' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('matching')}
+                  >
+                    Matching
+                  </button>
+                </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', color: '#9ca3af', marginBottom: '8px' }}>Các đáp án (Chọn đáp án đúng) *</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {formData.options.map((opt, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <input 
-                      type="radio" 
-                      name="correct_option"
-                      checked={opt.isCorrect}
-                      onChange={() => handleSetCorrect(i)}
-                      style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                    />
-                    <span style={{ color: '#fff', width: '30px' }}>{String.fromCharCode(65 + i)}.</span>
+                <h3 className="qb-section-title">Question</h3>
+                <textarea 
+                  className="qb-textarea"
+                  value={formData.question_text}
+                  onChange={(e) => setFormData({...formData, question_text: e.target.value})}
+                  placeholder={
+                    activeTab === 'typing' ? 'Use ___ to indicate the blank space.' : 'Enter your question here...'
+                  }
+                  required
+                />
+
+                <h3 className="qb-section-title">Answer</h3>
+
+                {activeTab === 'multiple_choice' && (
+                  <div className="qb-options-grid">
+                    {formData.options.map((opt, i) => (
+                      <div className="qb-option-wrapper" key={i}>
+                        <input 
+                          type="radio" 
+                          name="qb-correct"
+                          className="qb-option-radio"
+                          checked={opt.isCorrect}
+                          onChange={() => handleSetCorrect(i)}
+                        />
+                        <span className="qb-option-label">Option {String.fromCharCode(65 + i)}</span>
+                        <input 
+                          type="text" 
+                          className="qb-option-input"
+                          value={opt.text}
+                          onChange={(e) => handleOptionChange(i, e.target.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === 'typing' && (
+                  <div className="qb-fill-blank-wrapper">
+                    <span className="qb-ab-icon">ab</span>
                     <input 
                       type="text" 
-                      value={opt.text}
-                      onChange={(e) => handleOptionChange(i, e.target.value)}
-                      style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: opt.isCorrect ? '1px solid #00ff66' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
-                      placeholder={`Đáp án ${String.fromCharCode(65 + i)}`}
+                      className="qb-fill-blank-input"
+                      value={formData.fillBlankAnswer}
+                      onChange={(e) => setFormData({...formData, fillBlankAnswer: e.target.value})}
+                      placeholder="Example: 来ます"
                     />
                   </div>
-                ))}
+                )}
+
+                {activeTab === 'matching' && (
+                  <div>
+                    {formData.matchingPairs.map((pair, i) => (
+                      <div className="qb-matching-pair" key={i}>
+                        <input 
+                          type="text" 
+                          className="qb-match-input"
+                          placeholder="Left Side"
+                          value={pair.left}
+                          onChange={(e) => handleMatchingChange(i, 'left', e.target.value)}
+                        />
+                        <div className="qb-shuffle-icon">
+                          <Shuffle size={18} />
+                        </div>
+                        <input 
+                          type="text" 
+                          className="qb-match-input"
+                          placeholder="Right Side"
+                          value={pair.right}
+                          onChange={(e) => handleMatchingChange(i, 'right', e.target.value)}
+                        />
+                        <button type="button" className="qb-delete-btn" onClick={() => removeMatchingPair(i)}>
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" className="qb-add-pair-btn" onClick={addMatchingPair}>
+                      <Plus size={16} /> Add New Pair
+                    </button>
+                  </div>
+                )}
+
               </div>
-            </div>
 
-            <div style={{ marginBottom: '30px' }}>
-              <label style={{ display: 'block', color: '#9ca3af', marginBottom: '8px' }}>Giải thích (Không bắt buộc)</label>
-              <textarea 
-                value={formData.explanation}
-                onChange={(e) => setFormData({...formData, explanation: e.target.value})}
-                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', minHeight: '80px', resize: 'vertical' }}
-                placeholder="Giải thích vì sao chọn đáp án này..."
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-              <button 
-                onClick={handleCloseModal}
-                style={{ padding: '10px 20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#fff', cursor: 'pointer' }}
-              >
-                Hủy bỏ
-              </button>
-              <button 
-                onClick={handleSave}
-                style={{ padding: '10px 20px', background: '#00f2fe', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 'bold', cursor: 'pointer' }}
-              >
-                Lưu câu hỏi
-              </button>
-            </div>
+              <div className="exam-modal-footer" style={{ padding: '20px 32px' }}>
+                <button type="button" className="exam-btn-cancel" onClick={handleCloseModal}>Cancel</button>
+                <button type="submit" className="exam-btn-done">Done</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

@@ -1,94 +1,88 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  User, 
-  Flame, 
-  Target, 
-  Clock, 
-  TrendingUp, 
-  UserCog, 
-  Settings,
-  Eye,
-  EyeOff
-} from 'lucide-react';
+import { Pencil, MapPin, X, Check } from 'lucide-react';
 import userApi from '../../api/userApi';
+import './ProfileContent.css';
 
 const ProfileContent = () => {
-  // ---------------------------------------------------------
-  // MOCK DATABASE STATE (Ready for API Integration)
-  // ---------------------------------------------------------
-  // When a user logs in via Gmail/Database, fetch their data here
+  const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({
-    name: 'Nguyễn Văn A',
-    email: '',
-    currentPassword: '',
-    newPassword: '',
-    targetLevel: 'N5',
-    plan: 'PRO',
+    name: 'Alex',
+    email: 'Alex234@gmail.com',
+    location: 'Hồ Chí Minh, VN',
+    bio: "I'm a UI/UX designer with 7+ years of experience in creating intuitive and accessible interfaces. I love simplifying complex design concepts for beginners.",
+    phone: '',
+    address: '',
+    preferredContact: 'Email',
+    visibility: true,
+    avatarUrl: 'https://i.pravatar.cc/150?img=11',
     stats: {
-      streak: 34,
-      target: 'N2',
-      hoursLearned: '156H',
-      weeklyProgress: '+ 12%'
-    },
-    settings: {
-      soundEffects: localStorage.getItem('soundEffects') !== 'false',
-      encouragement: true,
-      listeningExercises: true
-    },
-    notificationConfig: {
-      is_enabled: true,
-      preferred_time: '08:00',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Ho_Chi_Minh'
+      completed: 2,
+      completedGrowth: 'Tăng 5%',
+      hours: '15h 20m',
+      hoursGrowth: 'Tăng 3%',
+      streak: '10 days',
+      streakGrowth: 'Tăng 10%',
+      progress: '20%',
+      progressGrowth: 'Tăng 2%'
     }
   });
 
-  const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    bio: ''
+  });
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        // Lấy email từ localStorage
+        setLoading(true);
+        // Load local user from storage
         const userStr = localStorage.getItem('user');
-        let localEmail = 'nguyenvana@example.com';
         if (userStr && userStr !== 'undefined') {
           try {
             const parsedUser = JSON.parse(userStr);
-            if (parsedUser.email) {
-              localEmail = parsedUser.email;
-            }
+            setUserData(prev => ({ 
+              ...prev, 
+              email: parsedUser.email || prev.email, 
+              name: parsedUser.name || prev.name,
+              avatarUrl: parsedUser.avatarUrl || prev.avatarUrl,
+              visibility: parsedUser.visibility ?? prev.visibility,
+              phone: parsedUser.phone || prev.phone,
+              address: parsedUser.address || prev.address,
+              location: parsedUser.address || prev.location,
+              bio: parsedUser.bio || prev.bio,
+              preferredContact: parsedUser.preferredContact || prev.preferredContact
+            }));
           } catch (e) {
             console.warn("Could not parse user from localStorage", e);
           }
         }
 
         const response = await userApi.getDashboardStats();
-        const notifConfig = await userApi.getNotificationConfig().catch(() => null);
-
         if (response) {
           const payload = response.data && response.data.stats ? response.data : response;
           const userObj = payload.user || {};
           const statsObj = payload.stats || {};
           
-          let preferredTime = '08:00';
-          if (notifConfig?.reminder_time) {
-            preferredTime = notifConfig.reminder_time.substring(0, 5); // Format HH:mm
-          }
-          
           setUserData(prev => ({
             ...prev,
             name: userObj.name || prev.name,
-            email: localEmail,
-            targetLevel: statsObj.target || 'N5',
+            avatarUrl: userObj.avatarUrl || prev.avatarUrl,
+            visibility: userObj.visibility ?? prev.visibility,
+            phone: userObj.phone || prev.phone,
+            address: userObj.address || prev.address,
+            location: userObj.address || prev.location,
+            bio: userObj.bio || prev.bio,
+            preferredContact: userObj.preferredContact || prev.preferredContact,
             stats: {
-              streak: statsObj.streak || 0,
-              target: statsObj.target || 'N5',
-              hoursLearned: `${statsObj.totalHours || 0}H`,
-              weeklyProgress: statsObj.weeklyGrowth != null ? (statsObj.weeklyGrowth >= 0 ? `+ ${statsObj.weeklyGrowth}%` : `${statsObj.weeklyGrowth}%`) : '+ 0%'
-            },
-            notificationConfig: {
-              is_enabled: notifConfig?.is_enabled ?? true,
-              preferred_time: preferredTime,
-              timezone: notifConfig?.timezone ?? (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Ho_Chi_Minh')
+              ...prev.stats,
+              streak: `${statsObj.streak || 0} days`,
+              hours: `${statsObj.totalHours || 0}H`,
+              progress: `${statsObj.progress || 0}%`
             }
           }));
         }
@@ -102,325 +96,324 @@ const ProfileContent = () => {
     fetchProfileData();
   }, []);
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const handleOpenEditModal = () => {
+    setEditForm({
+      name: userData.name,
+      email: userData.email,
+      phone: userData.phone,
+      address: userData.address || userData.location,
+      bio: userData.bio
+    });
+    setIsEditModalOpen(true);
   };
 
-  const toggleNewPasswordVisibility = () => {
-    setShowNewPassword(!showNewPassword);
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
   };
 
-  // Handlers for controlled inputs
-  const handleInputChange = (e) => {
+  const handleEditChange = (e) => {
     const { name, value } = e.target;
-    
-    // Nếu đổi targetLevel ở dưới form thì cập nhật luôn lên stats badge cho đồng bộ
-    if (name === 'targetLevel') {
-      setUserData(prev => ({
-        ...prev,
-        targetLevel: value,
-        stats: {
-          ...prev.stats,
-          target: value
-        }
-      }));
-    } else {
-      setUserData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    setEditForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const toggleSetting = (settingKey) => {
-    if (settingKey === 'soundEffects') {
-      const newVal = !userData.settings.soundEffects;
-      localStorage.setItem('soundEffects', newVal);
-      setUserData(prev => ({
-        ...prev,
-        settings: { ...prev.settings, soundEffects: newVal }
-      }));
-    } else {
-      setUserData(prev => ({
-        ...prev,
-        settings: {
-          ...prev.settings,
-          [settingKey]: !prev.settings[settingKey]
-        }
-      }));
-    }
-  };
-
-  const toggleNotification = async () => {
-    const newVal = !userData.notificationConfig.is_enabled;
-    setUserData(prev => ({
-      ...prev,
-      notificationConfig: { ...prev.notificationConfig, is_enabled: newVal }
-    }));
+  const handleSaveProfile = async () => {
     try {
-      await userApi.updateNotificationConfig({ is_enabled: newVal });
-    } catch (e) {
-      console.error(e);
+      // Optimistic update
       setUserData(prev => ({
         ...prev,
-        notificationConfig: { ...prev.notificationConfig, is_enabled: !newVal }
+        name: editForm.name,
+        email: editForm.email,
+        phone: editForm.phone,
+        location: editForm.address,
+        bio: editForm.bio
       }));
-    }
-  };
-
-  const updateNotificationTime = async (e) => {
-    const newTime = e.target.value;
-    setUserData(prev => ({
-      ...prev,
-      notificationConfig: { ...prev.notificationConfig, preferred_time: newTime }
-    }));
-    try {
-      await userApi.updateNotificationConfig({ 
-        preferred_time: newTime,
-        timezone: userData.notificationConfig.timezone
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleSendTestNotification = async () => {
-    try {
-      await userApi.sendTestNotification();
-      alert('Đã gửi email nhắc nhở thử nghiệm thành công! Vui lòng kiểm tra hòm thư của bạn.');
-    } catch (error) {
-      alert('Có lỗi khi gửi email thử nghiệm.');
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      const payload = {
-        fullName: userData.name,
-        targetLevel: userData.targetLevel
-      };
       
-      if (userData.newPassword) {
-        payload.newPassword = userData.newPassword;
+      // Call API
+      await userApi.updateProfile({
+        fullName: editForm.name,
+        phone: editForm.phone,
+        address: editForm.address,
+        bio: editForm.bio
+      });
+
+      // Update local storage
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        const parsedUser = JSON.parse(userStr);
+        parsedUser.name = editForm.name;
+        parsedUser.phone = editForm.phone;
+        parsedUser.address = editForm.address;
+        parsedUser.bio = editForm.bio;
+        localStorage.setItem('user', JSON.stringify(parsedUser));
       }
       
-      await userApi.updateProfile(payload);
-      alert('Đã lưu thông tin hồ sơ!');
-    } catch (error) {
-      console.error("Failed to save profile:", error);
-      alert('Có lỗi xảy ra khi lưu thay đổi!');
+      setIsEditModalOpen(false);
+      alert("Cập nhật thông tin thành công!");
+    } catch (err) {
+      console.error("Lỗi khi lưu profile", err);
+      alert("Có lỗi xảy ra khi cập nhật!");
     }
   };
 
-  return (
-    <div className="profile-content-area">
-      
-      {/* Header */}
-      <div className="profile-header">
-        <h1 className="profile-heading">HỒ SƠ CÁ NHÂN</h1>
-      </div>
+  const toggleVisibility = async () => {
+    const newVisibility = !userData.visibility;
+    setUserData(prev => ({ ...prev, visibility: newVisibility }));
+    try {
+      await userApi.updateProfile({ visibility: newVisibility });
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        const parsedUser = JSON.parse(userStr);
+        parsedUser.visibility = newVisibility;
+        localStorage.setItem('user', JSON.stringify(parsedUser));
+      }
+    } catch (e) {
+      console.error("Failed to update visibility", e);
+      setUserData(prev => ({ ...prev, visibility: !newVisibility }));
+    }
+  };
 
-      {/* Card 1: User Summary */}
-      <div className="profile-card summary-card">
-        <div className="summary-top">
-          <div className="avatar-placeholder">
-            <User size={32} strokeWidth={1.5} color="#00e5ff" />
-          </div>
-          <div className="summary-info">
-            <h2>{userData.name.toUpperCase()}</h2>
-            <p>{userData.email}</p>
-          </div>
-          <div className="badge-pro">{userData.plan}</div>
+  const handlePreferredContactChange = async (e) => {
+    const newValue = e.target.value;
+    setUserData(prev => ({ ...prev, preferredContact: newValue }));
+    try {
+      await userApi.updateProfile({ preferredContact: newValue });
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        const parsedUser = JSON.parse(userStr);
+        parsedUser.preferredContact = newValue;
+        localStorage.setItem('user', JSON.stringify(parsedUser));
+      }
+    } catch (err) {
+      console.error("Failed to update preferred contact", err);
+    }
+  };
+
+  const fileInputRef = React.useRef(null);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result;
+        setUserData(prev => ({ ...prev, avatarUrl: base64String }));
+        try {
+          await userApi.updateProfile({ avatarUrl: base64String });
+          const userStr = localStorage.getItem('user');
+          if (userStr && userStr !== 'undefined') {
+            const parsedUser = JSON.parse(userStr);
+            parsedUser.avatarUrl = base64String;
+            localStorage.setItem('user', JSON.stringify(parsedUser));
+          }
+        } catch (err) {
+          console.error("Avatar update failed:", err);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  if (loading) {
+    return <div style={{ padding: '40px', color: '#1a1a1a' }}>Đang tải dữ liệu hồ sơ...</div>;
+  }
+
+  return (
+    <div className="profile-page-container">
+      {/* HEADER SECTION */}
+      <div className="profile-header-new">
+        <div className="profile-avatar-large">
+          <img src={userData.avatarUrl || "https://i.pravatar.cc/150?img=11"} alt="Avatar" />
+          <button className="profile-edit-avatar-btn" onClick={handleAvatarClick}>
+            <Pencil size={12} />
+          </button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            style={{ display: 'none' }} 
+            accept="image/*"
+            onChange={handleAvatarChange}
+          />
         </div>
         
-        <div className="profile-stats-row">
-          <div className="profile-stat">
-            <Flame size={24} color="#f59e0b" />
-            <div className="stat-value">{userData.stats.streak}</div>
-            <div className="stat-label">Chuỗi ngày</div>
-          </div>
-          <div className="profile-stat">
-            <Target size={24} color="#38bdf8" />
-            <div className="stat-value">{userData.stats.target}</div>
-            <div className="stat-label">Mục tiêu</div>
-          </div>
-          <div className="profile-stat">
-            <Clock size={24} color="#a855f7" />
-            <div className="stat-value">{userData.stats.hoursLearned}</div>
-            <div className="stat-label">Số giờ học</div>
-          </div>
-          <div className="profile-stat">
-            <TrendingUp size={24} color="#10b981" />
-            <div className="stat-value success">{userData.stats.weeklyProgress}</div>
-            <div className="stat-label">Tuần này</div>
-          </div>
+        <div className="profile-user-info-new">
+          <h2>{userData.name}</h2>
+          <p>{userData.email}</p>
+          <p style={{ marginTop: '5px' }}>
+            <MapPin size={14} color="#64748b" /> {userData.location || 'Chưa cập nhật'}
+          </p>
+        </div>
+
+        <button className="profile-header-btn" onClick={handleOpenEditModal}>
+          Chỉnh sửa hồ sơ
+        </button>
+      </div>
+
+      {/* STATS SECTION */}
+      <div className="profile-stats-grid-new">
+        <div className="profile-stat-box-new">
+          <h3 className="profile-stat-title-new">Đã hoàn thành</h3>
+          <p className="profile-stat-value-new">{userData.stats.completed}</p>
+          <p className="profile-stat-desc-new">{userData.stats.completedGrowth}</p>
+        </div>
+        <div className="profile-stat-box-new">
+          <h3 className="profile-stat-title-new">Số giờ học</h3>
+          <p className="profile-stat-value-new">{userData.stats.hours}</p>
+          <p className="profile-stat-desc-new">{userData.stats.hoursGrowth}</p>
+        </div>
+        <div className="profile-stat-box-new">
+          <h3 className="profile-stat-title-new">Chuỗi ngày</h3>
+          <p className="profile-stat-value-new">{userData.stats.streak}</p>
+          <p className="profile-stat-desc-new">{userData.stats.streakGrowth}</p>
+        </div>
+        <div className="profile-stat-box-new">
+          <h3 className="profile-stat-title-new">Tiến độ mục tiêu</h3>
+          <p className="profile-stat-value-new">{userData.stats.progress}</p>
+          <p className="profile-stat-desc-new">{userData.stats.progressGrowth}</p>
         </div>
       </div>
 
-      {/* Card 2: User Inputs */}
-      <div className="profile-card settings-card">
-        <div className="card-title-row">
-          <UserCog className="cyan-icon" size={24} />
-          <h3 className="card-title">CÀI ĐẶT THÔNG TIN NGƯỜI DÙNG</h3>
-        </div>
+      {/* BIO SECTION */}
+      <h3 className="profile-section-title">Giới thiệu</h3>
+      <p className="profile-bio-text">{userData.bio}</p>
 
-        <div className="form-group">
-          <label>Tên hiển thị</label>
-          <input 
-            type="text" 
-            name="accountName" 
-            value={userData.name} 
-            className="profile-input" 
-            disabled
-            autoComplete="off"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Email</label>
+      {/* CONTACT INFORMATION */}
+      <h3 className="profile-section-title">Thông tin liên hệ</h3>
+      <div className="profile-contact-form">
+        <div className="profile-form-grid">
           <input 
             type="email" 
-            name="accountEmail" 
-            value={userData.email} 
-            className="profile-input" 
-            disabled
-            autoComplete="off"
+            className="profile-input-new" 
+            placeholder="Email" 
+            value={userData.email}
+            readOnly
           />
-        </div>
-
-        <div className="form-group">
-          <label>Mục tiêu (Target Level)</label>
-          <select 
-            name="targetLevel" 
-            value={userData.targetLevel} 
-            onChange={handleInputChange} 
-            className="profile-input" 
-            style={{ appearance: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: 'var(--white)' }}
-          >
-            <option value="N5" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N5 (Sơ cấp 1)</option>
-            <option value="N4" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N4 (Sơ cấp 2)</option>
-            <option value="N3" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N3 (Trung cấp)</option>
-            <option value="N2" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N2 (Cao cấp 1)</option>
-            <option value="N1" style={{ backgroundColor: '#1c2035' }}>Mục tiêu: N1 (Cao cấp 2)</option>
+          <input 
+            type="text" 
+            className="profile-input-new" 
+            placeholder="Phone number" 
+            value={userData.phone}
+            readOnly
+          />
+          </div>
+          <select className="profile-select-new" value={userData.preferredContact} onChange={handlePreferredContactChange}>
+            <option value="Email">Preferred Contact Method: Email</option>
+            <option value="Phone">Preferred Contact Method: Phone</option>
           </select>
+        <div style={{ marginTop: '20px', overflow: 'hidden' }}>
+          <button className="profile-btn-save" onClick={() => alert('Đã lưu thông tin liên hệ!')}>Save Changes</button>
         </div>
-
-        <div className="form-group">
-          <label>Mật khẩu hiện tại</label>
-          {/* Honeypot to defeat Edge/Chrome autofill */}
-          <input type="text" name="fakeusernameremembered" style={{display: 'none'}} aria-hidden="true" />
-          <input type="password" name="fakepasswordremembered" style={{display: 'none'}} aria-hidden="true" />
-          
-          <div className="password-input-wrapper">
-            <input 
-              type={showPassword ? "text" : "password"} 
-              name="currentPassword" 
-              value={userData.currentPassword || ''} 
-              onChange={handleInputChange} 
-              className="profile-input password-input" 
-              placeholder="Nhập mật khẩu hiện tại..."
-              autoComplete="new-password"
-            />
-            <button 
-              type="button" 
-              className="password-toggle-btn" 
-              onClick={togglePasswordVisibility}
-            >
-              {showPassword ? <EyeOff size={20} color="#6b7280" /> : <Eye size={20} color="#6b7280" />}
-            </button>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Mật khẩu mới</label>
-          <div className="password-input-wrapper">
-            <input 
-              type={showNewPassword ? "text" : "password"} 
-              name="newPassword" 
-              value={userData.newPassword || ''} 
-              onChange={handleInputChange} 
-              className="profile-input password-input" 
-              placeholder="Nhập mật khẩu mới..."
-              autoComplete="new-password"
-            />
-            <button 
-              type="button" 
-              className="password-toggle-btn" 
-              onClick={toggleNewPasswordVisibility}
-            >
-              {showNewPassword ? <EyeOff size={20} color="#6b7280" /> : <Eye size={20} color="#6b7280" />}
-            </button>
-          </div>
-        </div>
-
-        <button className="btn-save" onClick={handleSave}>Lưu thay đổi</button>
       </div>
 
-      {/* Card 3: Experience Settings */}
-      <div className="profile-card toggles-card">
-        <div className="card-title-row">
-          <Settings className="cyan-icon" size={24} />
-          <h3 className="card-title">CÀI ĐẶT TRẢI NGHIỆM HỌC</h3>
+      {/* PROFILE VISIBILITY */}
+      <div className="profile-visibility-card">
+        <div className="profile-visibility-info">
+          <h4>Profile Visibility</h4>
+          <p>Kiểm soát ai có thể xem hồ sơ của bạn</p>
+        </div>
+        <div className={`profile-custom-toggle ${userData.visibility ? 'active' : ''}`} onClick={toggleVisibility}>
+          <div className="profile-toggle-thumb"></div>
+        </div>
+      </div>
+
+      {/* SUBSCRIPTION PLANS */}
+      <h3 className="profile-section-title">Nâng cấp gói học</h3>
+      <div className="profile-plans-grid">
+        <div className="profile-plan-card">
+          <h4 className="profile-plan-title">STUDENT</h4>
+          <p className="profile-plan-price">0 VNĐ/ tháng</p>
+          <ul className="profile-plan-features">
+            <li><Check size={16} color="#0ea5e9" /> Từ vựng CNTT cốt lõi (500+ thuật ngữ)</li>
+            <li><Check size={16} color="#0ea5e9" /> Chương trình JLPT từ N5 đến N3</li>
+            <li><Check size={16} color="#0ea5e9" /> Các mô-đun ngữ pháp cơ bản</li>
+            <li><Check size={16} color="#0ea5e9" /> Quyền truy cập cộng đồng Discord</li>
+            <li><Check size={16} color="#0ea5e9" /> Bảng điều khiển theo dõi tiến độ</li>
+            <li><Check size={16} color="#0ea5e9" /> Bài kiểm tra và đánh giá hằng tuần</li>
+          </ul>
+          <button className="profile-plan-btn" style={{ opacity: 0.8 }}>Gói hiện tại</button>
         </div>
 
-        <div className="toggle-row">
-          <span className="toggle-label">Hiệu ứng âm thanh</span>
-          <div 
-            className={`custom-toggle ${userData.settings.soundEffects ? 'active' : ''}`}
-            onClick={() => toggleSetting('soundEffects')}
-          >
-            <div className="toggle-thumb"></div>
-          </div>
+        <div className="profile-plan-card">
+          <h4 className="profile-plan-title">PRO</h4>
+          <p className="profile-plan-price">99.000VNĐ/ tháng</p>
+          <ul className="profile-plan-features">
+            <li><Check size={16} color="#0ea5e9" /> Mọi nội dung trong gói Student</li>
+            <li><Check size={16} color="#0ea5e9" /> Từ vựng CNTT đầy đủ (hơn 2.000 thuật ngữ)</li>
+            <li><Check size={16} color="#0ea5e9" /> Chương trình JLPT từ N2 đến N1</li>
+            <li><Check size={16} color="#0ea5e9" /> Mô-đun chuẩn bị phỏng vấn</li>
+            <li><Check size={16} color="#0ea5e9" /> Keigo & mẫu email công việc</li>
+            <li><Check size={16} color="#0ea5e9" /> Buổi học 1-1 với gia sư (2 lần/tháng)</li>
+            <li><Check size={16} color="#0ea5e9" /> Thư viện tình huống thực tế CNTT</li>
+            <li><Check size={16} color="#0ea5e9" /> Đánh giá CV & hồ sơ năng lực</li>
+          </ul>
+          <button className="profile-plan-btn" style={{ opacity: 0.6 }}>Đăng ký ngay</button>
         </div>
+      </div>
 
-        <div className="toggle-row">
-          <span className="toggle-label">Thông báo nhắc nhở học tập</span>
-          <div 
-            className={`custom-toggle ${userData.notificationConfig.is_enabled ? 'active' : ''}`}
-            onClick={toggleNotification}
-          >
-            <div className="toggle-thumb"></div>
-          </div>
-        </div>
-
-        {userData.notificationConfig.is_enabled && (
-          <div className="form-group" style={{ marginTop: '10px' }}>
-            <label>Thời gian nhận thông báo</label>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <input 
-                type="time" 
-                value={userData.notificationConfig.preferred_time} 
-                onChange={updateNotificationTime}
-                className="profile-input" 
-                style={{ width: 'fit-content' }}
-              />
-              <button 
-                type="button"
-                className="btn-save"
-                style={{ padding: '8px 16px', margin: 0, width: 'auto', backgroundColor: '#3b82f6' }}
-                onClick={handleSendTestNotification}
-              >
-                Gửi thử email ngay
+      {/* EDIT MODAL */}
+      {isEditModalOpen && (
+        <div className="profile-modal-overlay">
+          <div className="profile-modal-box">
+            <div className="profile-modal-header">
+              <h2>Chỉnh sửa thông tin cá nhân</h2>
+              <button className="profile-modal-close" onClick={handleCloseEditModal}>
+                <X size={24} />
               </button>
             </div>
-          </div>
-        )}
+            
+            <div className="profile-modal-form">
+              <input 
+                type="text" 
+                name="name"
+                className="profile-modal-input" 
+                placeholder="Tên người dùng" 
+                value={editForm.name}
+                onChange={handleEditChange}
+              />
+              <input 
+                type="email" 
+                name="email"
+                className="profile-modal-input" 
+                placeholder="Email" 
+                value={editForm.email}
+                onChange={handleEditChange}
+                disabled
+              />
+              <input 
+                type="text" 
+                name="phone"
+                className="profile-modal-input" 
+                placeholder="SĐT" 
+                value={editForm.phone}
+                onChange={handleEditChange}
+              />
+              <input 
+                type="text" 
+                name="address"
+                className="profile-modal-input" 
+                placeholder="Địa chỉ" 
+                value={editForm.address}
+                onChange={handleEditChange}
+              />
+              <textarea 
+                name="bio"
+                className="profile-modal-textarea" 
+                placeholder="Giới thiệu"
+                value={editForm.bio}
+                onChange={handleEditChange}
+              />
+            </div>
 
-        <div className="toggle-row">
-          <span className="toggle-label">Bài tập nghe</span>
-          <div 
-            className={`custom-toggle ${userData.settings.listeningExercises ? 'active' : ''}`}
-            onClick={() => toggleSetting('listeningExercises')}
-          >
-            <div className="toggle-thumb"></div>
+            <div className="profile-modal-actions">
+              <button className="profile-modal-btn-cancel" onClick={handleCloseEditModal}>Hủy</button>
+              <button className="profile-modal-btn-save" onClick={handleSaveProfile}>Lưu thay đổi</button>
+            </div>
           </div>
         </div>
-
-      </div>
-
+      )}
     </div>
   );
 };

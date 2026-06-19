@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const res = await prisma.\\SELECT last_sign_in_at FROM auth.users LIMIT 1\; console.log(res); } main().catch(console.error).finally(() => prisma.\());

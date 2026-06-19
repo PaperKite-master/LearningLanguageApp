@@ -1,111 +1,140 @@
 import React, { useState } from 'react';
-import { Play, Check, Clock } from 'lucide-react';
+import { Play, ChevronDown, MessageSquare, Settings, Maximize, Youtube, FileText } from 'lucide-react';
 import './VideosContent.css';
 
-const MOCK_VIDEOS = [
-  {
-    id: 1,
-    title: 'CÁC LỜI CHÀO TRONG MÔI TRƯỜNG LÀM VIỆC NHẬT BẢN',
-    description: 'Học những lời chào cơ bản được sử dụng trong các công ty CNTT Nhật Bản.',
-    duration: '12 phút',
-    completed: true,
-  },
-  {
-    id: 2,
-    title: 'GIỚI THIỆU BẢN THÂN BẰNG TIẾNG NHẬT',
-    description: 'Cách tự giới thiệu trong một buổi phỏng vấn công nghệ tại Nhật Bản.',
-    duration: '15 phút',
-    completed: true,
-  },
-  {
-    id: 3,
-    title: 'CÁC CỤM TỪ TRONG CUỘC HỌP HẰNG NGÀY',
-    description: 'Những cụm từ quan trọng cho các cuộc họp agile standup bằng tiếng Nhật.',
-    duration: '18 phút',
-    completed: false,
-  },
-  {
-    id: 4,
-    title: 'TỪ VỰNG TRONG CODE REVIEW',
-    description: 'Các thuật ngữ kỹ thuật được sử dụng trong quá trình code review với đồng nghiệp người Nhật.',
-    duration: '20 phút',
-    completed: false,
-  },
-  {
-    id: 5,
-    title: 'VIẾT EMAIL',
-    description: 'Cách viết email chuyên nghiệp bằng tiếng Nhật.',
-    duration: '22 phút',
-    completed: false,
-  }
-];
+import timelineApi from '../../api/timelineApi';
 
 const VideosContent = () => {
+  const [timelines, setTimelines] = useState([]);
+  const [selectedTimeline, setSelectedTimeline] = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handlePlay = (video) => {
-    setPlayingVideo(video);
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await timelineApi.getAll();
+        // Filter timelines that actually have published video lessons
+        const validTimelines = data.map(t => {
+          const validLessons = (t.lessons || []).filter(l => l.status === 'published' && l.videoUrl);
+          return { ...t, lessons: validLessons };
+        }).filter(t => t.lessons.length > 0);
+
+        setTimelines(validTimelines);
+        if (validTimelines.length > 0) {
+          setSelectedTimeline(validTimelines[0]);
+          if (validTimelines[0].lessons.length > 0) {
+            setPlayingVideo(validTimelines[0].lessons[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch videos', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Helper to extract YouTube embed URL
+  const getEmbedUrl = (url) => {
+    if (!url) return '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      return `https://www.youtube.com/embed/${match[2]}`;
+    }
+    return url;
   };
-
-  const handleClose = () => {
-    setPlayingVideo(null);
-  };
-
-  if (playingVideo) {
-    return (
-      <div className="videos-container player-view">
-        <div className="video-player-wrapper">
-          <div className="video-player-mock">
-            <div className="play-icon-large">
-              <svg viewBox="0 0 24 24" width="70" height="70" stroke="currentColor" strokeWidth="2" fill="#d9d9d9" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </div>
-          </div>
-          <div className="player-actions">
-            <button className="done-btn" onClick={handleClose}>Xong</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="videos-container">
-      <h2 className="videos-title">BÀI HỌC VIDEO</h2>
-      
-      <div className="videos-list">
-        {MOCK_VIDEOS.map(video => (
-          <div key={video.id} className="video-card">
-            <div className="video-icon-wrapper">
-              {video.completed ? (
-                <div className="icon-circle completed">
-                  <Check size={28} color="#00E5FF" strokeWidth={3} />
-                </div>
-              ) : (
-                <div className="icon-circle pending">
-                  <Play size={28} color="#a560ff" fill="#a560ff" />
+    <div className="video-page-container">
+      {/* Left side: Video Player */}
+      <div className="video-left-panel">
+        <div className="video-player-card">
+          <div className="video-player-screen" style={{ padding: 0, overflow: 'hidden' }}>
+            {playingVideo ? (
+              <iframe
+                width="100%"
+                height="100%"
+                src={getEmbedUrl(playingVideo.videoUrl)}
+                title={playingVideo.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            ) : (
+              <div className="video-play-button-center">
+                <Play size={24} color="#1a1a1a" fill="#1a1a1a" style={{ marginLeft: '4px' }} />
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+
+      {/* Right side: Playlist */}
+      <div className="video-right-panel">
+        {isLoading ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Đang tải...</div>
+        ) : timelines.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Chưa có video nào.</div>
+        ) : (
+          <>
+            <h2 className="video-module-title">{playingVideo?.title || 'Chọn bài học'}</h2>
+            
+            <div className="video-module-dropdown" style={{ position: 'relative' }}>
+              <div 
+                style={{ display: 'flex', justifyContent: 'space-between', width: '100%', cursor: 'pointer' }}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                <span>{selectedTimeline?.title || 'Chọn Module'}</span>
+                <ChevronDown size={16} />
+              </div>
+              
+              {isDropdownOpen && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0, 
+                  background: 'white', border: '1px solid #e2e8f0', 
+                  borderRadius: '8px', marginTop: '4px', zIndex: 10,
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}>
+                  {timelines.map(t => (
+                    <div 
+                      key={t.id} 
+                      style={{ padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}
+                      onClick={() => {
+                        setSelectedTimeline(t);
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      {t.title}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
             
-            <div className="video-info">
-              <h3>{video.title}</h3>
-              <p>{video.description}</p>
-              <div className="video-meta">
-                <Clock size={14} />
-                <span>{video.duration}</span>
-              </div>
+            <div className="video-playlist">
+              {selectedTimeline?.lessons.map(video => (
+                <div 
+                  key={video.id} 
+                  className={`video-playlist-item ${playingVideo?.id === video.id ? 'active' : ''}`}
+                  onClick={() => setPlayingVideo(video)}
+                >
+                  <div className="video-item-icon">
+                    <Youtube size={20} strokeWidth={1.5} />
+                  </div>
+                  <div className="video-item-info">
+                    <h4>{video.title}</h4>
+                    <span>Video</span>
+                  </div>
+                </div>
+              ))}
             </div>
-            
-            <div className="video-action">
-              <button 
-                className={`action-btn ${video.completed ? 'btn-secondary' : 'btn-primary'}`}
-                onClick={() => handlePlay(video)}
-              >
-                {video.completed ? 'Xem lại' : 'Xem'}
-              </button>
-            </div>
-          </div>
-        ))}
+          </>
+        )}
       </div>
     </div>
   );

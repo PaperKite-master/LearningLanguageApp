@@ -6,7 +6,9 @@ import {
   StudyTimeResponseSchema,
   UserErrorResponseSchema,
   UpdateProfileBodySchema,
-  UpdateProfileResponseSchema
+  UpdateProfileResponseSchema,
+  ChangePasswordBodySchema,
+  SuccessMessageResponseSchema
 } from '../Schemas/user.schemas.js';
 
 export async function userRoutes(app) {
@@ -67,5 +69,43 @@ export async function userRoutes(app) {
       },
     },
     userController.updateProfile
+  );
+
+  app.post(
+    '/me/change-password',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Users'],
+        summary: 'Change user password',
+        security: [{ bearerAuth: [] }],
+        body: ChangePasswordBodySchema,
+        response: {
+          200: SuccessMessageResponseSchema,
+          400: UserErrorResponseSchema,
+          401: UserErrorResponseSchema,
+          500: UserErrorResponseSchema,
+        },
+      },
+    },
+    userController.changePassword
+  );
+
+  app.delete(
+    '/me/account',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Users'],
+        summary: 'Delete user account',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: SuccessMessageResponseSchema,
+          401: UserErrorResponseSchema,
+          500: UserErrorResponseSchema,
+        },
+      },
+    },
+    userController.deleteAccount
   );
 }

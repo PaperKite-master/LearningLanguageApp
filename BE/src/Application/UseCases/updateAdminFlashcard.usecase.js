@@ -5,6 +5,7 @@ import { toAdminFlashcardDto } from '../DTOs/AdminFlashcardDto.js';
  */
 export async function updateAdminFlashcardUseCase({ adminFlashcardRepo, id, payload }) {
   const flashcard = await adminFlashcardRepo.update(id, {
+    deckId: payload.deckId,
     level: payload.level,
     japaneseWord: payload.japaneseWord,
     pronunciation: payload.pronunciation,

@@ -1,0 +1,482 @@
+/* AdminUsersContent.css */
+
+/* Override dashboard layout for Students page to use Light Theme */
+.students-dashboard-override {
+  background-color: #f1f5f9 !important; /* Light gray background */
+}
+
+.students-main-area-light {
+  background-color: #f1f5f9 !important; /* Override the dark dashboard-main-area */
+  padding: 40px 60px !important;
+}
+
+.students-content-area {
+  width: 100%;
+  height: 100%;
+}
+
+.students-header {
+  margin-bottom: 24px;
+}
+
+.students-heading {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.students-panel-container {
+  background: transparent; /* No panel background, let the light gray show through */
+}
+
+.students-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.students-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.students-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.students-search-input {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  border: 1px solid transparent;
+  background-color: #ffffff;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.students-search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.students-filters {
+  display: flex;
+  gap: 12px;
+}
+
+.students-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #ffffff;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.students-filter-btn:hover {
+  background-color: #f8fafc;
+}
+
+/* Table Styles */
+.students-table-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.students-table th {
+  background-color: #f8fafc;
+  padding: 16px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: capitalize;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.students-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.students-table tr:last-child td {
+  border-bottom: none;
+}
+
+.col-checkbox {
+  width: 50px;
+  min-width: 50px;
+  text-align: left;
+  padding-left: 24px !important;
+  padding-right: 12px !important;
+}
+
+.col-checkbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+  border-radius: 4px;
+}
+
+.col-name {
+  font-weight: 600;
+  color: #0f172a;
+  min-width: 150px;
+}
+
+.col-email {
+  color: #64748b;
+}
+
+.col-course {
+  color: #475569;
+  min-width: 160px;
+}
+
+.col-spent {
+  color: #475569;
+  min-width: 100px;
+}
+
+.col-activity {
+  color: #475569;
+  min-width: 130px;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-active, .status-completed {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+.status-active .status-dot, .status-completed .status-dot {
+  background-color: #16a34a;
+}
+
+.status-inactive {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+.status-inactive .status-dot {
+  background-color: #dc2626;
+}
+
+/* Action Buttons */
+.action-buttons-inline {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.action-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.action-icon-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.action-icon-btn.danger-btn:hover {
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
+/* Send Message Modal */
+.send-message-modal {
+  width: 600px;
+  max-width: 90vw;
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.send-message-modal .modal-header {
+  padding: 24px 32px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: none;
+  background: #ffffff;
+}
+
+.send-message-modal .modal-header h2 {
+  font-size: 1.5rem;
+  margin: 0 0 4px 0;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.modal-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.progress-accordion-body {
+  padding: 0 32px 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accordion-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.accordion-header {
+  background-color: #f8fafc;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.accordion-header:hover {
+  background-color: #f1f5f9;
+}
+
+.accordion-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.accordion-check-icon {
+  color: #cbd5e1;
+}
+.accordion-check-icon.checked {
+  color: #0ea5e9;
+}
+
+.accordion-content {
+  padding: 0;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.lesson-check-item {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.lesson-check-item:last-child {
+  border-bottom: none;
+}
+
+.no-lessons {
+  color: #94a3b8;
+  font-style: italic;
+  justify-content: center;
+}
+
+/* Modal Footer Centered */
+.modal-footer-centered {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-send-message {
+  background-color: #0ea5e9;
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
+}
+
+.btn-send-message:hover {
+  background-color: #0284c7;
+}
+
+.btn-cancel-message {
+  background-color: #fff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  padding: 12px 32px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel-message:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Modal Overlay and Boxes */
+.students-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.students-modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 90vw;
+  width: 100%;
+}
+
+.delete-confirm-box {
+  width: 400px;
+  padding: 32px;
+  text-align: center;
+}
+
+.delete-title {
+  color: #ef4444;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.delete-confirm-box p {
+  color: #334155;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.delete-confirm-box .modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.modal-btn-cancel {
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn-cancel:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.modal-btn-danger {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn-danger:hover {
+  background-color: #dc2626;
+}

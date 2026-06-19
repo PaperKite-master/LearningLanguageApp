@@ -17,6 +17,8 @@ function toAdminUserDto(row, totalLessons) {
     progress,
     total_exp: row.total_exp,
     target_level: row.target_level,
+    spent: Number(row.spent ?? 0),
+    last_activity_at: row.last_sign_in_at || row.updated_at,
     banned_until: row.banned_until,
     created_at: row.created_at,
     updated_at: row.updated_at
@@ -37,6 +39,12 @@ async function fetchAllAdminUsers(prisma) {
       WHERE ulp.is_completed = true
         AND l.status = 'published'
       GROUP BY ulp.user_id
+    ),
+    user_spent AS (
+      SELECT user_id, SUM(amount) AS spent
+      FROM public.payment_transactions
+      WHERE status = 'COMPLETED'
+      GROUP BY user_id
     )
     SELECT
       u.id,
@@ -50,6 +58,8 @@ async function fetchAllAdminUsers(prisma) {
       u.deleted_at,
       u.created_at,
       u.updated_at,
+      u.last_sign_in_at,
+      us.spent,
       COALESCE(cp.completed_lessons, 0) AS completed_lessons,
       pl.total_lessons AS total_lessons,
       CASE
@@ -59,6 +69,7 @@ async function fetchAllAdminUsers(prisma) {
     FROM auth.users u
     LEFT JOIN public.profiles p ON p.id = u.id
     LEFT JOIN completed_progress cp ON cp.user_id = u.id
+    LEFT JOIN user_spent us ON us.user_id = u.id
     CROSS JOIN published_lessons pl
     ORDER BY u.created_at DESC NULLS LAST, u.email ASC
   `;
@@ -78,6 +89,12 @@ async function fetchAdminUserById(prisma, userId) {
       WHERE ulp.is_completed = true
         AND l.status = 'published'
       GROUP BY ulp.user_id
+    ),
+    user_spent AS (
+      SELECT user_id, SUM(amount) AS spent
+      FROM public.payment_transactions
+      WHERE status = 'COMPLETED'
+      GROUP BY user_id
     )
     SELECT
       u.id,
@@ -91,6 +108,8 @@ async function fetchAdminUserById(prisma, userId) {
       u.deleted_at,
       u.created_at,
       u.updated_at,
+      u.last_sign_in_at,
+      us.spent,
       COALESCE(cp.completed_lessons, 0) AS completed_lessons,
       pl.total_lessons AS total_lessons,
       CASE
@@ -100,6 +119,7 @@ async function fetchAdminUserById(prisma, userId) {
     FROM auth.users u
     LEFT JOIN public.profiles p ON p.id = u.id
     LEFT JOIN completed_progress cp ON cp.user_id = u.id
+    LEFT JOIN user_spent us ON us.user_id = u.id
     CROSS JOIN published_lessons pl
     WHERE u.id = CAST(${userId} AS uuid)
   `;
@@ -185,6 +205,50 @@ export const adminUsersController = {
       if (err?.code === 'P2023') {
         return reply.code(400).send({ error: 'Invalid UUID format in request params' });
       }
+      throw err;
+    }
+  },
+
+  getProgressDetails: async (request, reply) => {
+    try {
+      const { id } = request.params;
+
+      // Fetch all timelines (levels like N5, N4)
+      const timelines = await request.server.prisma.timelines.findMany({
+        orderBy: { order: 'asc' },
+        include: {
+          lessons: {
+            where: { status: 'published' },
+            orderBy: { order: 'asc' }
+          }
+        }
+      });
+
+      // Fetch user's completed lessons
+      const completedLessons = await request.server.prisma.user_lesson_progress.findMany({
+        where: {
+          user_id: id,
+          is_completed: true
+        },
+        select: { lesson_id: true }
+      });
+
+      const completedLessonIds = new Set(completedLessons.map(cl => cl.lesson_id));
+
+      const data = timelines.map(timeline => {
+        return {
+          level: timeline.title,
+          lessons: timeline.lessons.map(lesson => ({
+            id: lesson.id,
+            title: lesson.title,
+            is_completed: completedLessonIds.has(lesson.id)
+          }))
+        };
+      });
+
+      return reply.code(200).send({ data });
+    } catch (err) {
+      request.log.error(err);
       throw err;
     }
   }

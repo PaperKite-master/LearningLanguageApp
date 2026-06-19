@@ -10,8 +10,11 @@ export class PrismaAdminFlashcardRepository extends AdminFlashcardRepository {
     this.prisma = prisma;
   }
 
-  async list({ search, page = 1, limit = 20 } = {}) {
+  async list({ search, deckId, page = 1, limit = 20 } = {}) {
     const where = {};
+    if (deckId) {
+      where.deck_id = deckId;
+    }
 
     if (search) {
       where.OR = [
@@ -39,9 +42,10 @@ export class PrismaAdminFlashcardRepository extends AdminFlashcardRepository {
     });
   }
 
-  async create({ level, japaneseWord, pronunciation, meaningVi, status }) {
+  async create({ deckId, level, japaneseWord, pronunciation, meaningVi, status }) {
     return this.prisma.admin_flashcards.create({
       data: {
+        deck_id: deckId,
         level,
         japanese_word: japaneseWord,
         pronunciation,
@@ -51,10 +55,11 @@ export class PrismaAdminFlashcardRepository extends AdminFlashcardRepository {
     });
   }
 
-  async update(id, { level, japaneseWord, pronunciation, meaningVi, status }) {
+  async update(id, { deckId, level, japaneseWord, pronunciation, meaningVi, status }) {
     return this.prisma.admin_flashcards.update({
       where: { id },
       data: {
+        ...(deckId !== undefined && { deck_id: deckId }),
         ...(level !== undefined && { level }),
         ...(japaneseWord !== undefined && { japanese_word: japaneseWord }),
         ...(pronunciation !== undefined && { pronunciation }),

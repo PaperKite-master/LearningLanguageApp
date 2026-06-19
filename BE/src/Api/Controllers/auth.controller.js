@@ -31,6 +31,19 @@ export const authController = {
     }
   },
 
+  async verifyOtp(req, reply) {
+    try {
+      const result = await verifyOtpUseCase(req.body);
+      return reply.code(200).send(result);
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(err.statusCode || 400).send({
+        error: err.message,
+        statusCode: err.statusCode || 400,
+      });
+    }
+  },
+
   async forgotPassword(req, reply) {
     try {
       const result = await forgotPasswordUseCase(req.body);

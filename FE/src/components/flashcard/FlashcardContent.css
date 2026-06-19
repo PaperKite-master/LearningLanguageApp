@@ -1,5 +1,5 @@
 /* =========================================
-   User Flashcards Styles
+   User Flashcards Styles (Light Theme Redesign)
    ========================================= */
 
 .flashcard-content-area {
@@ -7,53 +7,55 @@
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
+
+  background: #ffffff;
+  min-height: 100%;
 }
 
-.flashcard-gradient-title {
+.flashcard-main-title {
   font-size: 36px;
-  font-weight: 800;
-  text-transform: uppercase;
-  background: linear-gradient(90deg, #0ea5e9 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  color: #000;
   margin-bottom: 30px;
-  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 /* Tabs */
-.flashcard-tabs {
-  margin-bottom: 40px;
-}
-
-.flashcard-tab-container {
+.flashcard-tabs-header {
   display: flex;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 50px;
-  padding: 5px;
-  width: fit-content;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 40px;
+  width: 100%;
+  max-width: 800px;
 }
 
-.fc-tab-btn {
+.fc-tab-line-btn {
   background: transparent;
   border: none;
-  color: #b5b5c3;
-  padding: 12px 32px;
+  color: #64748b;
+  padding: 12px 30px;
   font-size: 16px;
-  font-weight: 500;
-  border-radius: 50px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 180px;
+  position: relative;
 }
 
-.fc-tab-btn.active {
-  background-color: #2e3a5f;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.fc-tab-line-btn.active {
+  color: #d946ef;
 }
 
-.fc-tab-btn:hover:not(.active) {
-  color: #ffffff;
+.fc-tab-line-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #d946ef;
+}
+
+.fc-tab-line-btn:hover:not(.active) {
+  color: #333;
 }
 
 /* Flashcard Viewer */
@@ -88,31 +90,32 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  background-color: #3f1e8a;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .fc-card-back {
   transform: rotateX(180deg);
-  background-color: #2d1566;
+  background-color: #f8fafc;
 }
 
 .fc-card-text {
   font-size: 48px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: #1e293b;
   margin-bottom: 10px;
 }
 
 .fc-card-subtext {
   font-size: 48px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: #3b0764;
   margin-bottom: 20px;
 }
 
@@ -120,7 +123,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: #93c5fd;
+  color: #64748b;
   margin-bottom: 5px;
   font-weight: 600;
   opacity: 0.8;
@@ -131,7 +134,7 @@
   flex-direction: column;
   align-items: center;
   margin-top: 15px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 15px;
   width: 80%;
 }
@@ -153,8 +156,8 @@
 
 .fc-counter {
   font-size: 18px;
-  font-weight: 600;
-  color: #ffffff;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 .fc-nav-buttons {
@@ -164,34 +167,35 @@
 
 .fc-btn-prev {
   background: transparent;
-  border: 1px solid #ffffff;
-  color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
   padding: 10px 24px;
   border-radius: 50px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .fc-btn-prev:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 .fc-btn-next {
-  background: #0ea5e9;
+  background: #d946ef;
   border: none;
   color: #ffffff;
   padding: 10px 32px;
   border-radius: 50px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .fc-btn-next:hover:not(:disabled) {
-  background: #0284c7;
+  background: #c026d3;
 }
 
 .fc-btn-prev:disabled, .fc-btn-next:disabled {
@@ -265,63 +269,56 @@
 }
 
 .fc-loading, .fc-empty {
-  text-align: center;
-  color: #b5b5c3;
-  padding: 50px;
+  color: #64748b;
+  padding: 50px 0;
   font-size: 18px;
+  font-weight: 500;
 }
 
-/* JLPT Levels Grid */
-.fc-levels-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  max-width: 800px;
-  margin-top: 20px;
-}
-
-.fc-level-box {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 30px 20px;
+/* JLPT Levels List (New Design) */
+.fc-levels-list {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  gap: 20px;
+  max-width: 800px;
+}
+
+.fc-level-card-long {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid transparent;
 }
 
-.fc-level-box:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-5px);
-  border-color: #0ea5e9;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+.fc-level-card-long:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
-.fc-level-title {
-  font-size: 32px;
-  font-weight: 800;
-  color: #ffffff;
-  margin-bottom: 10px;
-  background: linear-gradient(90deg, #0ea5e9 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.fc-level-count {
+.fc-level-card-count {
   font-size: 14px;
-  color: #94a3b8;
-  font-weight: 500;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.fc-level-card-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #000;
 }
 
 .fc-back-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #64748b;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -331,6 +328,488 @@
 }
 
 .fc-back-btn:hover {
+  color: #1e293b;
+}
+
+
+/* --- New Grid Layout for My Cards --- */
+.fc-mycards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 800px;
+}
+
+.fc-mycard-item {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.fc-mycard-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.fc-mycard-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.fc-mycard-jp {
+  font-size: 24px;
+  font-weight: 900;
+  color: #1e293b;
+}
+
+.fc-mycard-star {
+  opacity: 0.8;
+}
+
+.fc-mycard-kana {
+  font-size: 16px;
+  color: #4c1d95; /* Purple */
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.fc-mycard-meaning-row {
+  flex-grow: 1;
+}
+
+.fc-mycard-meaning {
+  font-size: 16px;
+  color: #4c1d95; /* Purple */
+  font-weight: 500;
+}
+
+.fc-mycard-divider {
+  height: 1px;
+  background-color: #e2e8f0;
+  margin: 15px 0 10px 0;
+}
+
+.fc-mycard-bottom {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fc-mycard-delete {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.fc-mycard-delete:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.fc-export-btn-new {
+  background: #c084fc;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.fc-export-btn-new:hover {
+  background: #a855f7;
+}
+
+.fc-mycard-fab {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #c084fc;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  box-shadow: 0 4px 15px rgba(192, 132, 252, 0.4);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.fc-mycard-fab:hover {
+  transform: scale(1.05);
+  background: #a855f7;
+}
+
+/* --- New Modal Layout --- */
+.fc-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.fc-modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.fc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.fc-modal-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.fc-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.fc-modal-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.fc-modal-group {
+  margin-bottom: 20px;
+}
+
+.fc-modal-input {
+  width: 100%;
+  padding: 15px 0;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 16px;
+  color: #1e293b;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.fc-modal-input:focus {
+  border-bottom-color: #c084fc;
+}
+
+.fc-modal-input::placeholder {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.fc-btn-add-more-disabled {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+}
+
+.fc-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.fc-btn-submit {
+  background: #d946ef;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 40px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fc-btn-cancel {
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 30px;
+  padding: 12px 40px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+
+.fc-mycards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.fc-mycard-item {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.fc-mycard-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.fc-mycard-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 5px;
+}
+
+.fc-mycard-jp {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.fc-mycard-star {
+  color: #3b0764;
+}
+
+.fc-mycard-kana {
+  font-size: 14px;
+  color: #c084fc;
+  margin-bottom: 25px;
+}
+
+.fc-mycard-meaning {
+  font-size: 16px;
+  color: #c084fc;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.fc-mycard-divider {
+  height: 1px;
+  background: #e2e8f0;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.fc-mycard-delete {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.fc-mycard-delete:hover {
+  color: #ef4444;
+}
+
+.fc-mycard-fab {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #c084fc;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(192, 132, 252, 0.4);
+  transition: all 0.2s;
+  z-index: 100;
+}
+
+.fc-mycard-fab:hover {
+  transform: scale(1.05);
+  background: #a855f7;
+}
+
+.fc-export-btn-new {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  background: #c084fc;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.fc-export-btn-new:hover {
+  background: #a855f7;
+}
+
+/* Modal specific for new layout */
+.fc-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.fc-modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.fc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.fc-modal-header h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.fc-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.fc-modal-group {
+  margin-bottom: 20px;
+}
+
+.fc-modal-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #1e293b;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.fc-modal-input:focus {
+  border-bottom-color: #c084fc;
+}
+
+.fc-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+.fc-btn-cancel {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  padding: 10px 30px;
+  border-radius: 30px;
+  color: #64748b;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fc-btn-submit {
+  background: #d946ef;
   color: #ffffff;
+  border: none;
+  padding: 10px 40px;
+  border-radius: 30px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* Search Bar Styles */
+.fc-search-container {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 30px;
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 400px;
+  transition: all 0.3s ease;
+}
+
+.fc-search-container:focus-within {
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+  background: #ffffff;
+}
+
+.fc-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  padding-left: 12px;
+  font-size: 15px;
+  width: 100%;
+  color: #334155;
+}
+
+.fc-search-input::placeholder {
+  color: #94a3b8;
 }
 

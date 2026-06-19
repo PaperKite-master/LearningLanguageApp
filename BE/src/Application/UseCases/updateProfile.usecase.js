@@ -1,8 +1,14 @@
-export async function updateProfileUseCase({ prisma, userId, targetLevel, fullName, newPassword }) {
+export async function updateProfileUseCase({ prisma, userId, targetLevel, fullName, newPassword, avatarUrl, visibility, phone, address, bio, preferredContact }) {
   // Update Prisma profile
   const updateData = {};
   if (targetLevel !== undefined) updateData.target_level = targetLevel;
   if (fullName !== undefined) updateData.full_name = fullName;
+  if (avatarUrl !== undefined) updateData.avatar_url = avatarUrl;
+  if (visibility !== undefined) updateData.visibility = visibility;
+  if (phone !== undefined) updateData.phone = phone;
+  if (address !== undefined) updateData.address = address;
+  if (bio !== undefined) updateData.bio = bio;
+  if (preferredContact !== undefined) updateData.preferred_contact = preferredContact;
 
   let profile = null;
   if (Object.keys(updateData).length > 0) {
@@ -14,14 +20,17 @@ export async function updateProfileUseCase({ prisma, userId, targetLevel, fullNa
 
   // Update Supabase password if provided
   if (newPassword) {
-    // We would need the user's access token or admin privileges to update password
-    // For now, this requires the user to use reset password flow or we need to pass their token.
-    // If it's a future requirement, we can implement it. 
-    // Just a placeholder to show we accept it.
+    // Just a placeholder
   }
 
   return {
     targetLevel: profile?.target_level ?? undefined,
     fullName: profile?.full_name ?? undefined,
+    avatarUrl: profile?.avatar_url ?? undefined,
+    visibility: profile?.visibility ?? undefined,
+    phone: profile?.phone ?? undefined,
+    address: profile?.address ?? undefined,
+    bio: profile?.bio ?? undefined,
+    preferredContact: profile?.preferred_contact ?? undefined,
   };
 }

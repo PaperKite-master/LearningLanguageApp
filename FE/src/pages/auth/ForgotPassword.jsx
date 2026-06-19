@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
-import BackgroundLayer from '../../components/BackgroundLayer';
-import LeftColumn from '../../components/LeftColumn';
 import authApi from '../../api/authApi';
+import Header from '../../components/Header';
+import computer from '../../assets/computer.png';
+import './Auth.css';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -25,51 +26,65 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="app-container">
-      <BackgroundLayer />
-      <main className="main-content">
-        <LeftColumn />
-        <div className="right-column">
-          <div className="login-form-container">
-            <Link to="/login" className="back-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#fff', textDecoration: 'none', opacity: 0.7, marginBottom: '20px' }}>
-              <ArrowLeft size={16} /> Quay lại
+    <div className="auth-page-container">
+      <Header hideActions />
+      
+      <main className="auth-main-content">
+        
+        {/* Left Column - Illustration */}
+        <div className="auth-left-column">
+          <img 
+            src={computer} 
+            alt="HiNa Digital Learning" 
+            className="auth-illustration" 
+          />
+        </div>
+        
+        {/* Right Column - Form */}
+        <div className="auth-right-column">
+          <div className="auth-form-container">
+            <Link to="/login" className="auth-forgot-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '30px', color: '#6b7280', textDecoration: 'none' }}>
+              <ArrowLeft size={16} /> Quay lại đăng nhập
             </Link>
             
-            <h1 className="login-heading">QUÊN MẬT KHẨU?</h1>
+            <h1 className="auth-heading">QUÊN MẬT KHẨU?</h1>
             
-            <p className="login-desc">
+            <div className="auth-desc">
               Đừng lo lắng! Hãy nhập email bạn đã đăng ký, chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.
-            </p>
+            </div>
             
             {status === 'success' ? (
-              <div className="success-message" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '15px', borderRadius: '12px', marginTop: '20px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+              <div style={{ background: '#ecfdf5', color: '#10b981', padding: '15px', borderRadius: '12px', marginTop: '20px', border: '1px solid #a7f3d0' }}>
                 Yêu cầu thành công! Vui lòng kiểm tra hộp thư email của bạn để lấy liên kết đặt lại mật khẩu.
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ marginTop: '30px' }}>
-                <div className="input-group">
-                  <Mail className="input-icon" size={20} />
-                  <input 
-                    type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="styled-input pill-element" 
-                    placeholder="Email của bạn" 
-                    required
-                  />
+                <div className="auth-input-group">
+                  <label className="auth-input-label">Email</label>
+                  <div className="auth-input-wrapper">
+                    <Mail className="auth-input-icon" size={20} />
+                    <input 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="auth-input" 
+                      placeholder="Nhập địa chỉ email" 
+                      required
+                    />
+                  </div>
                 </div>
                 
                 {status === 'error' && (
-                  <div className="error-message" style={{ color: '#ef4444', fontSize: '14px', marginTop: '10px', marginBottom: '10px' }}>
+                  <div style={{ color: '#ef4444', fontSize: '14px', marginTop: '10px', marginBottom: '10px' }}>
                     {errorMessage}
                   </div>
                 )}
                 
                 <button 
                   type="submit" 
-                  className="login-btn pill-element"
+                  className="auth-submit-btn"
                   disabled={status === 'loading'}
-                  style={{ marginTop: status === 'error' ? '10px' : '25px', opacity: status === 'loading' ? 0.7 : 1, whiteSpace: 'nowrap' }}
+                  style={{ marginTop: status === 'error' ? '10px' : '15px', opacity: status === 'loading' ? 0.7 : 1 }}
                 >
                   {status === 'loading' ? 'Đang gửi...' : 'Gửi yêu cầu khôi phục'}
                 </button>

@@ -1,0 +1,399 @@
+/* DashboardNew.css - Overrides for the redesign */
+
+/* Override layout background */
+.dashboard-layout {
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+.dashboard-main-area {
+  background-color: #ffffff;
+  padding: 0 !important; /* TopBar takes top, content takes rest */
+  gap: 0;
+}
+
+/* Sidebar Overrides */
+.dashboard-sidebar {
+  background-color: #371089 !important; /* Dark Purple */
+  border-right: none !important;
+}
+
+.nav-item {
+  color: #e2e8f0 !important;
+  opacity: 0.8 !important;
+  border: 1px solid transparent;
+  padding: 12px !important;
+  flex-direction: row !important;
+  gap: 15px !important;
+  margin-bottom: 5px;
+}
+
+.nav-item:hover {
+  background-color: rgba(255,255,255,0.1) !important;
+  opacity: 1 !important;
+}
+
+.nav-item.active {
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  background-color: rgba(255,255,255,0.05) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.nav-item.active .nav-icon {
+  color: #ffffff !important;
+  filter: none !important;
+}
+
+/* Dashboard TopBar */
+.dashboard-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.topbar-streak {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.topbar-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.topbar-icon-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.topbar-profile {
+  position: relative;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.avatar-circle {
+  width: 35px;
+  height: 35px;
+  background-color: #371089;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #10b981;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  width: 220px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+  padding: 10px 0;
+  z-index: 100;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #475569;
+  transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #e2e8f0;
+  margin: 5px 0;
+}
+
+.logout-item {
+  color: #ef4444;
+}
+
+.logout-item:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.icon-bg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.icon-bg-user {
+  background-color: #faf5ff; /* light purple */
+}
+
+.icon-bg-bell {
+  background-color: #f3e8ff; /* slightly darker light purple */
+}
+
+.icon-bg-logout {
+  background-color: #fef2f2; /* light red */
+}
+
+
+/* Study Content Layout Overrides */
+.study-content-layout {
+  padding: 0 !important;
+}
+
+.study-header-banner {
+  display: none !important; /* The new design doesn't have this banner */
+}
+
+.study-columns {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  gap: 40px;
+}
+
+.study-main-col {
+  flex: 1;
+}
+
+.study-side-col {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+/* Learning Path Overrides */
+.learning-path {
+  background: transparent !important;
+}
+
+.path-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 40px;
+  justify-content: center;
+}
+
+.level-badge {
+  background-color: #bae6fd !important;
+  color: #0284c7 !important;
+  font-weight: bold;
+  font-size: 1.5rem !important;
+  padding: 10px 15px !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.level-info h3 {
+  color: #1e293b !important;
+  font-size: 1.5rem;
+  margin: 0 0 5px 0;
+  font-weight: 800;
+}
+
+.level-info p {
+  color: #64748b !important;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.path-divider {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 30px 0 !important;
+}
+
+.path-divider .line {
+  height: 1px !important;
+  background-color: #e2e8f0 !important;
+  flex: 1;
+}
+
+.path-divider .text {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px;
+}
+
+/* Path Nodes */
+.node-circle {
+  background-color: #e2e8f0 !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
+}
+
+.node-wrapper.active .node-circle {
+  background-color: #a855f7 !important; /* purple */
+}
+
+.node-wrapper.completed .node-circle {
+  background-color: #a855f7 !important; /* purple */
+}
+
+.node-connector path {
+  stroke: #38bdf8 !important; /* cyan dashes */
+  stroke-dasharray: 8 8 !important;
+}
+
+/* Checkpoint */
+.checkpoint-container {
+  margin: 40px 0 !important;
+}
+
+.checkpoint-card {
+  background-color: #2e156f !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 15px 40px !important;
+  box-shadow: 0 10px 20px rgba(46, 21, 111, 0.2) !important;
+}
+
+.checkpoint-card span {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.key-icon-wrapper {
+  background: transparent !important;
+}
+
+/* Locked Section Bottom */
+.locked-section-card {
+  background-color: #2e156f !important;
+  border: none !important;
+  border-radius: 16px !important;
+  padding: 40px !important;
+  margin-top: 60px !important;
+  box-shadow: 0 20px 40px rgba(46, 21, 111, 0.2) !important;
+}
+
+.locked-section-card h3 {
+  color: #ffffff !important;
+}
+
+.locked-section-card p {
+  color: #cbd5e1 !important;
+}
+
+.unlock-btn {
+  background-color: #d8b4fe !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Progress Widget Overrides */
+.progress-widget {
+  background-color: #ffffff !important;
+  border-radius: 24px !important;
+  padding: 30px !important;
+  box-shadow: 0 20px 40px rgba(168, 85, 247, 0.15) !important; /* Purple shadow */
+  border: 1px solid #f1f5f9 !important;
+}
+
+.widget-title {
+  color: #2e156f !important;
+  font-weight: 800 !important;
+  text-align: center;
+  font-size: 1.1rem !important;
+  margin-bottom: 20px !important;
+}
+
+.progress-ring .ring-bg {
+  stroke: #f1f5f9 !important;
+}
+
+.rocket-icon {
+  filter: drop-shadow(0 0 8px rgba(168,85,247,0.4)) !important;
+  color: #a855f7 !important;
+}
+
+.progress-label {
+  color: #1e293b !important;
+  font-weight: 800 !important;
+}
+
+.stat-pill {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.stat-num {
+  color: #1e293b !important;
+}
+
+.stat-desc {
+  color: #64748b !important;
+}

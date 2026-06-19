@@ -162,7 +162,7 @@ const LearningPath = () => {
         }}
       >
         <circle
-          stroke="#4b5563"
+          stroke="#e2e8f0"
           strokeWidth="8"
           fill="transparent"
           r={radius}
@@ -272,11 +272,11 @@ const LearningPath = () => {
                 {renderProgressRing(item)}
                 <div className="node-circle" style={{ zIndex: 10 }}>
                   {item.progressValue === 100 ? (
-                    <Crown size={28} color="#fbbf24" fill="#fbbf24" />
+                    <Crown size={28} color="#ffffff" />
                   ) : item.active ? (
-                    item.progressValue > 0 ? <Star size={24} color="#38bdf8" /> : <BookOpen size={24} />
+                    item.progressValue > 0 ? <Star size={24} color="#ffffff" fill="#ffffff" /> : <BookOpen size={24} color="#ffffff" />
                   ) : (
-                    <Lock size={24} opacity={0.5} />
+                    <BookOpen size={24} color="#94a3b8" />
                   )}
                 </div>
                 {renderLineToNextNode(item.offset, nextOffset, item.active)}

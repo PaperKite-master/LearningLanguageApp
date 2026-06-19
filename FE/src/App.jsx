@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LandingPage from './pages/landing/LandingPage';
-import Dashboard from './pages/dashboard/Dashboard';
 import Study from './pages/study/Study';
 import LessonDetail from './pages/study/LessonDetail';
 import Alphabet from './pages/alphabet/Alphabet';
@@ -18,7 +17,9 @@ import QuizTake from './pages/quiz/QuizTake';
 import AdminLessonCreate from './pages/admin/AdminLessonCreate';
 import AdminFlashcard from './pages/admin/AdminFlashcard';
 import AdminTimeline from './pages/admin/AdminTimeline';
+import AdminVideos from './pages/admin/AdminVideos';
 import AdminSettings from './pages/admin/AdminSettings';
+import UserSettings from './pages/settings/UserSettings';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -75,8 +76,8 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         
-        {/* Dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Dashboard redirects to Study */}
+        <Route path="/dashboard" element={<Navigate to="/study" replace />} />
         
         {/* Study Page  */}
         <Route path="/study" element={<Study />} />
@@ -99,6 +100,9 @@ function App() {
 
         {/* Quiz Take Page */}
         <Route path="/quiz/:id" element={<QuizTake />} />
+        
+        {/* User Settings */}
+        <Route path="/settings" element={<UserSettings />} />
 
         {/* Admin Pages */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -106,6 +110,7 @@ function App() {
         <Route path="/admin/content" element={<AdminContent />} />
         <Route path="/admin/content/create" element={<AdminLessonCreate />} />
         <Route path="/admin/timeline" element={<AdminTimeline />} />
+        <Route path="/admin/videos" element={<AdminVideos />} />
         <Route path="/admin/flashcard" element={<AdminFlashcard />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/tests" element={<AdminQuizzes />} />

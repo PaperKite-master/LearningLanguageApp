@@ -8,7 +8,8 @@ import {
   Map, 
   Layers, 
   Settings,
-  LogOut
+  LogOut,
+  Video
 } from 'lucide-react';
 import logo from '../../assets/logo.png';
 import authApi from '../../api/authApi';
@@ -49,6 +50,10 @@ const AdminSidebar = () => {
         <NavLink to="/admin/timeline" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
           <Map size={24} />
           <span>Timeline</span>
+        </NavLink>
+        <NavLink to="/admin/videos" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+          <Video size={24} />
+          <span>Videos</span>
         </NavLink>
         <NavLink to="/admin/flashcard" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
           <Layers size={24} />

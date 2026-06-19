@@ -7,6 +7,7 @@ import lessonApi from '../../api/lessonApi';
 import grammarApi from '../../api/grammarApi';
 import timelineApi from '../../api/timelineApi';
 import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
+import './AdminLessonCreateContent.css';
 
 const extractText = (children) => {
   if (typeof children === 'string') return children;
@@ -150,6 +151,19 @@ const AdminLessonCreateContent = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (contentType === 'lesson') {
+      if (!lessonFormData.title || !lessonFormData.timelineId || !lessonFormData.topic) {
+        alert('Vui lòng điền đầy đủ Tiêu đề, Thuộc Lộ trình và Chủ đề!');
+        return;
+      }
+    } else {
+      if (!grammarFormData.title || !grammarFormData.lessonId) {
+        alert('Vui lòng điền đầy đủ Tiêu đề Ngữ Pháp và Chọn Bài học!');
+        return;
+      }
+    }
+    
     try {
       if (contentType === 'lesson') {
         let finalLessonCode = lessonFormData.lessonCode;
@@ -213,73 +227,53 @@ const AdminLessonCreateContent = () => {
   };
 
   return (
-    <div className="admin-content-area admin-markdown-editor-page" data-color-mode="dark">
+    <div className="admin-lesson-create-area" data-color-mode="light">
       
       {/* Header */}
-      <div className="admin-header flex-header" style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+      <div className="admin-lesson-create-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button 
-            className="action-btn" 
+            className="action-btn-back" 
             onClick={() => navigate('/admin/content')}
-            style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}
+            title="Quay lại"
           >
-            <ArrowLeft size={24} color="#fff" />
+            <ArrowLeft size={20} />
           </button>
-          <h1 className="admin-heading" style={{ marginBottom: 0 }}>
+          <h1 className="admin-lesson-create-title">
             {editMode ? (contentType === 'lesson' ? 'CHỈNH SỬA BÀI HỌC' : 'CHỈNH SỬA NGỮ PHÁP') : (contentType === 'lesson' ? 'TẠO BÀI HỌC MỚI' : 'TẠO NGỮ PHÁP MỚI')}
           </h1>
         </div>
-        <div style={{ display: 'flex', gap: '15px' }}>
+        <div style={{ display: 'flex', gap: '12px' }}>
           <button className="modal-btn-cancel" onClick={() => navigate('/admin/content')}>
             Hủy
           </button>
-          <button className="admin-btn-primary" onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button className="admin-btn-primary" onClick={handleSave}>
             <Save size={18} /> {editMode ? 'Lưu Thay Đổi' : 'Lưu & Xuất bản'}
           </button>
         </div>
       </div>
 
       {/* Meta Data Form */}
-      <div className="admin-settings-panel" style={{ maxWidth: '100%', marginBottom: '24px', padding: '24px' }}>
+      <div className="admin-lesson-create-panel">
         
-        <div className="form-group" style={{ marginBottom: '20px' }}>
-          <label>Loại nội dung tạo mới</label>
-          <div className="status-radio-group">
-            <label className="radio-label">
-              <input 
-                type="radio" 
-                value="lesson" 
-                checked={contentType === 'lesson'} 
-                onChange={() => setContentType('lesson')} 
-              /> 📚 Bài học chính (Lesson)
-            </label>
-            <label className="radio-label">
-              <input 
-                type="radio" 
-                value="grammar" 
-                checked={contentType === 'grammar'} 
-                onChange={() => setContentType('grammar')} 
-              /> ✍️ Ngữ pháp bổ trợ (Grammar)
-            </label>
-          </div>
-        </div>
+        {/* Content type is determined by the route that triggered this page, so we don't need manual radio selection anymore. */}
 
         {/* Dynamic Form based on Selection */}
         {contentType === 'lesson' ? (
           <>
-            <div className="form-group-row" style={{ marginBottom: '15px' }}>
+            <div className="form-group-row">
               <div className="form-group" style={{ flex: 2 }}>
                 <label>Tiêu đề bài học</label>
                 <input 
                   type="text" name="title" value={lessonFormData.title} onChange={handleLessonChange} 
-                  className="modal-input" required placeholder="VD: Bài 1: Chào hỏi cơ bản"
+                  className="admin-lesson-create-input" required placeholder="VD: Bài 1: Chào hỏi cơ bản"
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
                 <label>Thuộc Lộ trình (Timeline)</label>
                 <select 
                   name="timelineId" value={lessonFormData.timelineId} onChange={handleLessonChange} 
-                  className="modal-input" required
+                  className="admin-lesson-create-input" required
                 >
                   <option value="">-- Chọn Lộ trình --</option>
                   {timelines.map(tl => (
@@ -293,7 +287,7 @@ const AdminLessonCreateContent = () => {
                 <label>Mã bài học (Lesson Code)</label>
                 <input 
                   type="text" name="lessonCode" value={lessonFormData.lessonCode} onChange={handleLessonChange} 
-                  className="modal-input" placeholder="VD: L001 (Để trống = Auto)"
+                  className="admin-lesson-create-input" placeholder="VD: L001 (Để trống = Auto)"
                 />
               </div>
             </div>
@@ -302,12 +296,12 @@ const AdminLessonCreateContent = () => {
                 <label>Chủ đề (Topic)</label>
                 <input 
                   type="text" name="topic" value={lessonFormData.topic} onChange={handleLessonChange} 
-                  className="modal-input" required placeholder="VD: Từ vựng, Ngữ pháp..."
+                  className="admin-lesson-create-input" required placeholder="VD: Từ vựng, Ngữ pháp..."
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
                 <label>Trạng thái</label>
-                <select name="status" value={lessonFormData.status} onChange={handleLessonChange} className="modal-input">
+                <select name="status" value={lessonFormData.status} onChange={handleLessonChange} className="admin-lesson-create-input">
                   <option value="published">Đã xuất bản (Published)</option>
                   <option value="draft">Bản nháp (Draft)</option>
                 </select>
@@ -316,27 +310,26 @@ const AdminLessonCreateContent = () => {
                 <label>Video URL (Youtube/AWS)</label>
                 <input 
                   type="url" name="videoUrl" value={lessonFormData.videoUrl} onChange={handleLessonChange} 
-                  className="modal-input" placeholder="https://..."
+                  className="admin-lesson-create-input" placeholder="https://..."
                 />
               </div>
             </div>
           </>
         ) : (
-          <div className="form-group-row" style={{ marginBottom: '15px' }}>
+          <div className="form-group-row" style={{ marginBottom: 0 }}>
             <div className="form-group" style={{ flex: 2 }}>
               <label>Tiêu đề Ngữ Pháp</label>
               <input 
                 type="text" name="title" value={grammarFormData.title} onChange={handleGrammarChange} 
-                className="modal-input" required placeholder="VD: Ngữ pháp は・が"
+                className="admin-lesson-create-input" required placeholder="VD: Ngữ pháp は・が"
               />
             </div>
             <div className="form-group" style={{ flex: 1 }}>
               <label>Thuộc Bài Học (Lesson)</label>
               <select 
                 name="lessonId" value={grammarFormData.lessonId} onChange={handleGrammarChange} 
-                className="modal-input" required
+                className="admin-lesson-create-input" required
                 disabled={editMode}
-                style={editMode ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
               >
                 <option value="">-- Chọn Bài học --</option>
                 {lessons.map(ls => (
@@ -348,7 +341,7 @@ const AdminLessonCreateContent = () => {
             </div>
             <div className="form-group" style={{ flex: 1 }}>
               <label>Trạng thái</label>
-              <select name="status" value={grammarFormData.status} onChange={handleGrammarChange} className="modal-input">
+              <select name="status" value={grammarFormData.status} onChange={handleGrammarChange} className="admin-lesson-create-input">
                 <option value="published">Đã xuất bản (Published)</option>
                 <option value="draft">Bản nháp (Draft)</option>
               </select>
@@ -361,14 +354,13 @@ const AdminLessonCreateContent = () => {
       {/* Markdown Editor Area */}
       <div 
         className="markdown-editor-wrapper" 
-        style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onPaste={handlePaste}
       >
-        <div className="editor-helper-bar" style={{ background: '#1c2035', padding: '10px 15px', fontSize: '0.85rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="editor-helper-bar">
           <FileText size={16} />
-          <span>Hỗ trợ Kéo/Thả (Drag & Drop) hoặc Dán (Ctrl+V) ảnh minh họa trực tiếp vào khung soạn thảo. Hệ thống sẽ tự động Upload lên Supabase.</span>
+          <span>Hỗ trợ Kéo/Thả (Drag & Drop) hoặc Dán (Ctrl+V) ảnh minh họa trực tiếp vào khung soạn thảo. Hệ thống sẽ tự động Upload.</span>
         </div>
         <MDEditor
           value={markdownValue}
@@ -384,21 +376,22 @@ const AdminLessonCreateContent = () => {
 
       {/* Grammar List Quick View (Only in Lesson Edit Mode) */}
       {editMode && contentType === 'lesson' && (
-        <div className="admin-settings-panel" style={{ maxWidth: '100%', marginTop: '24px', padding: '24px' }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#fff', fontSize: '1.2rem' }}>Danh sách Ngữ pháp của bài học này</h3>
+        <div className="admin-lesson-create-panel" style={{ marginTop: '24px' }}>
+          <h3 style={{ margin: '0 0 16px 0', color: '#0f172a', fontSize: '1.2rem' }}>Danh sách Ngữ pháp của bài học này</h3>
           {lessonGrammars.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {lessonGrammars.map((g, idx) => (
-                <div key={g.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={g.id} className="grammar-quick-list-item">
                   <div>
-                    <strong style={{ color: '#00f2fe' }}>#{idx + 1}</strong> <span style={{ marginLeft: '10px', color: '#e5e7eb' }}>{g.title}</span>
+                    <strong className="grammar-quick-list-index">#{idx + 1}</strong> 
+                    <span className="grammar-quick-list-title">{g.title}</span>
                   </div>
-                  <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>ID: {g.id.substring(0, 8)}</span>
+                  <span className="grammar-quick-list-id">ID: {g.id.substring(0, 8)}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p style={{ color: '#9ca3af', fontStyle: 'italic', margin: 0 }}>Chưa có điểm ngữ pháp nào được thêm vào bài học này.</p>
+            <p style={{ color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>Chưa có điểm ngữ pháp nào được thêm vào bài học này.</p>
           )}
         </div>
       )}

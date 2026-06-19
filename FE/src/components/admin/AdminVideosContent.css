@@ -1,0 +1,474 @@
+.admin-videos-container {
+  padding: 2rem;
+
+  color: #1e293b;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Area */
+.av-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.av-header-left h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.av-header-left p {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.av-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.av-search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  width: 280px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.av-search-box:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.av-search-icon {
+  color: #94a3b8;
+  margin-right: 0.5rem;
+}
+
+.av-search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #334155;
+  background: transparent;
+}
+
+.av-search-box input::placeholder {
+  color: #94a3b8;
+}
+
+.av-filter-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.av-filter-icon {
+  color: #94a3b8;
+  margin-right: 0.5rem;
+}
+
+.av-filter-box select {
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  color: #334155;
+  background: transparent;
+  cursor: pointer;
+}
+
+.av-btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+  transition: all 0.2s;
+}
+
+.av-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+}
+
+.av-btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.av-btn-secondary:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* Content Area */
+.av-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.av-loading {
+  text-align: center;
+  color: #64748b;
+  padding: 3rem;
+  font-size: 1.1rem;
+}
+
+.av-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+}
+
+.av-empty-icon {
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.av-empty h3 {
+  color: #334155;
+  margin: 0 0 0.5rem 0;
+}
+
+.av-module-block {
+  background: transparent;
+}
+
+.av-module-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+}
+
+.av-module-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.av-module-count {
+  background: #e2e8f0;
+  color: #475569;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.av-lessons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.av-lesson-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.av-lesson-row:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+  background: #f8fafc;
+}
+
+.av-lesson-left {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.av-lesson-thumb {
+  width: 80px;
+  height: 50px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.av-play-icon {
+  color: #6366f1;
+}
+
+.av-lesson-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.av-lesson-title {
+  font-weight: 500;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.av-lesson-badge {
+  background: #dbeafe;
+  color: #2563eb;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.av-lesson-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.av-status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.av-status-badge.published {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.av-status-badge.draft {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.av-options-wrapper {
+  position: relative;
+}
+
+.av-icon-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.av-icon-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.av-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  width: 160px;
+  z-index: 10;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.av-dropdown-menu button {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #334155;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.av-dropdown-menu button:hover {
+  background: #f1f5f9;
+}
+
+.av-danger-text {
+  color: #ef4444 !important;
+}
+
+.av-danger-text:hover {
+  background: #fef2f2 !important;
+}
+
+/* Modal styles */
+.av-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.av-modal-box {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.av-modal-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.av-modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.av-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+  display: flex;
+}
+
+.av-close-btn:hover {
+  color: #0f172a;
+}
+
+.av-modal-form {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.av-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.av-form-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.av-form-group input,
+.av-form-group select,
+.av-form-group textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.av-form-group input:focus,
+.av-form-group select:focus,
+.av-form-group textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.av-form-row {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.av-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}

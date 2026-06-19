@@ -17,6 +17,7 @@ export async function getQuizUseCase(prisma, quizId) {
     title: quiz.title,
     type: quiz.type,
     passingScore: quiz.passing_score,
+    time_limit: quiz.time_limit,
     questions: quiz.questions.map((q) => ({
       id: q.id,
       questionText: q.question_text,

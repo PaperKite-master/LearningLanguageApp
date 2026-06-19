@@ -10,6 +10,12 @@ export const DashboardResponseSchema = Type.Object({
   data: Type.Object({
     user: Type.Object({
       name: Type.String(),
+      avatarUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+      visibility: Type.Optional(Type.Union([Type.Boolean(), Type.Null()])),
+      phone: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+      address: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+      bio: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+      preferredContact: Type.Optional(Type.Union([Type.String(), Type.Null()])),
     }),
     stats: Type.Object({
       streak: Type.Integer(),
@@ -46,6 +52,12 @@ export const UpdateProfileBodySchema = Type.Object({
   targetLevel: Type.Optional(Type.String()),
   fullName: Type.Optional(Type.String()),
   newPassword: Type.Optional(Type.String()),
+  avatarUrl: Type.Optional(Type.String()),
+  visibility: Type.Optional(Type.Boolean()),
+  phone: Type.Optional(Type.String()),
+  address: Type.Optional(Type.String()),
+  bio: Type.Optional(Type.String()),
+  preferredContact: Type.Optional(Type.String()),
 });
 
 export const UpdateProfileResponseSchema = Type.Object({
@@ -54,5 +66,20 @@ export const UpdateProfileResponseSchema = Type.Object({
   data: Type.Object({
     targetLevel: Type.Optional(Type.Union([Type.String(), Type.Null()])),
     fullName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    avatarUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    visibility: Type.Optional(Type.Union([Type.Boolean(), Type.Null()])),
+    phone: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    address: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    bio: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    preferredContact: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   }),
+});
+export const ChangePasswordBodySchema = Type.Object({
+  oldPassword: Type.String(),
+  newPassword: Type.String(),
+});
+
+export const SuccessMessageResponseSchema = Type.Object({
+  status: Type.Literal('success'),
+  message: Type.String(),
 });

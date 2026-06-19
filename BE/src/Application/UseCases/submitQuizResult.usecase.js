@@ -20,15 +20,46 @@ export async function submitQuizResultUseCase(prisma, userId, quizId, answers) {
     const question = quiz.questions.find(q => q.id === answer.questionId);
     let isCorrect = false;
     let correctOptionIndex = -1;
+    let detail = {};
 
     if (question && Array.isArray(question.options)) {
-      correctOptionIndex = question.options.findIndex(opt => opt.isCorrect);
-      
-      const selectedOption = question.options[answer.answerIndex];
-      if (selectedOption && selectedOption.isCorrect) {
-        correctCount++;
-        isCorrect = true;
+      const qType = question.question_type || 'multiple_choice';
+
+      if (qType === 'multiple_choice' || qType === 'MULTIPLE_CHOICE') {
+        correctOptionIndex = question.options.findIndex(opt => opt.isCorrect);
+        
+        const selectedOption = question.options[answer.answerIndex];
+        if (selectedOption && selectedOption.isCorrect) {
+          isCorrect = true;
+        }
+      } else if (qType === 'typing' || qType === 'FILL_IN_BLANK') {
+        const correctText = question.options[0]?.correctAnswer?.trim().toLowerCase() || '';
+        const userText = (answer.answerText || '').trim().toLowerCase();
+        if (correctText === userText) {
+          isCorrect = true;
+        }
+        detail = { correctAnswer: question.options[0]?.correctAnswer };
+      } else if (qType === 'matching' || qType === 'MATCHING') {
+        const correctPairs = question.options;
+        const userPairs = answer.answerPairs || [];
+        
+        let allMatch = true;
+        if (userPairs.length !== correctPairs.length) {
+          allMatch = false;
+        } else {
+          for (const correctPair of correctPairs) {
+            const userPair = userPairs.find(up => up.left === correctPair.left && up.right === correctPair.right);
+            if (!userPair) {
+              allMatch = false;
+              break;
+            }
+          }
+        }
+        isCorrect = allMatch;
+        detail = { correctPairs };
       }
+
+      if (isCorrect) correctCount++;
     }
 
     questionResults.push({
@@ -36,6 +67,9 @@ export async function submitQuizResultUseCase(prisma, userId, quizId, answers) {
       isCorrect,
       correctOptionIndex,
       userAnswerIndex: answer.answerIndex,
+      userAnswerText: answer.answerText,
+      userAnswerPairs: answer.answerPairs,
+      ...detail
     });
   }
 

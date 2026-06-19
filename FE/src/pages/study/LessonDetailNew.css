@@ -1,0 +1,310 @@
+/* LessonDetailNew.css */
+
+.lesson-detail-new {
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+.lesson-header-new {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 40px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.back-btn-new {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  background: transparent;
+  color: #c084fc;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn-new:hover {
+  background-color: #f3e8ff;
+  border-color: #c084fc;
+}
+
+.lesson-header-new h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pill-badge {
+  display: inline-block;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+.grammar-badge {
+  background-color: #60a5fa;
+  color: #ffffff;
+}
+
+.exercise-badge {
+  background-color: #d8b4fe;
+  color: #ffffff;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+}
+
+.item-icon-left {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+}
+
+.grammar-icon {
+  background-color: #dbeafe;
+}
+
+.exercise-icon {
+  background-color: #2e156f;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info h4 {
+  margin: 0 0 5px 0;
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.item-info p {
+  margin: 0;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.item-icon-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vocab-card {
+  background-color: #ffffff;
+  border-radius: 30px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(244, 114, 182, 0.15);
+  border: 2px solid #fdf2f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vocab-card h3 {
+  color: #1e293b;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e2e8f0;
+  width: 80%;
+  text-transform: uppercase;
+}
+
+.vocab-icon {
+  margin-top: 20px;
+}
+
+/* Grammar Detail */
+.grammar-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.grammar-detail-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.grammar-detail-card h4 {
+  color: #1e293b;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+}
+
+.grammar-detail-card p, .grammar-detail-card li {
+  color: #334155;
+}
+
+.grammar-full-width {
+  grid-column: 1 / -1;
+}
+
+.practice-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.practice-btn {
+  background-color: #d8b4fe;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 40px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(216, 180, 254, 0.4);
+  transition: transform 0.2s;
+}
+
+.practice-btn:hover {
+  transform: translateY(-2px);
+  background-color: #c084fc;
+}
+
+/* Exercise Content */
+.lesson-exercise-content {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+}
+
+.lesson-exercise-content p, .lesson-exercise-content li {
+  color: #334155 !important;
+}
+
+.lesson-exercise-content h1, .lesson-exercise-content h2, .lesson-exercise-content h3 {
+  color: #1e293b !important;
+}
+
+/* Make sure markdown rendering works well on white bg */
+.wmde-markdown {
+  background: transparent !important;
+  color: #334155 !important;
+}
+.wmde-markdown h1, .wmde-markdown h2, .wmde-markdown h3, .wmde-markdown h4 {
+  color: #1e293b !important;
+}
+.wmde-markdown pre {
+  background-color: #f8fafc !important;
+}
+.wmde-markdown code {
+  color: #a855f7 !important;
+}
+
+/* Vocabulary Grid */
+.vocab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.student-vocab-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.student-vocab-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+  border-color: #dbeafe;
+}
+
+.vocab-jp-group {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #e2e8f0;
+  width: 100%;
+}
+
+.vocab-hiragana {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #3b82f6;
+  margin-bottom: 8px;
+}
+
+.vocab-kanji {
+  font-size: 1.5rem;
+  color: #1e293b;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.vocab-romaji {
+  font-size: 1rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.vocab-meaning {
+  font-size: 1.2rem;
+  color: #334155;
+  font-weight: 500;
+}

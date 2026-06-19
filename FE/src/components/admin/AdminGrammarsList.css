@@ -1,0 +1,307 @@
+/* AdminGrammarsList.css */
+
+.admin-grammars-area {
+  padding: 40px 60px;
+
+  color: #1e293b;
+  width: 100%;
+}
+
+.admin-grammars-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.admin-grammars-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.admin-grammars-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.admin-grammars-search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.admin-grammars-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.admin-grammars-search-input {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.admin-grammars-search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.admin-btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+  transition: all 0.2s ease;
+}
+
+.admin-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+}
+
+.admin-grammars-table-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.admin-grammars-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-grammars-table th {
+  background-color: #f8fafc;
+  padding: 16px 24px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: capitalize;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-grammars-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.admin-grammars-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-grammars-table tr:hover {
+  background-color: #f8fafc;
+}
+
+.col-checkbox {
+  width: 50px;
+  padding-left: 24px !important;
+  padding-right: 12px !important;
+}
+
+.col-checkbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+  border-radius: 4px;
+}
+
+.col-title {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.col-lesson {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.col-order {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.col-status {
+  width: 120px;
+}
+
+.grammar-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.grammar-status-pill .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.grammar-status-pill.published {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.grammar-status-pill.published .status-dot {
+  background-color: #16a34a;
+}
+
+.grammar-status-pill.draft {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.grammar-status-pill.draft .status-dot {
+  background-color: #64748b;
+}
+
+.col-actions {
+  text-align: right;
+  width: 120px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.icon-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-action-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.icon-action-btn.delete-btn:hover {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+/* Modal */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.admin-modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 90vw;
+  width: 100%;
+}
+
+.delete-confirm-box {
+  width: 400px;
+  padding: 32px;
+  text-align: center;
+}
+
+.delete-title {
+  color: #ef4444;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.delete-confirm-box p {
+  color: #334155;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.modal-btn-cancel {
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn-cancel:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.modal-btn-danger {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.no-data-msg {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+  font-size: 1.1rem;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit2, Trash2, X, Copy } from 'lucide-react';
+import { Search, Edit2, Trash2, X, Copy, Star, Plus } from 'lucide-react';
 import flashcardApi from '../../api/flashcardApi';
 
 const MyFlashcards = () => {
@@ -164,163 +164,120 @@ const MyFlashcards = () => {
   };
 
   return (
-    <div style={{ width: '100%' }}>
-      <div className="fc-mycards-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-        <button className="fc-export-btn" onClick={handleExportQuizlet}>Xuất qua Quizlet</button>
+    <div className="fc-mycards-section">
+      <div style={{ position: 'absolute', top: '40px', right: '40px', zIndex: 10 }}>
+        <button className="fc-export-btn-new" onClick={handleExportQuizlet}>
+          Xuất sang Quizlet
+        </button>
       </div>
 
-      <div className="admin-content-area" style={{ padding: '0', background: 'transparent', boxShadow: 'none' }}>
-        <div className="admin-header flex-header" style={{ marginBottom: '15px' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'white' }}>Thẻ cá nhân của bạn</h2>
-          <button className="admin-btn-primary" onClick={handleOpenAddModal} style={{ background: '#3b82f6' }}>
-            + Thêm thẻ mới
-          </button>
-        </div>
-
-        <div className="admin-panel-container">
-          
-          {/* Search Bar */}
-          <div className="admin-search-wrapper">
-            <Search size={20} className="admin-search-icon" color="#9ca3af" />
+      <div className="admin-content-card" style={{ background: 'transparent', boxShadow: 'none', padding: 0 }}>
+        <div style={{ marginBottom: '30px' }}>
+          <div className="fc-search-container">
+            <Search size={20} color="#94a3b8" />
             <input 
+              className="fc-search-input"
               type="text" 
-              placeholder="Tìm kiếm thẻ cá nhân..." 
-              className="admin-search-input"
+              placeholder="Tìm kiếm Thẻ của tôi..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+        </div>
 
-          {/* Data Table */}
+        <div className="admin-card-body" style={{ padding: 0 }}>
           {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>Đang tải thẻ của bạn...</div>
+            <div className="fc-loading">Đang tải thẻ...</div>
           ) : error ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>{error}</div>
+            <div className="error-message" style={{ color: 'red', textAlign: 'center', padding: '20px' }}>
+              {error}
+              <div style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+                Gợi ý: Hãy thử đăng xuất và đăng nhập lại.
+              </div>
+            </div>
           ) : (
-          <div className="admin-table-wrapper">
-            <table className="admin-users-table">
-              <thead>
-                <tr>
-                  <th>Mã thẻ</th>
-                  <th style={{ textAlign: 'center' }}>Tiếng Nhật</th>
-                  <th>Phát âm (Hiragana)</th>
-                  <th>Nghĩa Tiếng Việt</th>
-                  <th>Cấp độ</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredFlashcards.map((item) => (
-                  <tr key={item.id}>
-                    <td className="col-id" style={{ color: '#9ca3af', fontFamily: 'monospace' }}>{item.displayId}</td>
-                    <td className="col-name" style={{ textAlign: 'center' }}>{item.jp}</td>
-                    <td className="col-email">{item.kana}</td>
-                    <td className="col-category">
-                      <span className="category-text">{item.meaning}</span>
-                    </td>
-                    <td className="col-role">
-                      <span className="role-badge role-level">
-                        {item.level}
-                      </span>
-                    </td>
-                    
-                    <td className="col-action col-action-group">
-                      <button className="icon-action-btn edit-btn" title="Chỉnh sửa" onClick={() => handleOpenEditModal(item)}>
-                        <Edit2 size={18} />
-                      </button>
-                      <button className="icon-action-btn delete-btn" title="Xóa" onClick={() => setItemToDelete(item)}>
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
+            <div>
+              <div className="fc-mycards-grid">
+                {filteredFlashcards.map(item => (
+                  <div className="fc-mycard-item" key={item.id} onClick={() => handleOpenEditModal(item)}>
+                    <div className="fc-mycard-top">
+                      <div className="fc-mycard-jp">{item.jp}</div>
+                      <Star className="fc-mycard-star" size={16} fill="#3b0764" color="#3b0764" />
+                    </div>
+                    <div className="fc-mycard-kana">{item.kana}</div>
+                    <div className="fc-mycard-meaning">{item.meaning}</div>
+                    <div className="fc-mycard-divider"></div>
+                    <button className="fc-mycard-delete" onClick={(e) => { e.stopPropagation(); setItemToDelete(item); }}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-            
-            {filteredFlashcards.length === 0 && (
-              <div className="no-data-msg">Bạn chưa tạo Flashcard nào.</div>
-            )}
-          </div>
+              </div>
+              
+              {filteredFlashcards.length === 0 && (
+                <div className="fc-empty">Bạn chưa tạo Flashcard nào.</div>
+              )}
+            </div>
           )}
           
+          <button className="fc-mycard-fab" onClick={handleOpenAddModal} title="Thêm thẻ mới">
+            <Plus size={24} />
+          </button>
         </div>
       </div>
 
       {/* CREATE / EDIT MODAL */}
       {isModalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box">
-            <div className="modal-header">
-              <h2>{modalMode === 'add' ? 'Thêm Thẻ Cá Nhân' : 'Chỉnh Sửa Thẻ'}</h2>
-              <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>
+        <div className="fc-modal-overlay">
+          <div className="fc-modal-box">
+            <div className="fc-modal-header">
+              <h2>{modalMode === 'add' ? 'THÊM THẺ' : 'CHỈNH SỬA THẺ'}</h2>
+              <button className="fc-modal-close-btn" onClick={() => setIsModalOpen(false)}>
                 <X size={24} />
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="modal-body-form">
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label>Mã thẻ (Tự động)</label>
-                  <input type="text" value={formData.displayId} disabled className="modal-input disabled-input" />
-                </div>
-                <div className="form-group">
-                  <label>Cấp độ (Mục tiêu)</label>
-                  <select 
-                    value={formData.level} 
-                    onChange={e => setFormData({...formData, level: e.target.value})} 
-                    className="modal-input"
-                  >
-                    <option value="N5">JLPT N5</option>
-                    <option value="N4">JLPT N4</option>
-                    <option value="N3">JLPT N3</option>
-                    <option value="N2">JLPT N2</option>
-                    <option value="N1">JLPT N1</option>
-                  </select>
-                </div>
+            <form onSubmit={handleSubmit} className="fc-modal-form">
+              <div className="fc-modal-group">
+                <input 
+                  type="text" 
+                  value={formData.jp} 
+                  onChange={e => setFormData({...formData, jp: e.target.value})} 
+                  className="fc-modal-input" 
+                  placeholder="Từ"
+                />
               </div>
-
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label>Tiếng Nhật (Kanji/Kana)</label>
-                  <input 
-                    type="text" 
-                    value={formData.jp} 
-                    onChange={e => setFormData({...formData, jp: e.target.value})} 
-                    className="modal-input" 
-                    placeholder="VD: コンピュータ (có thể để trống)"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phát âm (Hiragana)</label>
-                  <input 
-                    type="text" 
-                    value={formData.kana} 
-                    onChange={e => setFormData({...formData, kana: e.target.value})} 
-                    className="modal-input" 
-                    required 
-                    placeholder="VD: こんぴゅーた"
-                  />
-                </div>
+              <div className="fc-modal-group">
+                <input 
+                  type="text" 
+                  value={formData.kana} 
+                  onChange={e => setFormData({...formData, kana: e.target.value})} 
+                  className="fc-modal-input" 
+                  required 
+                  placeholder="Cách đọc"
+                />
               </div>
-
-              <div className="form-group">
-                <label>Nghĩa Tiếng Việt</label>
+              <div className="fc-modal-group">
                 <input 
                   type="text" 
                   value={formData.meaning} 
                   onChange={e => setFormData({...formData, meaning: e.target.value})} 
-                  className="modal-input" 
+                  className="fc-modal-input" 
                   required 
-                  placeholder="VD: Máy tính"
+                  placeholder="Nghĩa"
                 />
               </div>
 
-              <div className="modal-footer">
-                <button type="button" className="modal-btn-cancel" onClick={() => setIsModalOpen(false)}>
-                  Hủy bỏ
+              {/* Hide the level and displayId inputs to keep UI clean, but still submit them */}
+              <input type="hidden" value={formData.level} />
+              <input type="hidden" value={formData.displayId} />
+
+              <div className="fc-modal-actions">
+                <button type="button" className="fc-btn-cancel" onClick={() => setIsModalOpen(false)}>
+                  Hủy
                 </button>
-                <button type="submit" className="admin-btn-primary" style={{ background: '#3b82f6' }}>
-                  {modalMode === 'add' ? 'Lưu Thẻ Cá Nhân' : 'Lưu Thay Đổi'}
+                <button type="submit" className="fc-btn-submit">
+                  {modalMode === 'add' ? 'Tạo' : 'Lưu'}
                 </button>
               </div>
             </form>
@@ -330,13 +287,17 @@ const MyFlashcards = () => {
 
       {/* DELETE CONFIRMATION MODAL */}
       {itemToDelete && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box delete-confirm-box">
-            <h2 className="delete-title">Xác nhận xóa Flashcard</h2>
-            <p>Bạn có chắc chắn muốn xóa thẻ từ vựng <strong>"{itemToDelete.jp}"</strong> không? Hành động này không thể hoàn tác.</p>
-            <div className="modal-footer">
-              <button className="modal-btn-cancel" onClick={() => setItemToDelete(null)}>Hủy bỏ</button>
-              <button className="modal-btn-danger" onClick={executeDelete}>Xóa vĩnh viễn</button>
+        <div className="fc-modal-overlay">
+          <div className="fc-modal-box" style={{ maxWidth: '400px' }}>
+            <div className="fc-modal-header">
+              <h2 style={{ color: '#ef4444' }}>Xóa thẻ</h2>
+            </div>
+            <p style={{ marginBottom: '30px', color: '#64748b', fontSize: '16px', lineHeight: '1.5' }}>
+              Bạn có chắc chắn muốn xóa thẻ <strong>"{itemToDelete.jp}"</strong> không? Hành động này không thể hoàn tác.
+            </p>
+            <div className="fc-modal-actions">
+              <button className="fc-btn-cancel" onClick={() => setItemToDelete(null)}>Hủy</button>
+              <button className="fc-btn-submit" style={{ background: '#ef4444' }} onClick={executeDelete}>Xóa</button>
             </div>
           </div>
         </div>
@@ -344,17 +305,17 @@ const MyFlashcards = () => {
 
       {/* QUIZLET EXPORT MODAL */}
       {isQuizletModalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box" style={{ maxWidth: '600px' }}>
-            <div className="modal-header">
+        <div className="fc-modal-overlay">
+          <div className="fc-modal-box" style={{ maxWidth: '600px' }}>
+            <div className="fc-modal-header">
               <h2>Xuất sang Quizlet</h2>
-              <button className="modal-close-btn" onClick={() => setIsQuizletModalOpen(false)}>
+              <button className="fc-modal-close-btn" onClick={() => setIsQuizletModalOpen(false)}>
                 <X size={24} />
               </button>
             </div>
             
             <div className="modal-body-form">
-              <p style={{ marginBottom: '15px', color: '#9ca3af' }}>
+              <p style={{ marginBottom: '15px', color: '#64748b' }}>
                 Copy đoạn văn bản dưới đây và dán vào phần <strong>Nhập từ Word, Excel, Google Docs, v.v.</strong> khi tạo Học phần mới trên Quizlet.
               </p>
               
@@ -365,11 +326,11 @@ const MyFlashcards = () => {
                   style={{
                     width: '100%',
                     height: '250px',
-                    backgroundColor: '#1f2937',
-                    color: '#e5e7eb',
+                    backgroundColor: '#f8fafc',
+                    color: '#1e293b',
                     padding: '15px',
                     borderRadius: '8px',
-                    border: '1px solid #374151',
+                    border: '1px solid #e2e8f0',
                     fontFamily: 'monospace',
                     resize: 'none'
                   }}
@@ -382,11 +343,11 @@ const MyFlashcards = () => {
                       position: 'absolute',
                       bottom: '15px',
                       right: '15px',
-                      backgroundColor: copied ? '#10b981' : '#3b82f6',
+                      backgroundColor: copied ? '#10b981' : '#c084fc',
                       color: 'white',
                       border: 'none',
-                      padding: '8px 12px',
-                      borderRadius: '4px',
+                      padding: '8px 16px',
+                      borderRadius: '30px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',

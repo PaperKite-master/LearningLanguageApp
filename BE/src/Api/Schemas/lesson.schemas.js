@@ -10,7 +10,8 @@ export const LessonDtoSchema = Type.Object({
   contentMarkdown: Type.Union([Type.String(), Type.Null()]),
   order: Type.Integer(),
   lessonCode: Type.Union([Type.String(), Type.Null()]),
-  createdAt: Type.Union([Type.String(), Type.Null()])
+  createdAt: Type.Union([Type.String(), Type.Null()]),
+  vocabularies: Type.Optional(Type.Array(Type.Any()))
 });
 
 export const LessonIdParamsSchema = Type.Object({
