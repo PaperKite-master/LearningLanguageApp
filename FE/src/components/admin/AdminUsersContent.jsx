@@ -479,6 +479,7 @@ const AdminUsersContent = () => {
                   style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', cursor: 'pointer' }}
                 >
                   <option value="USER">Học viên (User)</option>
+                  <option value="PRO">Học viên (PRO)</option>
                   <option value="ADMIN">Quản trị viên (Admin)</option>
                 </select>
               </div>

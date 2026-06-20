@@ -24,6 +24,7 @@ import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import PaymentResult from './pages/payment/PaymentResult';
 import './index.css';
 import './index.css';
 import authApi from './api/authApi';
@@ -97,6 +98,9 @@ function App() {
 
         {/* Profile Page */}
         <Route path="/profile" element={<Profile />} />
+
+        {/* Payment Result */}
+        <Route path="/payment/result" element={<PaymentResult />} />
 
         {/* Quiz Take Page */}
         <Route path="/quiz/:id" element={<QuizTake />} />

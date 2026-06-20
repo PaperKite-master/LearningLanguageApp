@@ -12,7 +12,6 @@ import {
   ProfileResponseSchema,
   ErrorResponseSchema,
   SendOtpBodySchema,
-  VerifyOtpBodySchema,
 } from '../Schemas/auth.schema.js';
 
 export async function authRoutes(fastify, options) {
@@ -45,21 +44,6 @@ export async function authRoutes(fastify, options) {
       },
     },
     handler: authController.login,
-  });
-
-  fastify.post('/verify-otp', {
-    schema: {
-      tags: ['Auth'],
-      summary: 'Verify OTP code',
-      description: 'Verifies a 6-digit OTP code sent to email (signup or recovery).',
-      body: VerifyOtpBodySchema,
-      response: {
-        200: LoginResponseSchema,
-        400: ErrorResponseSchema,
-        500: ErrorResponseSchema,
-      },
-    },
-    handler: authController.verifyOtp,
   });
 
   fastify.post('/forgot-password', {

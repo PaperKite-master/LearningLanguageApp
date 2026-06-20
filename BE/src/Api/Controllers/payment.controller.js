@@ -1,5 +1,7 @@
 import { vnpay } from '../../Infrastructure/VNPayClient.js';
 import { ProductCode, VnpLocale } from 'vnpay';
+import { MoMoClient } from '../../Infrastructure/MoMoClient.js';
+import { payOS } from '../../Infrastructure/PayOSClient.js';
 
 export const paymentController = {
   /**
@@ -126,6 +128,14 @@ export const paymentController = {
         },
       });
 
+      // If success, upgrade user to PRO
+      if (verify.isSuccess) {
+        await prisma.users.update({
+          where: { id: transaction.user_id },
+          data: { role: 'PRO' }
+        });
+      }
+
       req.log.info(`VNPay IPN Success: Updated order ${orderId} status to ${paymentStatus}`);
       return reply.send({ RspCode: '00', Message: 'Confirm Success' });
     } catch (err) {
@@ -171,4 +181,222 @@ export const paymentController = {
       });
     }
   },
+
+  /**
+   * Generate a MoMo payment URL and store the pending transaction in our DB
+   */
+  async createMomoUrl(req, reply) {
+    try {
+      const { amount, orderInfo } = req.body;
+      const prisma = req.server.prisma;
+      const userId = req.user.sub;
+
+      const orderId = 'MOMO_' + Date.now().toString() + Math.floor(1000 + Math.random() * 9000).toString();
+
+      await prisma.payment_transactions.create({
+        data: {
+          user_id: userId,
+          order_id: orderId,
+          amount,
+          order_info: orderInfo,
+          bank_code: 'MOMO',
+          status: 'PENDING',
+        },
+      });
+
+      const returnUrl = process.env.VNP_RETURN_URL || 'http://localhost:3000/payment/result';
+      const ipnUrl = process.env.MOMO_IPN_URL || 'https://d9f9-118-69-182-149.ngrok-free.app/momo-ipn'; // Requires public URL or ngrok for testing
+
+      const momoResponse = await MoMoClient.createPayment(
+        orderId,
+        amount,
+        orderInfo,
+        returnUrl,
+        ipnUrl
+      );
+
+      return reply.code(200).send({
+        paymentUrl: momoResponse.payUrl,
+        orderId,
+      });
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(500).send({
+        error: 'Failed to create MoMo payment URL',
+        message: err.message,
+        statusCode: 500,
+      });
+    }
+  },
+
+  /**
+   * MoMo IPN Webhook Callback
+   */
+  async momoIpn(req, reply) {
+    const prisma = req.server.prisma;
+
+    try {
+      req.log.info({ body: req.body }, 'Received MoMo IPN request');
+      const payload = req.body;
+
+      if (!payload || !payload.signature) {
+        return reply.code(400).send({ message: 'Missing signature' });
+      }
+
+      const isValid = MoMoClient.verifyIpnSignature(payload);
+      if (!isValid) {
+        return reply.code(400).send({ message: 'Invalid signature' });
+      }
+
+      const orderId = payload.orderId;
+      const amount = payload.amount;
+      const resultCode = payload.resultCode;
+
+      const transaction = await prisma.payment_transactions.findUnique({
+        where: { order_id: orderId },
+      });
+
+      if (!transaction) {
+        return reply.code(404).send({ message: 'Order not found' });
+      }
+
+      if (transaction.status !== 'PENDING') {
+        return reply.code(200).send({ message: 'Order already processed' });
+      }
+
+      const paymentStatus = resultCode === 0 ? 'SUCCESS' : 'FAILED';
+
+      await prisma.payment_transactions.update({
+        where: { id: transaction.id },
+        data: {
+          status: paymentStatus,
+          transaction_no: payload.transId?.toString() || null,
+          updated_at: new Date(),
+        },
+      });
+
+      if (resultCode === 0) {
+        await prisma.users.update({
+          where: { id: transaction.user_id },
+          data: { role: 'PRO' }
+        });
+      }
+
+      // Respond 204 No Content as required by MoMo
+      return reply.code(204).send();
+    } catch (err) {
+      req.log.error(err, 'Error processing MoMo IPN');
+      return reply.code(500).send({ message: 'Internal server error' });
+    }
+  },
+
+  /**
+   * Generate a PayOS (VietQR) payment URL and store the pending transaction
+   */
+  async createPayOsUrl(req, reply) {
+    try {
+      const { amount, orderInfo } = req.body;
+      const prisma = req.server.prisma;
+      const userId = req.user.sub;
+
+      // PayOS requires orderCode to be a positive integer (max 53 bits)
+      // Let's generate a unique integer. Date.now() + random suffix.
+      const orderCode = Number(String(Date.now()).slice(-9) + Math.floor(100 + Math.random() * 900).toString());
+
+      // We still store as order_id string in our DB
+      const orderId = orderCode.toString();
+
+      await prisma.payment_transactions.create({
+        data: {
+          user_id: userId,
+          order_id: orderId,
+          amount,
+          order_info: orderInfo,
+          bank_code: 'PAYOS',
+          status: 'PENDING',
+        },
+      });
+
+      const returnUrl = process.env.PAYOS_RETURN_URL || 'http://localhost:3000/payment/result';
+      const cancelUrl = process.env.PAYOS_CANCEL_URL || 'http://localhost:3000/payment/result?cancel=true';
+
+      const requestData = {
+        orderCode: orderCode,
+        amount: amount,
+        description: orderInfo.substring(0, 25), // PayOS desc limit is 25 chars
+        returnUrl: `${returnUrl}?orderCode=${orderCode}`,
+        cancelUrl: `${cancelUrl}&orderCode=${orderCode}`
+      };
+
+      const paymentLinkData = await payOS.createPaymentLink(requestData);
+
+      return reply.code(200).send({
+        paymentUrl: paymentLinkData.checkoutUrl,
+        orderId: orderId,
+      });
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(500).send({
+        error: 'Failed to create PayOS payment URL',
+        message: err.message,
+        statusCode: 500,
+      });
+    }
+  },
+
+  /**
+   * PayOS IPN Webhook Callback
+   */
+  async payosIpn(req, reply) {
+    const prisma = req.server.prisma;
+
+    try {
+      req.log.info({ body: req.body }, 'Received PayOS IPN request');
+      const payload = req.body;
+
+      // Verify the webhook using the SDK
+      const webhookData = payOS.verifyPaymentWebhookData(payload);
+
+      const orderId = webhookData.orderCode.toString();
+      const amount = webhookData.amount;
+      const paymentStatus = webhookData.code === '00' ? 'SUCCESS' : 'FAILED';
+
+      const transaction = await prisma.payment_transactions.findUnique({
+        where: { order_id: orderId },
+      });
+
+      if (!transaction) {
+        return reply.code(404).send({ message: 'Order not found' });
+      }
+
+      if (transaction.status !== 'PENDING') {
+        return reply.code(200).send({ message: 'Order already processed' });
+      }
+
+      await prisma.payment_transactions.update({
+        where: { id: transaction.id },
+        data: {
+          status: paymentStatus,
+          transaction_no: webhookData.reference,
+          updated_at: new Date(),
+        },
+      });
+
+      if (webhookData.code === '00') {
+        await prisma.users.update({
+          where: { id: transaction.user_id },
+          data: { role: 'PRO' }
+        });
+      }
+
+      return reply.code(200).send({
+        success: true,
+        message: 'Webhook processed successfully'
+      });
+    } catch (err) {
+      req.log.error(err, 'Error processing PayOS IPN');
+      return reply.code(500).send({ message: 'Internal server error' });
+    }
+  },
 };
+

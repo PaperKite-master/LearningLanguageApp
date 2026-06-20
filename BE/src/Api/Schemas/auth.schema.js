@@ -18,11 +18,6 @@ export const ForgotPasswordBodySchema = Type.Object({
   email: Type.String({ format: 'email', maxLength: 255, description: 'User email address' }),
 });
 
-export const VerifyOtpBodySchema = Type.Object({
-  email: Type.String({ format: 'email', maxLength: 255, description: 'User email address' }),
-  token: Type.String({ minLength: 6, maxLength: 8, description: 'OTP code (6 to 8 digits)' }),
-  type: Type.String({ description: 'Type of OTP (signup or recovery)', default: 'signup' }),
-});
 
 export const ResetPasswordBodySchema = Type.Object({
   newPassword: Type.String({ minLength: 8, maxLength: 32, pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,32}$', description: 'New password (8-32 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special character)', examples: ['Password123!'] }),

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Pencil, MapPin, X, Check } from 'lucide-react';
+import { Pencil, MapPin, X, Check, CreditCard, Smartphone } from 'lucide-react';
 import userApi from '../../api/userApi';
+import paymentApi from '../../api/paymentApi';
 import './ProfileContent.css';
 
 const ProfileContent = () => {
@@ -36,6 +37,9 @@ const ProfileContent = () => {
     bio: ''
   });
 
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -55,6 +59,7 @@ const ProfileContent = () => {
               address: parsedUser.address || prev.address,
               location: parsedUser.address || prev.location,
               bio: parsedUser.bio || prev.bio,
+              role: parsedUser.role || prev.role,
               preferredContact: parsedUser.preferredContact || prev.preferredContact
             }));
           } catch (e) {
@@ -77,6 +82,7 @@ const ProfileContent = () => {
             address: userObj.address || prev.address,
             location: userObj.address || prev.location,
             bio: userObj.bio || prev.bio,
+            role: userObj.role || prev.role,
             preferredContact: userObj.preferredContact || prev.preferredContact,
             stats: {
               ...prev.stats,
@@ -217,6 +223,68 @@ const ProfileContent = () => {
     }
   };
 
+  const handleOpenPaymentModal = () => {
+    setIsPaymentModalOpen(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+  };
+
+  const handlePayWithVNPay = async () => {
+    try {
+      setIsPaymentLoading(true);
+      const res = await paymentApi.createVnpayUrl({
+        amount: 99000,
+        orderInfo: 'Nang cap tai khoan PRO'
+      });
+      if (res.data && res.data.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Không thể tạo giao dịch VNPay. Vui lòng thử lại sau.');
+    } finally {
+      setIsPaymentLoading(false);
+    }
+  };
+
+  const handlePayWithMoMo = async () => {
+    try {
+      setIsPaymentLoading(true);
+      const res = await paymentApi.createMomoUrl({
+        amount: 99000,
+        orderInfo: 'Nang cap tai khoan PRO'
+      });
+      if (res.data && res.data.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Không thể tạo giao dịch MoMo. Vui lòng thử lại sau.');
+    } finally {
+      setIsPaymentLoading(false);
+    }
+  };
+
+  const handlePayWithPayOs = async () => {
+    try {
+      setIsPaymentLoading(true);
+      const res = await paymentApi.createPayOsUrl({
+        amount: 99000,
+        orderInfo: 'Nang cap tai khoan PRO'
+      });
+      if (res.data && res.data.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Không thể tạo giao dịch PayOS. Vui lòng thử lại sau.');
+    } finally {
+      setIsPaymentLoading(false);
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: '40px', color: '#1a1a1a' }}>Đang tải dữ liệu hồ sơ...</div>;
   }
@@ -349,7 +417,11 @@ const ProfileContent = () => {
             <li><Check size={16} color="#0ea5e9" /> Thư viện tình huống thực tế CNTT</li>
             <li><Check size={16} color="#0ea5e9" /> Đánh giá CV & hồ sơ năng lực</li>
           </ul>
-          <button className="profile-plan-btn" style={{ opacity: 0.6 }}>Đăng ký ngay</button>
+          {userData.role === 'PRO' ? (
+            <button className="profile-plan-btn" style={{ opacity: 0.8 }} disabled>Gói hiện tại</button>
+          ) : (
+            <button className="profile-plan-btn" onClick={handleOpenPaymentModal}>Đăng ký ngay</button>
+          )}
         </div>
       </div>
 
@@ -410,6 +482,44 @@ const ProfileContent = () => {
             <div className="profile-modal-actions">
               <button className="profile-modal-btn-cancel" onClick={handleCloseEditModal}>Hủy</button>
               <button className="profile-modal-btn-save" onClick={handleSaveProfile}>Lưu thay đổi</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PAYMENT MODAL */}
+      {isPaymentModalOpen && (
+        <div className="profile-modal-overlay">
+          <div className="profile-modal-box" style={{ maxWidth: '400px' }}>
+            <div className="profile-modal-header">
+              <h2>Chọn phương thức thanh toán</h2>
+              <button className="profile-modal-close" onClick={handleClosePaymentModal}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className="profile-modal-form" style={{ gap: '15px', marginTop: '10px', border: 'none', overflow: 'visible', padding: '5px' }}>
+              <button 
+                className="payment-method-btn vnpay-btn" 
+                onClick={handlePayWithVNPay}
+                disabled={isPaymentLoading}
+              >
+                <CreditCard size={20} /> Thanh toán qua VNPay
+              </button>
+              <button 
+                className="payment-method-btn momo-btn" 
+                onClick={handlePayWithMoMo}
+                disabled={isPaymentLoading}
+              >
+                <Smartphone size={20} /> Thanh toán qua Ví MoMo
+              </button>
+              <button 
+                className="payment-method-btn payos-btn" 
+                onClick={handlePayWithPayOs}
+                disabled={isPaymentLoading}
+              >
+                <CreditCard size={20} /> Chuyển khoản QR (PayOS)
+              </button>
+              {isPaymentLoading && <p style={{textAlign: 'center', color: '#666'}}>Đang tạo giao dịch...</p>}
             </div>
           </div>
         </div>
