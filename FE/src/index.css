@@ -2662,18 +2662,21 @@ select.modal-input option {
 }
 
 .admin-settings-panel {
-  background-color: #151828;
-  border-radius: 16px;
+  background-color: #ffffff;
+  border-radius: 20px;
   padding: 30px 40px;
   max-width: 800px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .settings-panel-title {
-  color: var(--white);
+  color: #1e293b;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 30px;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .settings-row {
@@ -2681,7 +2684,7 @@ select.modal-input option {
   justify-content: space-between;
   align-items: center;
   padding: 24px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .settings-row:last-child {
@@ -2692,17 +2695,17 @@ select.modal-input option {
 .settings-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .settings-label {
-  color: var(--white);
+  color: #1e293b;
   font-size: 1.1rem;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .settings-desc {
-  color: #9ca3af;
+  color: #64748b;
   font-size: 0.95rem;
 }
 
@@ -2710,8 +2713,8 @@ select.modal-input option {
 .custom-toggle {
   width: 56px;
   height: 30px;
-  background-color: transparent;
-  border: 1px solid #4b5563; /* Grey outline when off */
+  background-color: #e2e8f0;
+  border: none;
   border-radius: 20px;
   position: relative;
   cursor: pointer;
@@ -2723,23 +2726,22 @@ select.modal-input option {
   position: absolute;
   top: 3px;
   left: 4px;
-  width: 22px;
-  height: 22px;
-  background-color: #9ca3af; /* Grey thumb when off */
+  width: 24px;
+  height: 24px;
+  background-color: #ffffff;
   border-radius: 50%;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bouncy elastic effect */
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* Active ON state */
 .custom-toggle.active {
-  background-color: rgba(0, 255, 102, 0.1);
-  border-color: #00ff66; /* Neon green */
+  background-color: #3b82f6;
 }
 
 .custom-toggle.active .toggle-thumb {
-  background-color: #00ff66;
-  left: calc(100% - 26px); /* Slide perfectly to the right */
-  box-shadow: 0 0 10px rgba(0, 255, 102, 0.5); /* Glow effect */
+  left: calc(100% - 28px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
 .bottom-active {

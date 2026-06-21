@@ -3,12 +3,26 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { User, Bell, ChevronRight, ChevronDown, Flame } from 'lucide-react';
 import { ChangePasswordModal, LinkAccountsModal, DeleteAccountModal } from './AccountModals';
 import './UserSettings.css';
+import logo from '../../assets/logo.png';
 
 const UserSettings = () => {
   const navigate = useNavigate();
   const [isChangePasswordOpen, setChangePasswordOpen] = useState(false);
   const [isLinkAccountsOpen, setLinkAccountsOpen] = useState(false);
   const [isDeleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [userName, setUserName] = useState('Alex');
+
+  React.useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr && userStr !== 'undefined') {
+      try {
+        const parsedUser = JSON.parse(userStr);
+        setUserName(parsedUser.full_name || parsedUser.fullName || parsedUser.name || 'Alex');
+      } catch (e) {
+        console.error("Failed to parse user", e);
+      }
+    }
+  }, []);
 
   // Handle logout or dropdown (simplified for UI)
   const handleDropdown = () => {
@@ -20,9 +34,7 @@ const UserSettings = () => {
       {/* Settings Sidebar */}
       <aside className="settings-sidebar">
         <div className="settings-logo" onClick={() => navigate('/study')} style={{ cursor: 'pointer' }}>
-          <h1 style={{ color: '#fff', fontSize: '2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            Hi<span style={{ color: '#ff7043' }}>n</span>a
-          </h1>
+          <img src={logo} alt="HiNa Logo" className="logo-image" />
         </div>
 
         <nav className="settings-nav">
@@ -57,7 +69,7 @@ const UserSettings = () => {
                   <ChevronDown size={12} color="#ffffff" />
                 </div>
               </div>
-              <span className="settings-username">Alex</span>
+              <span className="settings-username">{userName}</span>
             </div>
           </div>
         </header>

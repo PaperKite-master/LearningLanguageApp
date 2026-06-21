@@ -51,8 +51,8 @@ const AdminSettingsContent = () => {
   return (
     <div className="admin-content-area">
       <div className="admin-header flex-header">
-        <h1 className="admin-heading flex items-center gap-3" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Settings size={28} color="#00e5ff" />
+        <h1 className="admin-heading flex items-center gap-3" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#1e293b', marginTop: '15px' }}>
+          <Settings size={28} color="#3b82f6" />
           CÀI ĐẶT HỆ THỐNG
         </h1>
       </div>

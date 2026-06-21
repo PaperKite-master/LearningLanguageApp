@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TopBar from '../../components/TopBar';
 import Header from '../../components/Header';
 import BackgroundLayer from '../../components/BackgroundLayer';
@@ -8,6 +8,34 @@ import './LandingPage.css';
 import { BookOpen, Cpu, Award, Target, Calendar, HandCoins, ClipboardCheck, Check, Facebook, Twitter, Instagram, Github } from 'lucide-react';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const handleRegisterPro = () => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user'));
+      if (!u) {
+        navigate('/signup');
+      } else {
+        navigate('/settings'); // Redirect to profile/settings where the user can open payment modal
+      }
+    } catch(e) {
+      navigate('/signup');
+    }
+  };
+
+  const handleRegisterFree = () => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user'));
+      if (!u) {
+        navigate('/signup');
+      } else {
+        navigate(u.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard');
+      }
+    } catch(e) {
+      navigate('/signup');
+    }
+  };
+
   const getAuthLink = () => {
     try {
       const u = JSON.parse(localStorage.getItem('user'));
@@ -198,7 +226,7 @@ const LandingPage = () => {
                 <div className="lp-pricing-name">STUDENT</div>
                 <div className="lp-pricing-desc">Gói hỗ trợ sinh viên học cơ bản, giúp tiếp cận với tiếng Nhật trong môi trường IT</div>
                 <div className="lp-pricing-price">0Đ / THÁNG</div>
-                <button className="lp-pricing-btn">Miễn phí</button>
+                <button className="lp-pricing-btn" onClick={handleRegisterFree}>Miễn phí</button>
                 <ul className="lp-pricing-features">
                   <li><Check size={18} /> Học ngữ pháp và từ vựng cơ bản</li>
                   <li><Check size={18} /> Từ vựng chuyên ngành (Giới hạn)</li>
@@ -213,7 +241,7 @@ const LandingPage = () => {
                 <div className="lp-pricing-name">PRO</div>
                 <div className="lp-pricing-desc">Gói nâng cao cho Kỹ sư IT thực thụ, mở khóa toàn bộ tính năng và bài học chuyên sâu</div>
                 <div className="lp-pricing-price">99.000Đ / THÁNG</div>
-                <button className="lp-pricing-btn">Đăng ký ngay</button>
+                <button className="lp-pricing-btn" onClick={handleRegisterPro}>Đăng ký ngay</button>
                 <ul className="lp-pricing-features">
                   <li><Check size={18} /> Mở khóa tất cả bài học</li>
                   <li><Check size={18} /> Từ vựng chuyên ngành kỹ thuật sâu</li>

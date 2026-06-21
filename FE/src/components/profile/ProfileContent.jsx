@@ -7,24 +7,24 @@ import './ProfileContent.css';
 const ProfileContent = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({
-    name: 'Alex',
-    email: 'Alex234@gmail.com',
-    location: 'Hồ Chí Minh, VN',
-    bio: "I'm a UI/UX designer with 7+ years of experience in creating intuitive and accessible interfaces. I love simplifying complex design concepts for beginners.",
+    name: '',
+    email: '',
+    location: '',
+    bio: '',
     phone: '',
     address: '',
     preferredContact: 'Email',
     visibility: true,
-    avatarUrl: 'https://i.pravatar.cc/150?img=11',
+    avatarUrl: '',
     stats: {
-      completed: 2,
-      completedGrowth: 'Tăng 5%',
-      hours: '15h 20m',
-      hoursGrowth: 'Tăng 3%',
-      streak: '10 days',
-      streakGrowth: 'Tăng 10%',
-      progress: '20%',
-      progressGrowth: 'Tăng 2%'
+      completed: 0,
+      completedGrowth: '',
+      hours: '0h',
+      hoursGrowth: '',
+      streak: '0 days',
+      streakGrowth: '',
+      progress: '0%',
+      progressGrowth: ''
     }
   });
 
@@ -294,7 +294,7 @@ const ProfileContent = () => {
       {/* HEADER SECTION */}
       <div className="profile-header-new">
         <div className="profile-avatar-large">
-          <img src={userData.avatarUrl || "https://i.pravatar.cc/150?img=11"} alt="Avatar" />
+          <img src={userData.avatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(userData.name || 'User') + "&background=311b92&color=fff"} alt="Avatar" />
           <button className="profile-edit-avatar-btn" onClick={handleAvatarClick}>
             <Pencil size={12} />
           </button>
@@ -346,7 +346,7 @@ const ProfileContent = () => {
 
       {/* BIO SECTION */}
       <h3 className="profile-section-title">Giới thiệu</h3>
-      <p className="profile-bio-text">{userData.bio}</p>
+      <p className="profile-bio-text">{userData.bio || 'Chưa có thông tin giới thiệu.'}</p>
 
       {/* CONTACT INFORMATION */}
       <h3 className="profile-section-title">Thông tin liên hệ</h3>

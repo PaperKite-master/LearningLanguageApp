@@ -21,25 +21,9 @@ const ProgressContent = () => {
       hoursLearned: '156H',
       weeklyProgress: '+ 12%'
     },
-    skillProgress: [
-      { id: 'kanji', label: 'Kanji', current: 890, total: 2000 },
-      { id: 'vocab', label: 'Từ vựng', current: 1240, total: 1720 },
-      { id: 'grammar', label: 'Ngữ pháp', current: 145, total: 250 },
-      { id: 'video', label: 'Video', current: 95, total: 150, unit: 'hrs' },
-    ],
-    todayFocus: [
-      { id: 1, title: 'Video', sub: '30 phút' },
-      { id: 2, title: 'Viết email', sub: '20 phút' },
-      { id: 3, title: 'Từ vựng', sub: '15 từ' },
-    ],
-    completedLessons: [
-      { id: 1, title: 'Hiragana', done: true },
-      { id: 2, title: 'Katakana', done: true },
-      { id: 3, title: 'Chào hỏi cơ bản', done: true },
-      { id: 4, title: 'Số và số đếm', done: true },
-      { id: 5, title: 'Hán tự', done: false },
-      { id: 6, title: 'Ngữ pháp cơ bản', done: false },
-    ]
+    skillProgress: [],
+    todayFocus: [],
+    completedLessons: []
   });
 
   const [loading, setLoading] = useState(true);

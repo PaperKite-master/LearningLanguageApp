@@ -163,16 +163,37 @@ const AlphabetPractice = ({ onBack }) => {
     const isKata = alphabetType === 'katakana';
     const activeColor = isKata ? '#0ea5e9' : '#d946ef';
 
-    // Preview always uses Hiragana if 'both' is selected
-    const previewData = isKata ? {
-      basic: katakanaData,
-      dakuon: katakanaDakuonData,
-      yoon: katakanaYoonData
-    } : {
-      basic: hiraganaData,
-      dakuon: hiraganaDakuonData,
-      yoon: hiraganaYoonData
+    const getPreviewData = () => {
+      if (alphabetType === 'katakana') {
+        return { basic: katakanaData, dakuon: katakanaDakuonData, yoon: katakanaYoonData };
+      }
+      if (alphabetType === 'hiragana') {
+        return { basic: hiraganaData, dakuon: hiraganaDakuonData, yoon: hiraganaYoonData };
+      }
+      
+      const combine = (hData, kData) => {
+        return hData.map((h, i) => {
+          if (!h) return null;
+          return {
+            ...h,
+            kana: (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '0.85rem', lineHeight: '1.2' }}>
+                <span>{h.kana}</span>
+                <span style={{ opacity: 0.8 }}>{kData[i]?.kana}</span>
+              </div>
+            )
+          };
+        });
+      };
+
+      return {
+        basic: combine(hiraganaData, katakanaData),
+        dakuon: combine(hiraganaDakuonData, katakanaDakuonData),
+        yoon: combine(hiraganaYoonData, katakanaYoonData)
+      };
     };
+
+    const previewData = getPreviewData();
 
     const pureYoon = previewData.yoon.filter(item => item && yoonStarts.includes(item.romaji.charAt(0)));
     const dakuonYoon = previewData.yoon.filter(item => item && !yoonStarts.includes(item.romaji.charAt(0)));
