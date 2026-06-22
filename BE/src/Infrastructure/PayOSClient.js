@@ -1,6 +1,6 @@
 import PayOSModule from '@payos/node';
 
-const PayOS = PayOSModule.PayOS || PayOSModule;
+const PayOS = PayOSModule.PayOS ?? PayOSModule.default ?? PayOSModule;
 
 // Lấy credentials từ biến môi trường hoặc dùng giá trị rỗng mặc định để tránh lỗi crash lúc khởi động nếu chưa điền key
 const clientId = process.env.PAYOS_CLIENT_ID || 'dummy-client-id';

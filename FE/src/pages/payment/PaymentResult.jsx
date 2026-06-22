@@ -5,6 +5,18 @@ import authApi from '../../api/authApi';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
 import './PaymentResult.css';
 
+const waitForTransactionSuccess = async (transactionId, maxAttempts = 15, delayMs = 2000) => {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const res = await paymentApi.verifyTransaction(transactionId);
+    if (res.data?.status === 'SUCCESS') {
+      return res.data;
+    }
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+
+  throw new Error('Transaction not confirmed yet');
+};
+
 const PaymentResult = () => {
   const [status, setStatus] = useState('loading'); // 'loading', 'success', 'error'
   const [message, setMessage] = useState('Đang xử lý kết quả thanh toán...');
@@ -30,7 +42,7 @@ const PaymentResult = () => {
 
       const isVnPaySuccess = vnp_ResponseCode === '00';
       const isMomoSuccess = resultCode === '0';
-      const isPayOsSuccess = payosCode === '00' && payosCancel === 'false';
+      const isPayOsSuccess = payosCode === '00' && payosCancel !== 'true';
       
       const transactionId = vnp_TxnRef || orderId || payosOrderCode;
 
@@ -42,10 +54,7 @@ const PaymentResult = () => {
 
       if (isVnPaySuccess || isMomoSuccess || isPayOsSuccess) {
         try {
-          // Verify with our BE
-          const res = await paymentApi.verifyTransaction(transactionId);
-          // Assuming BE updated user role to PRO
-          // Fetch updated profile
+          await waitForTransactionSuccess(transactionId);
           const updatedUser = await authApi.getMe();
           localStorage.setItem('user', JSON.stringify(updatedUser));
           

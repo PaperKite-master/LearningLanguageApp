@@ -3,6 +3,13 @@ import { ProductCode, VnpLocale } from 'vnpay';
 import { MoMoClient } from '../../Infrastructure/MoMoClient.js';
 import { payOS } from '../../Infrastructure/PayOSClient.js';
 
+async function upgradeUserToPro(prisma, userId) {
+  await prisma.profiles.update({
+    where: { id: userId },
+    data: { role: 'PRO', updated_at: new Date() },
+  });
+}
+
 export const paymentController = {
   /**
    * Generate a VNPay payment URL and store the pending transaction in our DB
@@ -128,12 +135,9 @@ export const paymentController = {
         },
       });
 
-      // If success, upgrade user to PRO
+      // If success, upgrade user to PRO (app reads role from public.profiles)
       if (verify.isSuccess) {
-        await prisma.users.update({
-          where: { id: transaction.user_id },
-          data: { role: 'PRO' }
-        });
+        await upgradeUserToPro(prisma, transaction.user_id);
       }
 
       req.log.info(`VNPay IPN Success: Updated order ${orderId} status to ${paymentStatus}`);
@@ -161,6 +165,10 @@ export const paymentController = {
           error: 'Transaction not found',
           statusCode: 404,
         });
+      }
+
+      if (transaction.status === 'SUCCESS') {
+        await upgradeUserToPro(prisma, transaction.user_id);
       }
 
       return reply.code(200).send({
@@ -276,10 +284,7 @@ export const paymentController = {
       });
 
       if (resultCode === 0) {
-        await prisma.users.update({
-          where: { id: transaction.user_id },
-          data: { role: 'PRO' }
-        });
+        await upgradeUserToPro(prisma, transaction.user_id);
       }
 
       // Respond 204 No Content as required by MoMo
@@ -320,15 +325,23 @@ export const paymentController = {
       const returnUrl = process.env.PAYOS_RETURN_URL || 'http://localhost:3000/payment/result';
       const cancelUrl = process.env.PAYOS_CANCEL_URL || 'http://localhost:3000/payment/result?cancel=true';
 
+      const description = orderInfo.substring(0, 25); // PayOS desc limit is 25 chars
       const requestData = {
-        orderCode: orderCode,
-        amount: amount,
-        description: orderInfo.substring(0, 25), // PayOS desc limit is 25 chars
+        orderCode,
+        amount,
+        description,
+        items: [
+          {
+            name: description,
+            quantity: 1,
+            price: amount,
+          },
+        ],
         returnUrl: `${returnUrl}?orderCode=${orderCode}`,
-        cancelUrl: `${cancelUrl}&orderCode=${orderCode}`
+        cancelUrl: `${cancelUrl}&orderCode=${orderCode}`,
       };
 
-      const paymentLinkData = await payOS.createPaymentLink(requestData);
+      const paymentLinkData = await payOS.paymentRequests.create(requestData);
 
       return reply.code(200).send({
         paymentUrl: paymentLinkData.checkoutUrl,
@@ -354,19 +367,21 @@ export const paymentController = {
       req.log.info({ body: req.body }, 'Received PayOS IPN request');
       const payload = req.body;
 
-      // Verify the webhook using the SDK
-      const webhookData = payOS.verifyPaymentWebhookData(payload);
+      const webhookData = await payOS.webhooks.verify(payload);
 
       const orderId = webhookData.orderCode.toString();
-      const amount = webhookData.amount;
-      const paymentStatus = webhookData.code === '00' ? 'SUCCESS' : 'FAILED';
+      const paymentStatus = payload.code === '00' ? 'SUCCESS' : 'FAILED';
 
       const transaction = await prisma.payment_transactions.findUnique({
         where: { order_id: orderId },
       });
 
       if (!transaction) {
-        return reply.code(404).send({ message: 'Order not found' });
+        req.log.warn({ orderId }, 'PayOS webhook verified but order not found');
+        return reply.code(200).send({
+          success: true,
+          message: 'Webhook verified, order not found',
+        });
       }
 
       if (transaction.status !== 'PENDING') {
@@ -382,11 +397,8 @@ export const paymentController = {
         },
       });
 
-      if (webhookData.code === '00') {
-        await prisma.users.update({
-          where: { id: transaction.user_id },
-          data: { role: 'PRO' }
-        });
+      if (payload.code === '00') {
+        await upgradeUserToPro(prisma, transaction.user_id);
       }
 
       return reply.code(200).send({
@@ -395,7 +407,8 @@ export const paymentController = {
       });
     } catch (err) {
       req.log.error(err, 'Error processing PayOS IPN');
-      return reply.code(500).send({ message: 'Internal server error' });
+      const statusCode = err.name === 'InvalidSignatureError' || err.name === 'WebhookError' ? 400 : 500;
+      return reply.code(statusCode).send({ message: err.message || 'Internal server error' });
     }
   },
 };
