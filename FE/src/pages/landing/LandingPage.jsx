@@ -5,52 +5,28 @@ import Header from '../../components/Header';
 import BackgroundLayer from '../../components/BackgroundLayer';
 import computer from '../../assets/computer.png';
 import './LandingPage.css';
+import { useAuth } from '../../context/AuthContext';
 import { BookOpen, Cpu, Award, Target, Calendar, HandCoins, ClipboardCheck, Check, Facebook, Twitter, Instagram, Github } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   const handleRegisterPro = () => {
-    try {
-      const u = JSON.parse(localStorage.getItem('user'));
-      if (!u) {
-        navigate('/signup');
-      } else {
-        navigate('/settings'); // Redirect to profile/settings where the user can open payment modal
-      }
-    } catch(e) {
+    if (!isAuthenticated) {
       navigate('/signup');
+      return;
     }
+    navigate('/settings');
   };
 
   const handleRegisterFree = () => {
-    try {
-      const u = JSON.parse(localStorage.getItem('user'));
-      if (!u) {
-        navigate('/signup');
-      } else {
-        navigate(u.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard');
-      }
-    } catch(e) {
+    if (!isAuthenticated) {
       navigate('/signup');
+      return;
     }
+    navigate(user?.role === 'ADMIN' ? '/admin/dashboard' : '/study');
   };
-
-  const getAuthLink = () => {
-    try {
-      const u = JSON.parse(localStorage.getItem('user'));
-      return u?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
-    } catch(e) { return '/dashboard'; }
-  };
-
-  const getAuthText = () => {
-    try {
-      const u = JSON.parse(localStorage.getItem('user'));
-      return u?.role === 'ADMIN' ? 'Vào trang quản lý' : 'Tiếp tục học';
-    } catch(e) { return 'Tiếp tục học'; }
-  };
-
-  const isAuth = !!localStorage.getItem('accessToken');
 
   return (
     <div className="landing-page-container">
@@ -74,15 +50,9 @@ const LandingPage = () => {
                 <li>Hãy chinh phục công việc mơ ước tại các công ty công nghệ hàng đầu Nhật Bản với vốn từ vựng chuyên ngành, kính ngữ trong kinh doanh, và sự chuẩn bị cho phỏng vấn kỹ thuật.</li>
               </ul>
               
-              {isAuth ? (
-                <Link to={getAuthLink()} className="lp-btn">
-                  {getAuthText()}
-                </Link>
-              ) : (
-                <Link to="/signup" className="lp-btn">
-                  Bắt đầu ngay
-                </Link>
-              )}
+              <Link to="/signup" className="lp-btn">
+                Bắt đầu ngay
+              </Link>
             </div>
             
             <div className="lp-hero-image">
@@ -279,15 +249,9 @@ const LandingPage = () => {
               <h2 className="lp-cta-title">BẠN ĐÃ SẴN SÀNG<br/>NÂNG CẤP KỸ NĂNG CHƯA?</h2>
               <p className="lp-cta-desc">Tham gia cùng hàng ngàn Kỹ sư IT khác trên nền tảng giáo dục chuyên biệt của HINA. Bắt đầu hành trình chinh phục tiếng Nhật cho IT ngay từ hôm nay!</p>
               
-              {isAuth ? (
-                <Link to={getAuthLink()} className="lp-btn" style={{ padding: '15px 40px', fontSize: '1.2rem' }}>
-                  {getAuthText()}
-                </Link>
-              ) : (
-                <Link to="/signup" className="lp-btn" style={{ padding: '15px 40px', fontSize: '1.2rem' }}>
-                  Bắt đầu ngay hôm nay
-                </Link>
-              )}
+              <Link to="/signup" className="lp-btn" style={{ padding: '15px 40px', fontSize: '1.2rem' }}>
+                Bắt đầu ngay hôm nay
+              </Link>
             </div>
           </div>
         </section>
@@ -316,9 +280,9 @@ const LandingPage = () => {
               <h3 className="lp-footer-title">Khám phá HINA</h3>
               <ul className="lp-footer-links">
                 <li><Link to="/">Trang chủ</Link></li>
-                <li><Link to="/study/lessons">Khóa học IT</Link></li>
-                <li><Link to="/games">Trò chơi ôn tập</Link></li>
-                <li><Link to="/leaderboard">Bảng xếp hạng</Link></li>
+                <li><Link to="/study">Khóa học IT</Link></li>
+                <li><Link to="/flashcard">Flashcard</Link></li>
+                <li><Link to="/videos">Video bài giảng</Link></li>
               </ul>
             </div>
             

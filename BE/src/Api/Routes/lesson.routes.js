@@ -1,5 +1,6 @@
 import { lessonController } from '../Controllers/lesson.controller.js';
 import { authenticate } from '../Middlewares/authenticate.js';
+import { optionalAuthenticate } from '../Middlewares/optionalAuthenticate.js';
 import {
   LessonProgressBodySchema,
   LessonProgressResponseSchema,
@@ -15,6 +16,7 @@ export async function lessonRoutes(app) {
   app.get(
     '/',
     {
+      preHandler: [optionalAuthenticate],
       schema: {
         response: {
           200: ListLessonsResponseSchema
@@ -27,7 +29,9 @@ export async function lessonRoutes(app) {
   app.get(
     '/:id',
     {
+      preHandler: [authenticate],
       schema: {
+        security: [{ bearerAuth: [] }],
         params: LessonIdParamsSchema,
         response: {
           200: LessonResponseSchema

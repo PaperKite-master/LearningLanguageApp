@@ -1,22 +1,11 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useAuth, useLogout } from '../context/AuthContext';
 
 const Header = ({ hideActions = false }) => {
-  const navigate = useNavigate();
-  const token = localStorage.getItem('accessToken');
-  const userStr = localStorage.getItem('user');
-  let user = null;
-  try {
-    if (userStr) user = JSON.parse(userStr);
-  } catch (e) {}
-
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+  const { status, user, isAuthenticated } = useAuth();
+  const handleLogout = useLogout();
 
   return (
     <header className="main-header">
@@ -27,9 +16,9 @@ const Header = ({ hideActions = false }) => {
       </div>
       {!hideActions && (
         <div className="header-actions">
-          {token ? (
+          {status === 'loading' ? null : isAuthenticated ? (
             <>
-              <Link to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} className="register-link">
+              <Link to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/study'} className="register-link">
                 {user?.role === 'ADMIN' ? 'Trang quản lý' : 'Vào học'}
               </Link>
               <button onClick={handleLogout} className="login-btn-header" style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '1rem' }}>

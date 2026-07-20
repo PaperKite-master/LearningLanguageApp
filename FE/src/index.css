@@ -748,6 +748,28 @@ body, html {
   color: #fbbf24;
 }
 
+.dashboard-main-area.video-main-area {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 24px 32px;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 960px) {
+  .video-page-container {
+    flex-direction: column;
+  }
+
+  .video-right-panel {
+    width: 100%;
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 /* --- Main Area --- */
 .dashboard-main-area {
   flex: 1;
@@ -1222,6 +1244,20 @@ body, html {
   background-color: #1a1d2d;
   border-color: #2b3044;
   box-shadow: none;
+}
+
+.node-wrapper.pro-locked .node-circle {
+  background-color: rgba(88, 28, 135, 0.25);
+  border-color: rgba(192, 132, 252, 0.45);
+  color: #d8b4fe;
+}
+
+.path-divider.is-locked .text {
+  color: #c084fc;
+}
+
+.video-playlist-item.is-locked {
+  opacity: 0.75;
 }
 
 .node-progress-ring {

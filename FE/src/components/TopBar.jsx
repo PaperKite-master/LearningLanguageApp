@@ -8,7 +8,7 @@ const TopBar = () => {
         Ưu đãi có hạn chỉ dành cho bạn! Đăng ký ngay - giảm 50%!
       </div>
       <div className="language-selector">
-        <span>Vietnameses</span>
+        <span>Tiếng Việt</span>
         <ChevronDown size={14} />
       </div>
     </div>

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import quizApi from '../../api/quizApi';
 import Sidebar from '../../components/dashboard/Sidebar';
+import ProUpgradeBanner from '../../components/common/ProUpgradeBanner';
 import hinaLogo from '../../assets/hina-reading.png';
 import './QuizTake.css';
 
@@ -202,6 +203,7 @@ const QuizTake = () => {
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isProLocked, setIsProLocked] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
@@ -236,7 +238,14 @@ const QuizTake = () => {
           setTimeLeft(data.time_limit * 60);
         }
       } catch (err) {
-        setError('Không thể tải bài kiểm tra. Có thể nó chưa sẵn sàng hoặc không tồn tại.');
+        const message = err?.message || '';
+        if (message.toLowerCase().includes('pro')) {
+          setIsProLocked(true);
+          setError(null);
+        } else {
+          setIsProLocked(false);
+          setError('Không thể tải bài kiểm tra. Có thể nó chưa sẵn sàng hoặc không tồn tại.');
+        }
       } finally {
         setLoading(false);
       }
@@ -325,6 +334,23 @@ const QuizTake = () => {
         <Sidebar />
         <main className="dashboard-main-area" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <h2>Đang tải bài kiểm tra...</h2>
+        </main>
+      </div>
+    );
+  }
+
+  if (isProLocked) {
+    return (
+      <div className="dashboard-layout">
+        <Sidebar />
+        <main className="dashboard-main-area" style={{ padding: '40px 60px' }}>
+          <ProUpgradeBanner
+            title="Bài kiểm tra thuộc timeline PRO"
+            description="Gói USER chỉ làm được kiểm tra của timeline đầu tiên. Nâng cấp PRO để mở khóa."
+          />
+          <button className="qt-btn-submit" onClick={() => navigate('/study')} style={{ marginTop: '20px' }}>
+            Quay lại Lộ trình
+          </button>
         </main>
       </div>
     );

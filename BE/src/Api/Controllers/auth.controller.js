@@ -1,4 +1,4 @@
-import { registerUseCase } from '../../Application/UseCases/register.usecase.js';
+import { registerUseCase, resendSignupOtpUseCase } from '../../Application/UseCases/register.usecase.js';
 import { loginUseCase } from '../../Application/UseCases/login.usecase.js';
 import { verifyOtpUseCase } from '../../Application/UseCases/verifyOtp.usecase.js';
 import { forgotPasswordUseCase } from '../../Application/UseCases/forgotPassword.usecase.js';
@@ -28,19 +28,6 @@ export const authController = {
       return reply.code(err.statusCode || 401).send({
         error: err.message,
         statusCode: err.statusCode || 401,
-      });
-    }
-  },
-
-  async verifyOtp(req, reply) {
-    try {
-      const result = await verifyOtpUseCase(req.body);
-      return reply.code(200).send(result);
-    } catch (err) {
-      req.log.error(err);
-      return reply.code(err.statusCode || 400).send({
-        error: err.message,
-        statusCode: err.statusCode || 400,
       });
     }
   },
@@ -103,7 +90,7 @@ export const authController = {
         role: profile.role,
         total_exp: profile.total_exp,
         target_level: profile.target_level,
-        updated_at: profile.updated_at,
+        updated_at: profile.updated_at ? profile.updated_at.toISOString() : null,
       });
     } catch (err) {
       req.log.error(err);
@@ -117,6 +104,19 @@ export const authController = {
   async sendOtp(req, reply) {
     try {
       const result = await sendOtpUseCase(req.server.prisma, req.body);
+      return reply.code(200).send(result);
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(err.statusCode || 500).send({
+        error: err.message,
+        statusCode: err.statusCode || 500,
+      });
+    }
+  },
+
+  async resendSignupOtp(req, reply) {
+    try {
+      const result = await resendSignupOtpUseCase(req.server.prisma, req.body);
       return reply.code(200).send(result);
     } catch (err) {
       req.log.error(err);

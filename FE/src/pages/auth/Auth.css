@@ -334,3 +334,52 @@
   position: relative;
   z-index: 20;
 }
+
+.otp-digit-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.otp-digit-grid.has-error .otp-digit-input {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.12);
+}
+
+.otp-digit-input {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 56px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--lp-text-dark, #1F174D);
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  text-align: center;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.otp-digit-input:focus {
+  outline: none;
+  border-color: var(--lp-light-purple, #DD76F7);
+  box-shadow: 0 0 0 3px rgba(221, 118, 247, 0.15);
+}
+
+.otp-digit-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .otp-digit-grid {
+    gap: 6px;
+  }
+
+  .otp-digit-input {
+    font-size: 1rem;
+    max-height: 44px;
+    border-radius: 10px;
+  }
+}

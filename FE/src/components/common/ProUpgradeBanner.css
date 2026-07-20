@@ -1,0 +1,60 @@
+.pro-upgrade-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.18), rgba(30, 41, 59, 0.9));
+  color: #f8fafc;
+  margin: 16px 0;
+}
+
+.pro-upgrade-banner-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(168, 85, 247, 0.18);
+  color: #d8b4fe;
+  flex-shrink: 0;
+}
+
+.pro-upgrade-banner-content {
+  flex: 1;
+}
+
+.pro-upgrade-banner-content h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.pro-upgrade-banner-content p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.pro-upgrade-banner-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pro-upgrade-banner-btn:hover {
+  filter: brightness(1.05);
+}
+
+@media (max-width: 768px) {
+  .pro-upgrade-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

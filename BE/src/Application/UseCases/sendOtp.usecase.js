@@ -1,4 +1,6 @@
 import { sendEmail } from '../../Infrastructure/MailClient.js';
+import { formatEmailDeliveryError } from '../../Shared/emailErrors.js';
+import { generateOtpCode } from '../../Shared/otp.js';
 
 /**
  * Send OTP use case - generates a random 6-digit code, stores it, and sends via SMTP
@@ -10,7 +12,7 @@ import { sendEmail } from '../../Infrastructure/MailClient.js';
  */
 export async function sendOtpUseCase(prisma, { email, createUser }) {
   // Generate random 6-digit code
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = generateOtpCode();
 
   // Create expiration timestamp (5 minutes from now)
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -35,7 +37,7 @@ export async function sendOtpUseCase(prisma, { email, createUser }) {
         <h2 style="font-size: 20px; font-weight: 600; margin-top: 0; color: #ffffff;">Mã Xác Thực OTP</h2>
         <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">Vui lòng sử dụng mã OTP dưới đây để xác thực đăng nhập hoặc đăng ký tài khoản của bạn. Mã này có hiệu lực trong vòng 5 phút.</p>
         <div style="background: linear-gradient(135deg, #A855F7 0%, #3B0764 100%); padding: 15px 40px; border-radius: 8px; display: inline-block; margin-bottom: 20px;">
-          <span style="font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: 6px; font-family: monospace;">${code}</span>
+          <span style="font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: 2px; font-family: monospace;">${code}</span>
         </div>
         <p style="color: #ef4444; font-size: 13px; margin: 15px 0 0 0;">* Tuyệt đối không chia sẻ mã xác thực này với bất kỳ ai.</p>
       </div>
@@ -49,7 +51,9 @@ export async function sendOtpUseCase(prisma, { email, createUser }) {
   try {
     await sendEmail(email, `${code} là mã xác thực HiNa của bạn`, html);
   } catch (error) {
-    throw new Error(`Failed to send email: ${error.message}`);
+    const err = new Error(formatEmailDeliveryError(error));
+    err.statusCode = 503;
+    throw err;
   }
 
   return {

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { X, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import userApi from '../../api/userApi';
-import authApi from '../../api/authApi';
-import { useNavigate } from 'react-router-dom';
+import { useLogout } from '../../context/AuthContext';
 
 export const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [oldPassword, setOldPassword] = useState('');
@@ -175,7 +174,7 @@ export const DeleteAccountModal = ({ isOpen, onClose }) => {
   const [confirmText, setConfirmText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const handleLogout = useLogout();
 
   if (!isOpen) return null;
 
@@ -188,9 +187,7 @@ export const DeleteAccountModal = ({ isOpen, onClose }) => {
     setLoading(true);
     try {
       await userApi.deleteAccount();
-      // Clear local storage and redirect to login
-      authApi.logout();
-      navigate('/login');
+      handleLogout();
     } catch (err) {
       setError('Có lỗi xảy ra khi xóa tài khoản. Vui lòng thử lại.');
       setLoading(false);

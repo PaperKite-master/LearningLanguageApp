@@ -19,7 +19,7 @@ export async function authRoutes(fastify, options) {
     schema: {
       tags: ['Auth'],
       summary: 'Register a new user',
-      description: 'Creates a new user and sends an email verification link.',
+      description: 'Creates a new user and sends a 6-digit OTP via Gmail SMTP.',
       body: RegisterBodySchema,
       response: {
         201: RegisterResponseSchema,
@@ -99,7 +99,7 @@ export async function authRoutes(fastify, options) {
     schema: {
       tags: ['Auth'],
       summary: 'Send an OTP to email',
-      description: 'Triggers sending a 6-digit OTP code to the provided email address.',
+      description: 'Triggers sending a custom OTP code via SMTP (legacy). Signup uses Supabase OTP instead.',
       body: SendOtpBodySchema,
       response: {
         200: GenericMessageResponseSchema,
@@ -110,11 +110,25 @@ export async function authRoutes(fastify, options) {
     handler: authController.sendOtp,
   });
 
+  fastify.post('/resend-signup-otp', {
+    schema: {
+      tags: ['Auth'],
+      summary: 'Resend signup OTP via Gmail SMTP',
+      body: ForgotPasswordBodySchema,
+      response: {
+        200: GenericMessageResponseSchema,
+        400: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: authController.resendSignupOtp,
+  });
+
   fastify.post('/verify-otp', {
     schema: {
       tags: ['Auth'],
       summary: 'Verify OTP code',
-      description: 'Verifies the OTP code for signup, login (type: email), or recovery, and returns JWT tokens + user profile (if type is signup/email).',
+      description: 'Verifies signup OTP (Gmail, 6 digits) or recovery OTP (Supabase).',
       body: VerifyOtpBodySchema,
       response: {
         200: LoginResponseSchema,

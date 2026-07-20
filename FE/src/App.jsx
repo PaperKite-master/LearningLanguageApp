@@ -25,12 +25,14 @@ import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import PaymentResult from './pages/payment/PaymentResult';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
-import './index.css';
-import authApi from './api/authApi';
 
 function OAuthRedirect() {
   const navigate = useNavigate();
+  const { refreshAuth } = useAuth();
+
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes('access_token') && !hash.includes('type=recovery')) {
@@ -41,19 +43,21 @@ function OAuthRedirect() {
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
         if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-        
-        // Fetch profile to make sure it's created and to get role
-        authApi.getMe().then((user) => {
-           localStorage.setItem('user', JSON.stringify(user));
-           if (user.role === 'ADMIN') navigate('/admin/dashboard');
-           else navigate('/dashboard');
-        }).catch(err => {
-           console.error('Failed to sync profile after OAuth', err);
-           navigate('/login');
-        });
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+
+        refreshAuth()
+          .then((user) => {
+            if (!user) {
+              navigate('/login');
+              return;
+            }
+            navigate(user.role === 'ADMIN' ? '/admin/dashboard' : '/study');
+          })
+          .catch(() => navigate('/login'));
       }
     }
-  }, [navigate]);
+  }, [navigate, refreshAuth]);
+
   return null;
 }
 
@@ -62,7 +66,6 @@ function RecoveryRedirect() {
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes('type=recovery') && hash.includes('access_token')) {
-      // Navigate to reset password and preserve the hash
       navigate('/reset-password' + hash);
     }
   }, [navigate]);
@@ -72,63 +75,52 @@ function RecoveryRedirect() {
 function App() {
   return (
     <Router>
-      <RecoveryRedirect />
-      <OAuthRedirect />
-      <Routes>
+      <AuthProvider>
+        <RecoveryRedirect />
+        <OAuthRedirect />
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         
-        {/* Dashboard redirects to Study */}
         <Route path="/dashboard" element={<Navigate to="/study" replace />} />
         
-        {/* Study Page  */}
-        <Route path="/study" element={<Study />} />
-        <Route path="/lesson/:id" element={<LessonDetail />} />
+        <Route path="/study" element={<ProtectedRoute><Study /></ProtectedRoute>} />
+        <Route path="/lesson/:id" element={<ProtectedRoute><LessonDetail /></ProtectedRoute>} />
 
-        {/* Alphabet Page */}
-        <Route path="/alphabet" element={<Alphabet />} />
+        <Route path="/alphabet" element={<ProtectedRoute><Alphabet /></ProtectedRoute>} />
 
-        {/* Flashcard Page */}
-        <Route path="/flashcard" element={<Flashcard />} />
+        <Route path="/flashcard" element={<ProtectedRoute><Flashcard /></ProtectedRoute>} />
 
-        {/* Video Page */}
-        <Route path="/videos" element={<Video />} />
+        <Route path="/videos" element={<ProtectedRoute><Video /></ProtectedRoute>} />
 
-        {/* Progress Page */}
-        <Route path="/progress" element={<Progress />} />
+        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
 
-        {/* Profile Page */}
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
-        {/* Payment Result */}
-        <Route path="/payment/result" element={<PaymentResult />} />
+        <Route path="/payment/result" element={<ProtectedRoute><PaymentResult /></ProtectedRoute>} />
 
-        {/* Quiz Take Page */}
-        <Route path="/quiz/:id" element={<QuizTake />} />
+        <Route path="/quiz/:id" element={<ProtectedRoute><QuizTake /></ProtectedRoute>} />
         
-        {/* User Settings */}
-        <Route path="/settings" element={<UserSettings />} />
+        <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
 
-        {/* Admin Pages */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/content" element={<AdminContent />} />
-        <Route path="/admin/content/create" element={<AdminLessonCreate />} />
-        <Route path="/admin/timeline" element={<AdminTimeline />} />
-        <Route path="/admin/videos" element={<AdminVideos />} />
-        <Route path="/admin/flashcard" element={<AdminFlashcard />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
-        <Route path="/admin/tests" element={<AdminQuizzes />} />
-        <Route path="/admin/tests/:id/questions" element={<AdminQuizQuestions />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute adminOnly><AdminUsers /></ProtectedRoute>} />
+        <Route path="/admin/content" element={<ProtectedRoute adminOnly><AdminContent /></ProtectedRoute>} />
+        <Route path="/admin/content/create" element={<ProtectedRoute adminOnly><AdminLessonCreate /></ProtectedRoute>} />
+        <Route path="/admin/timeline" element={<ProtectedRoute adminOnly><AdminTimeline /></ProtectedRoute>} />
+        <Route path="/admin/videos" element={<ProtectedRoute adminOnly><AdminVideos /></ProtectedRoute>} />
+        <Route path="/admin/flashcard" element={<ProtectedRoute adminOnly><AdminFlashcard /></ProtectedRoute>} />
+        <Route path="/admin/settings" element={<ProtectedRoute adminOnly><AdminSettings /></ProtectedRoute>} />
+        <Route path="/admin/tests" element={<ProtectedRoute adminOnly><AdminQuizzes /></ProtectedRoute>} />
+        <Route path="/admin/tests/:id/questions" element={<ProtectedRoute adminOnly><AdminQuizQuestions /></ProtectedRoute>} />
         
-        {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         
-        {/* Catch all */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }
