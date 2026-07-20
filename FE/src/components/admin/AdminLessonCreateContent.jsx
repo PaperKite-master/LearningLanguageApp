@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MDEditor from '@uiw/react-md-editor';
 import remarkBreaks from 'remark-breaks';
-import { ArrowLeft, Save, FileText } from 'lucide-react';
+import { ArrowLeft, Save, FileText, Languages } from 'lucide-react';
 import lessonApi from '../../api/lessonApi';
 import grammarApi from '../../api/grammarApi';
 import timelineApi from '../../api/timelineApi';
@@ -81,6 +81,7 @@ const AdminLessonCreateContent = () => {
   const [timelines, setTimelines] = useState([]);
   const [lessons, setLessons] = useState([]);
   const [lessonGrammars, setLessonGrammars] = useState([]);
+  const [generatingSubtitles, setGeneratingSubtitles] = useState(false);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -226,6 +227,23 @@ const AdminLessonCreateContent = () => {
     }
   };
 
+  const handleGenerateSubtitles = async () => {
+    if (!editMode || !lessonData?.id || !lessonFormData.videoUrl) {
+      alert('Cần lưu bài học với URL YouTube trước khi tạo phụ đề.');
+      return;
+    }
+
+    try {
+      setGeneratingSubtitles(true);
+      const updated = await lessonApi.generateSubtitles(lessonData.id);
+      alert(`Đã tạo ${updated.subtitles?.length || 0} dòng phụ đề song ngữ.`);
+    } catch (error) {
+      alert('Tạo phụ đề thất bại: ' + error.message);
+    } finally {
+      setGeneratingSubtitles(false);
+    }
+  };
+
   return (
     <div className="admin-lesson-create-area" data-color-mode="light">
       
@@ -308,12 +326,34 @@ const AdminLessonCreateContent = () => {
               </div>
               <div className="form-group" style={{ flex: 1.5 }}>
                 <label>Video URL (Youtube/AWS)</label>
-                <input 
-                  type="url" name="videoUrl" value={lessonFormData.videoUrl} onChange={handleLessonChange} 
-                  className="admin-lesson-create-input" placeholder="https://..."
+                <input
+                  type="url"
+                  name="videoUrl"
+                  value={lessonFormData.videoUrl}
+                  onChange={handleLessonChange}
+                  className="admin-lesson-create-input"
+                  placeholder="https://www.youtube.com/watch?v=..."
                 />
               </div>
             </div>
+
+            {editMode && lessonData?.id && (
+              <div className="subtitle-generate-banner">
+                <div>
+                  <strong>Phụ đề song ngữ (JP → VI)</strong>
+                  <p>Lấy phụ đề YouTube tiếng Nhật và dịch sang tiếng Việt, lưu vào bài học.</p>
+                </div>
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  onClick={handleGenerateSubtitles}
+                  disabled={generatingSubtitles || !lessonFormData.videoUrl}
+                >
+                  <Languages size={18} />
+                  {generatingSubtitles ? 'Đang tạo phụ đề...' : 'Tạo phụ đề song ngữ'}
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <div className="form-group-row" style={{ marginBottom: 0 }}>

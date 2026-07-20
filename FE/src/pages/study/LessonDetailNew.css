@@ -5,6 +5,11 @@
   min-height: 100vh;
 }
 
+.lesson-detail-new .study-main-col {
+  max-width: 900px;
+  width: 100%;
+}
+
 .lesson-header-new {
   display: flex;
   align-items: center;
@@ -62,6 +67,11 @@
 
 .exercise-badge {
   background-color: #d8b4fe;
+  color: #ffffff;
+}
+
+.quiz-badge {
+  background-color: #c084fc;
   color: #ffffff;
 }
 
@@ -248,8 +258,8 @@
 /* Vocabulary Grid */
 .vocab-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 25px;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;

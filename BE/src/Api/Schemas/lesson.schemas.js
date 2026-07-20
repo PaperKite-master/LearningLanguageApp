@@ -7,11 +7,13 @@ export const LessonDtoSchema = Type.Object({
   topic: Type.Union([Type.String(), Type.Null()]),
   status: Type.Union([Type.Literal('draft'), Type.Literal('published')]),
   videoUrl: Type.Union([Type.String(), Type.Null()]),
+  subtitles: Type.Optional(Type.Union([Type.Array(Type.Any()), Type.Null()])),
   contentMarkdown: Type.Union([Type.String(), Type.Null()]),
   order: Type.Integer(),
   lessonCode: Type.Union([Type.String(), Type.Null()]),
   createdAt: Type.Union([Type.String(), Type.Null()]),
-  vocabularies: Type.Optional(Type.Array(Type.Any()))
+  vocabularies: Type.Optional(Type.Array(Type.Any())),
+  questions: Type.Optional(Type.Array(Type.Any()))
 });
 
 export const LessonIdParamsSchema = Type.Object({

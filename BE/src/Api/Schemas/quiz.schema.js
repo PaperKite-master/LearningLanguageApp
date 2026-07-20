@@ -25,6 +25,14 @@ export const SubmitQuizBodySchema = Type.Object({
         }),
         { description: 'Pairs for matching questions' }
       )),
+      readingAnswers: Type.Optional(Type.Array(
+        Type.Object({
+          subQuestionId: Type.String(),
+          answerIndex: Type.Number()
+        }),
+        { description: 'Answers for reading sub questions' }
+      )),
+      answerOrder: Type.Optional(Type.Array(Type.String(), { description: 'Ordered words/phrases for reordering questions' })),
     }),
     { description: 'Array of user answers' }
   ),

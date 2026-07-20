@@ -2,6 +2,7 @@ import { createLessonUseCase } from '../../Application/UseCases/createLesson.use
 import { updateLessonUseCase } from '../../Application/UseCases/updateLesson.usecase.js';
 import { deleteLessonUseCase } from '../../Application/UseCases/deleteLesson.usecase.js';
 import { listAdminLessonsUseCase } from '../../Application/UseCases/listAdminLessons.usecase.js';
+import { generateLessonSubtitlesUseCase } from '../../Application/UseCases/generateLessonSubtitles.usecase.js';
 
 export const adminLessonController = {
   list: async (request, reply) => {
@@ -57,10 +58,27 @@ export const adminLessonController = {
         return reply.code(404).send({ error: 'Lesson not found' });
       }
       if (err?.code === 'P2023') {
-        return reply.code(400).send({ error: 'Invalid UUID format in request params' });
+        return reply.code(404).send({ error: 'Invalid UUID format in request params' });
       }
       throw err;
     }
-  }
+  },
+
+  generateSubtitles: async (request, reply) => {
+    try {
+      const lesson = await generateLessonSubtitlesUseCase({
+        lessonRepo: request.lessonRepo,
+        id: request.params.id,
+      });
+      return reply.code(200).send({ data: lesson });
+    } catch (err) {
+      request.log.error(err);
+      const statusCode = err.statusCode ?? 500;
+      return reply.code(statusCode).send({
+        error: err.message || 'Failed to generate subtitles',
+        statusCode,
+      });
+    }
+  },
 };
 

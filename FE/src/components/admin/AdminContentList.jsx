@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Edit2, Trash2, ExternalLink } from 'lucide-react';
+import { Search, Edit2, Trash2, ExternalLink, Languages } from 'lucide-react';
 import lessonApi from '../../api/lessonApi';
 import './AdminContentList.css';
 
@@ -38,6 +38,26 @@ const AdminContentList = () => {
 
   const handleOpenAddModal = () => {
     navigate('/admin/content/create');
+  };
+
+  const handleGenerateSubtitles = async (item, event) => {
+    event.stopPropagation();
+    if (!item.videoUrl) {
+      alert('Bài học chưa có YouTube URL. Hãy Edit và thêm link video trước.');
+      return;
+    }
+    if (!window.confirm(`Tạo phụ đề song ngữ cho "${item.title}"? (có thể mất vài phút)`)) {
+      return;
+    }
+    try {
+      setLoading(true);
+      await lessonApi.generateSubtitles(item.id);
+      alert('Tạo phụ đề thành công!');
+    } catch (error) {
+      alert('Tạo phụ đề thất bại: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenEditModal = (item) => {
@@ -207,6 +227,13 @@ const AdminContentList = () => {
                     <div className="action-buttons">
                       <button className="icon-action-btn edit-btn" title="Edit" onClick={() => handleOpenEditModal(item)}>
                         <Edit2 size={16} />
+                      </button>
+                      <button
+                        className="icon-action-btn"
+                        title="Tạo phụ đề song ngữ"
+                        onClick={(e) => handleGenerateSubtitles(item, e)}
+                      >
+                        <Languages size={16} color="#7c3aed" />
                       </button>
                       <button className="icon-action-btn delete-btn" title="Delete" onClick={() => setItemToDelete(item)}>
                         <Trash2 size={16} color="#ef4444" />

@@ -8,7 +8,7 @@ export async function createAdminFlashcardUseCase({ adminFlashcardRepo, payload 
     deckId: payload.deckId,
     level: payload.level,
     japaneseWord: payload.japaneseWord,
-    pronunciation: payload.pronunciation,
+    pronunciation: payload.pronunciation ?? "",
     meaningVi: payload.meaningVi,
     status: payload.status
   });

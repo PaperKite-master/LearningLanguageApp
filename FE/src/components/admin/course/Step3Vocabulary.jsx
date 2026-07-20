@@ -43,10 +43,14 @@ const Step3Vocabulary = ({ formData, setFormData }) => {
   };
 
   const handleSaveQuestions = (questions) => {
-    const newVocabs = [...vocabularies];
-    newVocabs[activeVocabIndex].questions = questions;
-    setVocabularies(newVocabs);
-    updateForm(newVocabs);
+    if (activeVocabIndex === -1) {
+      setFormData({ ...formData, questions });
+    } else {
+      const newVocabs = [...vocabularies];
+      newVocabs[activeVocabIndex].questions = questions;
+      setVocabularies(newVocabs);
+      updateForm(newVocabs);
+    }
     setModalOpen(false);
   };
 
@@ -121,49 +125,60 @@ const Step3Vocabulary = ({ formData, setFormData }) => {
               </div>
             </div>
 
-            <div className="vocab-questions-section" style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px dashed #e5e7eb' }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '10px', gap: '15px' }}>
-                  <h4 style={{ color: '#4b5563', margin: 0, fontSize: '0.95rem' }}>Questions ({vocab.questions?.length || 0})</h4>
-                  <button 
-                    onClick={() => openQuizModal(index)}
-                    className="admin-btn-secondary"
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}
-                  >
-                  <ListChecks size={16} /> Manage Questions
-                </button>
-              </div>
-              
-              {vocab.questions && vocab.questions.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {vocab.questions.map((q, qIndex) => (
-                    <div key={qIndex} className="question-item">
-                      <span style={{ color: '#6b7280', fontSize: '0.85rem' }}>{q.question_type}</span>
-                      <span style={{ color: '#1f2937', flex: 1, margin: '0 15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {q.question_text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p style={{ color: '#6b7280', fontSize: '0.85rem', fontStyle: 'italic', margin: 0 }}>
-                  No questions added for this vocabulary.
-                </p>
-              )}
-            </div>
-
           </div>
         ))}
 
-          <button onClick={addVocabulary} className="admin-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', alignSelf: 'flex-start' }}>
+        <button onClick={addVocabulary} className="admin-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', alignSelf: 'flex-start' }}>
           <Plus size={20} /> Add Vocabulary
         </button>
+      </div>
+
+      {/* Practice Questions Section */}
+      <div className="practice-questions-section" style={{ marginTop: '40px', padding: '24px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h3 style={{ color: '#1f2937', margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Practice Questions ({formData.questions?.length || 0})</h3>
+            <p style={{ color: '#6b7280', margin: '4px 0 0 0', fontSize: '0.85rem' }}>Thêm câu hỏi luyện tập cho bài học này tại đây (các câu hỏi sẽ không gắn liền với từ vựng cụ thể nào).</p>
+          </div>
+          <button 
+            onClick={() => {
+              setActiveVocabIndex(-1);
+              setModalOpen(true);
+            }}
+            className="admin-btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem' }}
+          >
+            <ListChecks size={18} /> Manage Questions
+          </button>
+        </div>
+        
+        {formData.questions && formData.questions.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {formData.questions.map((q, qIndex) => (
+              <div key={qIndex} className="question-item" style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span className="question-type-badge" style={{ padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                  {q.question_type || 'multiple_choice'}
+                </span>
+                <span style={{ color: '#1f2937', flex: 1, fontWeight: 500, fontSize: '0.95rem' }}>
+                  {qIndex + 1}. {q.question_text}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px 20px', background: '#ffffff', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem', margin: 0, fontStyle: 'italic' }}>
+              Chưa có câu hỏi luyện tập nào cho bài học này.
+            </p>
+          </div>
+        )}
       </div>
 
       {modalOpen && (
         <QuizBuilderModal 
           isOpen={modalOpen} 
           onClose={() => setModalOpen(false)} 
-          initialQuestions={vocabularies[activeVocabIndex]?.questions || []}
+          initialQuestions={activeVocabIndex === -1 ? (formData.questions || []) : (vocabularies[activeVocabIndex]?.questions || [])}
           onSave={handleSaveQuestions}
         />
       )}

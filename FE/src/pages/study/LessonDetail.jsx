@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, PlayCircle, BookOpen, FileText, ArrowRight, Edit2, Lock, ClipboardList, Database, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, BookOpen, FileText, ArrowRight, Edit2, Lock, ClipboardList, Database, CheckCircle2 } from 'lucide-react';
 import MDEditor from '@uiw/react-md-editor';
 import remarkBreaks from 'remark-breaks';
 import userLessonApi from '../../api/userLessonApi';
@@ -10,6 +10,7 @@ import Sidebar from '../../components/dashboard/Sidebar';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar';
 import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
 import VocabPractice from '../../components/study/VocabPractice';
+import BilingualVideoPlayer from '../../components/study/BilingualVideoPlayer';
 import './LessonDetailNew.css';
 
 const extractText = (children) => {
@@ -165,16 +166,6 @@ const LessonDetail = () => {
 
   const mdComponents = useMemo(() => getMarkdownComponents(handleExerciseComplete), [handleExerciseComplete]);
 
-  const getEmbedUrl = (url) => {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    if (match && match[2].length === 11) {
-      return `https://www.youtube.com/embed/${match[2]}`;
-    }
-    return url;
-  };
-
   const renderGrammarContent = (markdown) => {
     if (!markdown) return null;
     // Tách bằng thẻ heading level 3 (###)
@@ -252,6 +243,24 @@ const LessonDetail = () => {
                   <h2>{lesson.title.toUpperCase()}</h2>
                 </div>
 
+                <div>
+                  <span className="pill-badge exercise-badge">Bài học</span>
+                  <div className="card-list">
+                    <div className="item-card" onClick={() => setViewMode('exercise')}>
+                      <div className="item-icon-left exercise-icon">
+                        <Edit2 size={24} color="#ffffff" strokeWidth={1.5} />
+                      </div>
+                      <div className="item-info">
+                        <h4>Bài Học</h4>
+                        <p>{totalExercises > 0 ? `${totalExercises} câu hỏi` : 'Đọc hiểu'}</p>
+                      </div>
+                      <div className="item-icon-right">
+                        {isExerciseCompleted ? <CheckCircle2 size={24} color="#10b981" /> : <ArrowRight size={24} color="#a855f7" />}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {grammars && grammars.length > 0 && (
                   <div>
                     <span className="pill-badge grammar-badge">Ngữ pháp</span>
@@ -274,23 +283,10 @@ const LessonDetail = () => {
                   </div>
                 )}
 
-                <div>
-                  <span className="pill-badge exercise-badge">Làm bài tập</span>
-                  <div className="card-list">
-                    <div className="item-card" onClick={() => setViewMode('exercise')}>
-                      <div className="item-icon-left exercise-icon">
-                        <Edit2 size={24} color="#ffffff" strokeWidth={1.5} />
-                      </div>
-                      <div className="item-info">
-                        <h4>Bài Học & Thực Hành</h4>
-                        <p>{totalExercises > 0 ? `${totalExercises} câu hỏi` : 'Đọc hiểu'}</p>
-                      </div>
-                      <div className="item-icon-right">
-                        {isExerciseCompleted ? <CheckCircle2 size={24} color="#10b981" /> : <Lock size={24} color="#94a3b8" />}
-                      </div>
-                    </div>
-
-                    {lessonQuiz && (
+                {lessonQuiz && (
+                  <div>
+                    <span className="pill-badge quiz-badge">Kiểm tra</span>
+                    <div className="card-list">
                       <div className="item-card" onClick={() => navigate(`/quiz/${lessonQuiz.id}`)}>
                         <div className="item-icon-left exercise-icon">
                           <ClipboardList size={24} color="#ffffff" strokeWidth={1.5} />
@@ -303,9 +299,9 @@ const LessonDetail = () => {
                           <ArrowRight size={24} color="#a855f7" />
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             )}
 
@@ -323,7 +319,7 @@ const LessonDetail = () => {
                 
                 <div className="practice-btn-container">
                   <button className="practice-btn" onClick={() => setViewMode('exercise')}>
-                    Luyện tập
+                    Bài học
                   </button>
                 </div>
               </>
@@ -350,12 +346,16 @@ const LessonDetail = () => {
                       <div className="vocab-meaning-group">
                         <div className="vocab-meaning">{vocab.meaning}</div>
                       </div>
-                      {vocab.questions && vocab.questions.length > 0 && (
-                        <VocabPractice questions={vocab.questions} />
-                      )}
                     </div>
                   ))}
                 </div>
+
+                {lesson.questions && lesson.questions.length > 0 && (
+                  <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '2px dashed #e2e8f0' }}>
+                    <h3 style={{ fontSize: '1.25rem', color: '#1e293b', marginBottom: '20px', fontWeight: 'bold' }}>Luyện tập</h3>
+                    <VocabPractice questions={lesson.questions} />
+                  </div>
+                )}
               </>
             )}
 
@@ -370,20 +370,11 @@ const LessonDetail = () => {
                 </div>
                 
                 <div className="lesson-exercise-content">
-                  {getEmbedUrl(lesson.videoUrl) && (
-                    <div style={{ marginBottom: '30px', background: '#f8fafc', padding: '15px', borderRadius: '16px' }}>
-                      <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e293b', marginBottom: '15px' }}>
-                        <PlayCircle size={20} color="#a855f7" /> Video Bài Giảng
-                      </h3>
-                      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px' }}>
-                        <iframe 
-                          src={getEmbedUrl(lesson.videoUrl)} 
-                          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                          allowFullScreen
-                          title="Lesson Video"
-                        />
-                      </div>
-                    </div>
+                  {lesson.videoUrl && (
+                    <BilingualVideoPlayer
+                      videoUrl={lesson.videoUrl}
+                      subtitles={Array.isArray(lesson.subtitles) ? lesson.subtitles : []}
+                    />
                   )}
 
                   {totalExercises > 0 && (

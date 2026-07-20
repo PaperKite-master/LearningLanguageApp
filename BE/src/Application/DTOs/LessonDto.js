@@ -18,6 +18,7 @@ export function toLessonDto(lesson) {
     topic: lesson.topic ?? null,
     status: lesson.status ?? 'published',
     videoUrl: lesson.video_url ?? null,
+    subtitles: lesson.subtitles ?? null,
     contentMarkdown: lesson.content_markdown ?? null,
     order: lesson.order ?? 0,
     lessonCode: lesson.lesson_code ?? null,
@@ -30,14 +31,17 @@ export function toLessonDto(lesson) {
       hiragana: v.hiragana,
       romaji: v.romaji,
       meaning: v.meaning,
-      questions: v.questions ? v.questions.map(q => ({
-        id: q.id,
-        question_text: q.question_text,
-        question_type: q.question_type,
-        options: q.options,
-        explanation: q.explanation
-      })) : []
-    })) : []
+      questions: []
+    })) : [],
+    questions: lesson.quizzes && lesson.quizzes[0] && lesson.quizzes[0].questions
+      ? lesson.quizzes[0].questions.map(q => ({
+          id: q.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options,
+          explanation: q.explanation
+        }))
+      : []
   };
 }
 

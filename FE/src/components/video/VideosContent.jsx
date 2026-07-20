@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Play, ChevronDown, MessageSquare, Settings, Maximize, Youtube, FileText } from 'lucide-react';
+import { Play, ChevronDown, Youtube } from 'lucide-react';
 import './VideosContent.css';
 
 import timelineApi from '../../api/timelineApi';
+import BilingualVideoPlayer from '../study/BilingualVideoPlayer';
 
 const VideosContent = () => {
   const [timelines, setTimelines] = useState([]);
@@ -37,40 +38,24 @@ const VideosContent = () => {
     fetchData();
   }, []);
 
-  // Helper to extract YouTube embed URL
-  const getEmbedUrl = (url) => {
-    if (!url) return '';
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    if (match && match[2].length === 11) {
-      return `https://www.youtube.com/embed/${match[2]}`;
-    }
-    return url;
-  };
-
   return (
     <div className="video-page-container">
       {/* Left side: Video Player */}
       <div className="video-left-panel">
         <div className="video-player-card">
-          <div className="video-player-screen" style={{ padding: 0, overflow: 'hidden' }}>
-            {playingVideo ? (
-              <iframe
-                width="100%"
-                height="100%"
-                src={getEmbedUrl(playingVideo.videoUrl)}
-                title={playingVideo.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            ) : (
+          {playingVideo ? (
+            <BilingualVideoPlayer
+              key={playingVideo.id}
+              videoUrl={playingVideo.videoUrl}
+              subtitles={Array.isArray(playingVideo.subtitles) ? playingVideo.subtitles : []}
+            />
+          ) : (
+            <div className="video-player-screen">
               <div className="video-play-button-center">
                 <Play size={24} color="#1a1a1a" fill="#1a1a1a" style={{ marginLeft: '4px' }} />
               </div>
-            )}
-          </div>
-
+            </div>
+          )}
         </div>
       </div>
 

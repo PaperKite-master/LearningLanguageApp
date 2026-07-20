@@ -26,7 +26,9 @@ export class PrismaLessonRepository {
           where: { is_completed: true },
           select: { id: true }
         },
-        vocabulary: {
+        vocabulary: true,
+        quizzes: {
+          where: { type: 'VOCABULARY' },
           include: {
             questions: {
               orderBy: { order: 'asc' }
@@ -42,7 +44,9 @@ export class PrismaLessonRepository {
     return this.prisma.lessons.findFirst({
       where: { id, status: 'published' },
       include: {
-        vocabulary: {
+        vocabulary: true,
+        quizzes: {
+          where: { type: 'VOCABULARY' },
           include: {
             questions: {
               orderBy: { order: 'asc' }
@@ -53,7 +57,18 @@ export class PrismaLessonRepository {
     });
   }
 
-  async create({ title, timelineId, topic, status, videoUrl, contentMarkdown, order, lessonCode, vocabularies }) {
+  async findByIdAny(id) {
+    return this.prisma.lessons.findUnique({ where: { id } });
+  }
+
+  async updateSubtitles(id, subtitles) {
+    return this.prisma.lessons.update({
+      where: { id },
+      data: { subtitles }
+    });
+  }
+
+  async create({ title, timelineId, topic, status, videoUrl, contentMarkdown, order, lessonCode, vocabularies, questions, subtitles }) {
     const normalizedTimelineId = normalizeNullableUuid(timelineId);
     const normalizedTopic = normalizeNullableText(topic);
 
@@ -66,30 +81,17 @@ export class PrismaLessonRepository {
           topic: normalizedTopic,
           status: status ?? 'published',
           video_url: videoUrl ?? null,
+          subtitles: subtitles ?? undefined,
           content_markdown: contentMarkdown ?? null,
           order: order ?? 0,
           lesson_code: lessonCode ?? null
         }
       });
 
-      // 2. Handle vocabularies and questions
+      // 2. Handle vocabularies
       if (vocabularies && vocabularies.length > 0) {
-        let quiz = null;
-        const allQuestions = vocabularies.flatMap(v => v.questions || []);
-        
-        if (allQuestions.length > 0) {
-          quiz = await tx.quizzes.create({
-            data: {
-              lesson_id: lesson.id,
-              title: `Quiz: ${lesson.title}`,
-              type: 'VOCABULARY',
-              status: 'published'
-            }
-          });
-        }
-
         for (const vocab of vocabularies) {
-          const createdVocab = await tx.vocabulary.create({
+          await tx.vocabulary.create({
             data: {
               lesson_id: lesson.id,
               hiragana: vocab.hiragana,
@@ -98,28 +100,38 @@ export class PrismaLessonRepository {
               meaning: vocab.meaning
             }
           });
-
-          if (vocab.questions && vocab.questions.length > 0 && quiz) {
-            await tx.questions.createMany({
-              data: vocab.questions.map((q, idx) => ({
-                quiz_id: quiz.id,
-                vocabulary_id: createdVocab.id,
-                question_text: q.question_text,
-                question_type: q.question_type ?? 'multiple_choice',
-                options: q.options ? q.options : [],
-                explanation: q.explanation ?? null,
-                order: idx
-              }))
-            });
-          }
         }
+      }
+
+      // 3. Handle questions
+      if (questions && questions.length > 0) {
+        const quiz = await tx.quizzes.create({
+          data: {
+            lesson_id: lesson.id,
+            title: `Quiz: ${lesson.title}`,
+            type: 'VOCABULARY',
+            status: 'published'
+          }
+        });
+
+        await tx.questions.createMany({
+          data: questions.map((q, idx) => ({
+            quiz_id: quiz.id,
+            vocabulary_id: null,
+            question_text: q.question_text,
+            question_type: q.question_type ?? 'multiple_choice',
+            options: q.options ? q.options : [],
+            explanation: q.explanation ?? null,
+            order: idx
+          }))
+        });
       }
 
       return lesson;
     });
   }
 
-  async update(id, { title, timelineId, topic, status, videoUrl, contentMarkdown, order, lessonCode, vocabularies }) {
+  async update(id, { title, timelineId, topic, status, videoUrl, contentMarkdown, order, lessonCode, vocabularies, questions, subtitles }) {
     const normalizedTimelineId = normalizeNullableUuid(timelineId);
     const normalizedTopic = normalizeNullableText(topic);
 
@@ -133,6 +145,7 @@ export class PrismaLessonRepository {
           topic: normalizedTopic,
           status,
           video_url: videoUrl,
+          subtitles,
           content_markdown: contentMarkdown,
           order,
           lesson_code: lessonCode
@@ -143,12 +156,27 @@ export class PrismaLessonRepository {
       if (vocabularies !== undefined) {
         // Delete old vocabularies
         await tx.vocabulary.deleteMany({ where: { lesson_id: id } });
-        
+
+        if (vocabularies.length > 0) {
+          for (const vocab of vocabularies) {
+            await tx.vocabulary.create({
+              data: {
+                lesson_id: id,
+                hiragana: vocab.hiragana,
+                romaji: vocab.romaji ?? null,
+                kanji: vocab.kanji ?? null,
+                meaning: vocab.meaning
+              }
+            });
+          }
+        }
+      }
+
+      // 3. Sync questions if provided
+      if (questions !== undefined) {
         let quiz = await tx.quizzes.findFirst({ where: { lesson_id: id, type: 'VOCABULARY' } });
-        
-        const allQuestions = vocabularies.flatMap(v => v.questions || []);
-        
-        if (allQuestions.length > 0) {
+
+        if (questions.length > 0) {
           if (!quiz) {
             quiz = await tx.quizzes.create({
               data: {
@@ -162,38 +190,21 @@ export class PrismaLessonRepository {
             // Clear old questions
             await tx.questions.deleteMany({ where: { quiz_id: quiz.id } });
           }
+
+          await tx.questions.createMany({
+            data: questions.map((q, idx) => ({
+              quiz_id: quiz.id,
+              vocabulary_id: null,
+              question_text: q.question_text,
+              question_type: q.question_type ?? 'multiple_choice',
+              options: q.options ? q.options : [],
+              explanation: q.explanation ?? null,
+              order: idx
+            }))
+          });
         } else if (quiz) {
           // No questions now, delete existing quiz
           await tx.quizzes.delete({ where: { id: quiz.id } });
-          quiz = null;
-        }
-
-        if (vocabularies.length > 0) {
-          for (const vocab of vocabularies) {
-            const createdVocab = await tx.vocabulary.create({
-              data: {
-                lesson_id: id,
-                hiragana: vocab.hiragana,
-                romaji: vocab.romaji ?? null,
-                kanji: vocab.kanji ?? null,
-                meaning: vocab.meaning
-              }
-            });
-
-            if (vocab.questions && vocab.questions.length > 0 && quiz) {
-              await tx.questions.createMany({
-                data: vocab.questions.map((q, idx) => ({
-                  quiz_id: quiz.id,
-                  vocabulary_id: createdVocab.id,
-                  question_text: q.question_text,
-                  question_type: q.question_type ?? 'multiple_choice',
-                  options: q.options ? q.options : [],
-                  explanation: q.explanation ?? null,
-                  order: idx
-                }))
-              });
-            }
-          }
         }
       }
 
