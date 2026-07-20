@@ -329,7 +329,6 @@ const AdminFlashcardsContent = () => {
                     type="text" 
                     value={cardForm.kana} 
                     onChange={e => setCardForm({...cardForm, kana: e.target.value})} 
-                    required 
                   />
                 </div>
               </div>

@@ -34,7 +34,8 @@ export const CreateLessonBodySchema = Type.Object({
   contentMarkdown: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   order: Type.Optional(Type.Integer({ minimum: 0 })),
   lessonCode: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  vocabularies: Type.Optional(Type.Array(VocabularySchema))
+  vocabularies: Type.Optional(Type.Array(VocabularySchema)),
+  questions: Type.Optional(Type.Array(QuestionSchema))
 });
 
 export const UpdateLessonBodySchema = Type.Partial(CreateLessonBodySchema);

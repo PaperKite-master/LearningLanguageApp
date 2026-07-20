@@ -27,6 +27,7 @@ const AdminCourseCreateContent = () => {
     lessonCode: '',
     contentMarkdown: '## Cấu trúc\n\n## Cách dùng\n\n## Ví dụ\n',
     vocabularies: [],
+    questions: [],
     status: 'published',
   });
 
@@ -52,6 +53,7 @@ const AdminCourseCreateContent = () => {
         lessonCode: lessonData.lessonCode || '',
         contentMarkdown: lessonData.contentMarkdown || '## Cấu trúc\n\n## Cách dùng\n\n## Ví dụ\n',
         vocabularies: lessonData.vocabularies || [],
+        questions: lessonData.questions || [],
         status: lessonData.status || 'published',
       });
     }
@@ -82,7 +84,8 @@ const AdminCourseCreateContent = () => {
         videoUrl: formData.videoUrl,
         contentMarkdown: formData.contentMarkdown,
         lessonCode: formData.lessonCode,
-        vocabularies: formData.vocabularies
+        vocabularies: formData.vocabularies,
+        questions: formData.questions
       };
 
       if (editMode) {

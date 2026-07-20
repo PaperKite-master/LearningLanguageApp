@@ -29,7 +29,8 @@ const AdminQuizQuestionsContent = () => {
     matchingPairs: [
       { left: '', right: '' },
       { left: '', right: '' }
-    ]
+    ],
+    readingQuestions: []
   });
 
   useEffect(() => {
@@ -65,6 +66,7 @@ const AdminQuizQuestionsContent = () => {
         { text: '', isCorrect: false },
         { text: '', isCorrect: false }
       ];
+      let readingQs = [];
 
       if (qType === 'multiple_choice' && question.options) {
         mcOptions = [...question.options];
@@ -72,6 +74,8 @@ const AdminQuizQuestionsContent = () => {
         fillAns = question.options[0]?.correctAnswer || '';
       } else if (qType === 'matching' && question.options) {
         matchPairs = [...question.options];
+      } else if (qType === 'reading' && question.options) {
+        readingQs = [...question.options];
       }
 
       setFormData({
@@ -79,7 +83,8 @@ const AdminQuizQuestionsContent = () => {
         explanation: question.explanation || '',
         options: mcOptions,
         fillBlankAnswer: fillAns,
-        matchingPairs: matchPairs
+        matchingPairs: matchPairs,
+        readingQuestions: readingQs
       });
     } else {
       setEditingQuestion(null);
@@ -96,6 +101,18 @@ const AdminQuizQuestionsContent = () => {
         matchingPairs: [
           { left: '', right: '' },
           { left: '', right: '' }
+        ],
+        readingQuestions: [
+          {
+            id: `sub_${Date.now()}_0`,
+            questionText: '',
+            options: [
+              { text: '', isCorrect: true },
+              { text: '', isCorrect: false },
+              { text: '', isCorrect: false },
+              { text: '', isCorrect: false }
+            ]
+          }
         ]
       });
     }
@@ -137,6 +154,62 @@ const AdminQuizQuestionsContent = () => {
     setFormData({ ...formData, matchingPairs: newPairs });
   };
 
+  const addReadingQuestion = (e) => {
+    e.preventDefault();
+    const newSub = {
+      id: `sub_${Date.now()}_${formData.readingQuestions.length}`,
+      questionText: '',
+      options: [
+        { text: '', isCorrect: true },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false },
+        { text: '', isCorrect: false }
+      ]
+    };
+    setFormData({ ...formData, readingQuestions: [...formData.readingQuestions, newSub] });
+  };
+
+  const removeReadingQuestion = (id) => {
+    setFormData({
+      ...formData,
+      readingQuestions: formData.readingQuestions.filter(q => q.id !== id)
+    });
+  };
+
+  const handleReadingQuestionTextChange = (id, text) => {
+    const updated = formData.readingQuestions.map(q => {
+      if (q.id === id) return { ...q, questionText: text };
+      return q;
+    });
+    setFormData({ ...formData, readingQuestions: updated });
+  };
+
+  const handleReadingOptionChange = (qId, optIndex, text) => {
+    const updated = formData.readingQuestions.map(q => {
+      if (q.id === qId) {
+        const newOptions = [...q.options];
+        newOptions[optIndex].text = text;
+        return { ...q, options: newOptions };
+      }
+      return q;
+    });
+    setFormData({ ...formData, readingQuestions: updated });
+  };
+
+  const handleReadingSetCorrect = (qId, optIndex) => {
+    const updated = formData.readingQuestions.map(q => {
+      if (q.id === qId) {
+        const newOptions = q.options.map((opt, i) => ({
+          ...opt,
+          isCorrect: i === optIndex
+        }));
+        return { ...q, options: newOptions };
+      }
+      return q;
+    });
+    setFormData({ ...formData, readingQuestions: updated });
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.question_text.trim()) {
@@ -166,6 +239,22 @@ const AdminQuizQuestionsContent = () => {
         return;
       }
       optionsToSave = validPairs;
+    } else if (activeTab === 'reading') {
+      if (formData.readingQuestions.length === 0) {
+        alert("Vui lòng nhập ít nhất 1 câu hỏi phụ.");
+        return;
+      }
+      const validSubQuestions = formData.readingQuestions.every(sub => {
+        const textOk = sub.questionText.trim() !== '';
+        const optionsOk = sub.options.every(opt => opt.text.trim() !== '');
+        const hasCorrect = sub.options.some(opt => opt.isCorrect);
+        return textOk && optionsOk && hasCorrect;
+      });
+      if (!validSubQuestions) {
+        alert("Vui lòng điền đầy đủ câu hỏi, 4 đáp án và chọn đáp án đúng cho mỗi câu hỏi phụ.");
+        return;
+      }
+      optionsToSave = formData.readingQuestions;
     }
 
     try {
@@ -248,6 +337,35 @@ const AdminQuizQuestionsContent = () => {
           ))}
         </div>
       );
+    } else if (qType === 'reading') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', marginTop: '10px' }}>
+          <div style={{ fontWeight: 'bold', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '8px', color: '#1e293b' }}>
+            Câu hỏi phụ ({ (q.options || []).length } câu):
+          </div>
+          {(q.options || []).map((subQ, subIdx) => (
+            <div key={subQ.id || subIdx} style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontWeight: 600, color: '#334155', marginBottom: '8px' }}>
+                {subIdx + 1}. {subQ.questionText}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                {(subQ.options || []).map((opt, i) => (
+                  <div key={i} style={{
+                    padding: '8px 12px',
+                    background: opt.isCorrect ? '#f0fdf4' : '#f8fafc',
+                    border: opt.isCorrect ? '1px solid #86efac' : '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    color: opt.isCorrect ? '#166534' : '#64748b',
+                    fontSize: '13px'
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>{String.fromCharCode(65 + i)}.</span> {opt.text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
     }
     return null;
   };
@@ -284,7 +402,8 @@ const AdminQuizQuestionsContent = () => {
             const typeLabels = {
               'multiple_choice': 'Multiple choice',
               'typing': 'Fill in the blank',
-              'matching': 'Matching'
+              'matching': 'Matching',
+              'reading': 'Reading comprehension'
             };
             
             return (
@@ -323,8 +442,8 @@ const AdminQuizQuestionsContent = () => {
               </button>
             </div>
             
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <div className="exam-modal-body" style={{ padding: '24px 32px' }}>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div className="exam-modal-body" style={{ padding: '24px 32px', flex: 1, overflowY: 'auto' }}>
                 
                 <div className="qb-tabs">
                   <button 
@@ -347,6 +466,13 @@ const AdminQuizQuestionsContent = () => {
                     onClick={() => setActiveTab('matching')}
                   >
                     Matching
+                  </button>
+                  <button 
+                    type="button"
+                    className={`qb-tab-btn ${activeTab === 'reading' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('reading')}
+                  >
+                    Reading
                   </button>
                 </div>
 
@@ -427,6 +553,65 @@ const AdminQuizQuestionsContent = () => {
                     ))}
                     <button type="button" className="qb-add-pair-btn" onClick={addMatchingPair}>
                       <Plus size={16} /> Add New Pair
+                    </button>
+                  </div>
+                )}
+
+                {activeTab === 'reading' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '15px' }}>
+                    {formData.readingQuestions.map((subQ, subIndex) => (
+                      <div key={subQ.id} style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', position: 'relative' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <span style={{ fontWeight: 'bold', color: '#1e293b' }}>Câu hỏi phụ #{subIndex + 1}</span>
+                          <button 
+                            type="button" 
+                            style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px' }}
+                            onClick={() => removeReadingQuestion(subQ.id)}
+                          >
+                            <Trash2 size={16} /> Xóa câu hỏi
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#475569' }}>Nội dung câu hỏi phụ</span>
+                          <input 
+                            type="text" 
+                            style={{ padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px', width: '100%', fontSize: '14px', outline: 'none' }}
+                            value={subQ.questionText}
+                            onChange={(e) => handleReadingQuestionTextChange(subQ.id, e.target.value)}
+                            placeholder="Ví dụ: Câu hỏi về nội dung đoạn văn..."
+                            required
+                          />
+                        </div>
+                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '8px' }}>Các đáp án lựa chọn:</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                          {subQ.options.map((opt, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                              <input 
+                                type="radio" 
+                                name={`sub-correct-${subQ.id}`}
+                                checked={opt.isCorrect}
+                                onChange={() => handleReadingSetCorrect(subQ.id, i)}
+                              />
+                              <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>{String.fromCharCode(65 + i)}</span>
+                              <input 
+                                type="text" 
+                                style={{ border: 'none', borderBottom: '1px solid #e2e8f0', padding: '4px', flex: 1, fontSize: '13px', outline: 'none' }}
+                                value={opt.text}
+                                onChange={(e) => handleReadingOptionChange(subQ.id, i, e.target.value)}
+                                placeholder="Nhập đáp án..."
+                                required
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <button 
+                      type="button" 
+                      onClick={addReadingQuestion}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: '#e0e7ff', color: '#4f46e5', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                      <Plus size={18} /> Thêm câu hỏi phụ
                     </button>
                   </div>
                 )}

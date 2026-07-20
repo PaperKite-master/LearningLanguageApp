@@ -30,14 +30,17 @@ export function toLessonDto(lesson) {
       hiragana: v.hiragana,
       romaji: v.romaji,
       meaning: v.meaning,
-      questions: v.questions ? v.questions.map(q => ({
-        id: q.id,
-        question_text: q.question_text,
-        question_type: q.question_type,
-        options: q.options,
-        explanation: q.explanation
-      })) : []
-    })) : []
+      questions: []
+    })) : [],
+    questions: lesson.quizzes && lesson.quizzes[0] && lesson.quizzes[0].questions
+      ? lesson.quizzes[0].questions.map(q => ({
+          id: q.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options,
+          explanation: q.explanation
+        }))
+      : []
   };
 }
 

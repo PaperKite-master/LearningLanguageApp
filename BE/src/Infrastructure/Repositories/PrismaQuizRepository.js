@@ -32,7 +32,13 @@ export class PrismaQuizRepository extends QuizRepository {
 
   async getQuizByLessonId(lessonId) {
     return this.prisma.quizzes.findFirst({
-      where: { lesson_id: lessonId, status: 'published' },
+      where: { 
+        lesson_id: lessonId, 
+        status: 'published',
+        NOT: {
+          type: 'VOCABULARY'
+        }
+      },
       include: {
         questions: {
           orderBy: { order: 'asc' },

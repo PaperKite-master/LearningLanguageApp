@@ -32,6 +32,21 @@ const QuizBuilderModal = ({ isOpen, onClose, initialQuestions, onSave }) => {
       newQuestion.options = { answer: '' };
     } else if (type === 'matching') {
       newQuestion.options = [{ left: '', right: '' }, { left: '', right: '' }];
+    } else if (type === 'reorder') {
+      newQuestion.options = [{ text: '' }, { text: '' }];
+    } else if (type === 'reading') {
+      newQuestion.options = [
+        {
+          id: `sub_${Date.now()}_0`,
+          questionText: '',
+          options: [
+            { text: '', isCorrect: true },
+            { text: '', isCorrect: false },
+            { text: '', isCorrect: false },
+            { text: '', isCorrect: false }
+          ]
+        }
+      ];
     }
 
     setQuestions([...questions, newQuestion]);
@@ -93,6 +108,12 @@ const QuizBuilderModal = ({ isOpen, onClose, initialQuestions, onSave }) => {
           </button>
           <button className="admin-btn-secondary" onClick={() => addQuestion('matching')} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <Plus size={16} /> Add Matching
+          </button>
+          <button className="admin-btn-secondary" onClick={() => addQuestion('reorder')} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Plus size={16} /> Add Reorder
+          </button>
+          <button className="admin-btn-secondary" onClick={() => addQuestion('reading')} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Plus size={16} /> Add Reading
           </button>
         </div>
 
@@ -200,6 +221,148 @@ const QuizBuilderModal = ({ isOpen, onClose, initialQuestions, onSave }) => {
                     style={{ background: 'transparent', border: '1px dashed #00f2fe', color: '#00f2fe', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
                   >
                     + Add Pair
+                  </button>
+                </div>
+              )}
+
+              {q.question_type === 'reorder' && (
+                <div style={{ marginTop: '15px' }}>
+                  <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginBottom: '10px' }}>Nhập các cụm từ theo thứ tự ĐÚNG. Hệ thống sẽ tự động xáo trộn chúng khi hiển thị cho học sinh.</p>
+                  {q.options && q.options.map((opt, oIndex) => (
+                    <div key={oIndex} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 'bold', color: '#64748b', minWidth: '24px' }}>{oIndex + 1}.</span>
+                      <input 
+                        type="text" 
+                        value={opt.text} 
+                        onChange={(e) => {
+                          const newQs = [...questions];
+                          newQs[qIndex].options[oIndex].text = e.target.value;
+                          setQuestions(newQs);
+                        }} 
+                        className="modal-input" 
+                        style={{ flex: 1 }}
+                        placeholder={`Cụm từ thứ ${oIndex + 1}`}
+                        required
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newQs = [...questions];
+                          newQs[qIndex].options.splice(oIndex, 1);
+                          setQuestions(newQs);
+                        }}
+                        style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => {
+                      const newQs = [...questions];
+                      newQs[qIndex].options.push({ text: '' });
+                      setQuestions(newQs);
+                    }}
+                    style={{ background: 'transparent', border: '1px dashed #00f2fe', color: '#00f2fe', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
+                  >
+                    + Add Phrase/Word
+                  </button>
+                </div>
+              )}
+
+              {q.question_type === 'reading' && (
+                <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginBottom: '5px' }}>Nhập nội dung đoạn văn/email vào ô "Question Prompt" ở trên. Sau đó thêm các câu hỏi phụ ở bên dưới.</p>
+                  
+                  {q.options && Array.isArray(q.options) && q.options.map((subQ, subIndex) => (
+                    <div key={subQ.id || subIndex} style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb', position: 'relative' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ fontWeight: 'bold', color: '#374151', fontSize: '0.9rem' }}>Câu hỏi phụ #{subIndex + 1}</span>
+                        <button 
+                          type="button" 
+                          style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
+                          onClick={() => {
+                            const newQs = [...questions];
+                            newQs[qIndex].options.splice(subIndex, 1);
+                            setQuestions(newQs);
+                          }}
+                        >
+                          <Trash2 size={14} /> Xóa câu hỏi
+                        </button>
+                      </div>
+                      
+                      <div className="form-group" style={{ marginBottom: '10px' }}>
+                        <label style={{ fontSize: '0.85rem', color: '#4b5563' }}>Nội dung câu hỏi phụ</label>
+                        <input 
+                          type="text" 
+                          value={subQ.questionText || ''} 
+                          onChange={(e) => {
+                            const newQs = [...questions];
+                            newQs[qIndex].options[subIndex].questionText = e.target.value;
+                            setQuestions(newQs);
+                          }}
+                          className="modal-input" 
+                          placeholder="Ví dụ: Cụm từ trên có nghĩa là gì?"
+                          required
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        {subQ.options.map((opt, oIdx) => (
+                          <div key={oIdx} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f9fafb', padding: '6px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                            <input 
+                              type="radio" 
+                              name={`sub-correct-${qIndex}-${subIndex}`}
+                              checked={opt.isCorrect}
+                              onChange={() => {
+                                const newQs = [...questions];
+                                newQs[qIndex].options[subIndex].options.forEach((o, idx) => {
+                                  o.isCorrect = (idx === oIdx);
+                                });
+                                setQuestions(newQs);
+                              }}
+                            />
+                            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#64748b' }}>{String.fromCharCode(65 + oIdx)}</span>
+                            <input 
+                              type="text" 
+                              value={opt.text}
+                              onChange={(e) => {
+                                const newQs = [...questions];
+                                newQs[qIndex].options[subIndex].options[oIdx].text = e.target.value;
+                                setQuestions(newQs);
+                              }}
+                              style={{ border: 'none', borderBottom: '1px solid #cbd5e1', background: 'transparent', outline: 'none', fontSize: '0.85rem', flex: 1 }}
+                              placeholder={`Đáp án ${String.fromCharCode(65 + oIdx)}`}
+                              required
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const newQs = [...questions];
+                      if (!Array.isArray(newQs[qIndex].options)) {
+                        newQs[qIndex].options = [];
+                      }
+                      newQs[qIndex].options.push({
+                        id: `sub_${Date.now()}_${newQs[qIndex].options.length}`,
+                        questionText: '',
+                        options: [
+                          { text: '', isCorrect: true },
+                          { text: '', isCorrect: false },
+                          { text: '', isCorrect: false },
+                          { text: '', isCorrect: false }
+                        ]
+                      });
+                      setQuestions(newQs);
+                    }}
+                    style={{ background: 'transparent', border: '1px dashed #3b82f6', color: '#3b82f6', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', alignSelf: 'flex-start' }}
+                  >
+                    + Add Sub-Question
                   </button>
                 </div>
               )}

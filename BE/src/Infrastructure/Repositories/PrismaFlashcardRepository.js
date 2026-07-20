@@ -24,10 +24,22 @@ export class PrismaFlashcardRepository extends FlashcardRepository {
 
   // Fetch admin cards (Thư viện thẻ)
   async listLibrary() {
-    return this.prisma.flashcards.findMany({
-      where: { user_id: null },
+    const cards = await this.prisma.admin_flashcards.findMany({
+      where: { status: 'PUBLISHED' },
       orderBy: { created_at: 'desc' }
     });
+    return cards.map(card => ({
+      id: card.id,
+      user_id: null,
+      front_text: card.japanese_word,
+      back_text: card.meaning_vi,
+      notes: JSON.stringify({
+        kana: card.pronunciation,
+        level: card.level,
+        status: card.status === 'PUBLISHED' ? 'Published' : 'Draft'
+      }),
+      created_at: card.created_at
+    }));
   }
 
   // Fetch user cards (Thẻ của tôi)
@@ -40,8 +52,26 @@ export class PrismaFlashcardRepository extends FlashcardRepository {
   }
 
   async findByIdAndUserId(id, userId) {
+    if (userId === null) {
+      const card = await this.prisma.admin_flashcards.findUnique({
+        where: { id }
+      });
+      if (!card) return null;
+      return {
+        id: card.id,
+        user_id: null,
+        front_text: card.japanese_word,
+        back_text: card.meaning_vi,
+        notes: JSON.stringify({
+          kana: card.pronunciation,
+          level: card.level,
+          status: card.status === 'PUBLISHED' ? 'Published' : 'Draft'
+        }),
+        created_at: card.created_at
+      };
+    }
     return this.prisma.flashcards.findFirst({
-      where: { id, user_id: userId || null }
+      where: { id, user_id: userId }
     });
   }
 
