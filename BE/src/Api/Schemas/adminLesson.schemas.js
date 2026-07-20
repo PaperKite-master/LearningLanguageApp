@@ -31,6 +31,7 @@ export const CreateLessonBodySchema = Type.Object({
     Type.Literal('published')
   ], { default: 'published' })),
   videoUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  subtitles: Type.Optional(Type.Union([Type.Array(Type.Any()), Type.Null()])),
   contentMarkdown: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   order: Type.Optional(Type.Integer({ minimum: 0 })),
   lessonCode: Type.Optional(Type.Union([Type.String(), Type.Null()])),

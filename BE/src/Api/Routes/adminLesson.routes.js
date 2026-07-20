@@ -72,5 +72,24 @@ export async function adminLessonRoutes(app) {
     },
     adminLessonController.remove
   );
+
+  app.post(
+    '/:id/generate-subtitles',
+    {
+      preHandler: [authenticate, requireAdmin],
+      schema: {
+        security: [{ bearerAuth: [] }],
+        params: LessonIdParamsSchema,
+        response: {
+          200: LessonResponseSchema,
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          404: { type: 'object', properties: { error: { type: 'string' } } },
+          422: { type: 'object', properties: { error: { type: 'string' } } },
+          500: { type: 'object', properties: { error: { type: 'string' } } }
+        }
+      }
+    },
+    adminLessonController.generateSubtitles
+  );
 }
 

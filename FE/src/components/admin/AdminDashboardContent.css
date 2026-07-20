@@ -154,6 +154,21 @@
 }
 
 /* Overriding global dashboard background if necessary */
+.admin-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.custom-tooltip .tooltip-label {
+  margin: 0 0 4px;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
 .admin-dashboard-area {
   background-color: #fafafa !important;
   padding: 0 !important;

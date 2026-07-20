@@ -1,98 +1,241 @@
 import { prisma } from '../../../Infrastructure/Persistence/prisma.js';
+import { APP_TIMEZONE } from '../../../Shared/dateUtils.js';
+
+const SUCCESS_PAYMENT_STATUSES = ['SUCCESS', 'COMPLETED'];
+const MONTH_LABELS = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+
+function getMonthRange(offsetMonths = 0) {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: APP_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(now);
+
+  let year = Number(parts.find((part) => part.type === 'year').value);
+  let month = Number(parts.find((part) => part.type === 'month').value) - 1;
+
+  month += offsetMonths;
+  while (month < 0) {
+    month += 12;
+    year -= 1;
+  }
+  while (month > 11) {
+    month -= 12;
+    year += 1;
+  }
+
+  const start = new Date(`${year}-${String(month + 1).padStart(2, '0')}-01T00:00:00+07:00`);
+  const endMonth = month === 11 ? 0 : month + 1;
+  const endYear = month === 11 ? year + 1 : year;
+  const end = new Date(`${endYear}-${String(endMonth + 1).padStart(2, '0')}-01T00:00:00+07:00`);
+
+  return { start, end, monthIndex: month };
+}
+
+function getDayRange(daysAgoStart, daysAgoEnd) {
+  const now = new Date();
+  const end = new Date(now);
+  end.setDate(end.getDate() - daysAgoStart);
+  end.setHours(23, 59, 59, 999);
+
+  const start = new Date(now);
+  start.setDate(start.getDate() - daysAgoEnd);
+  start.setHours(0, 0, 0, 0);
+
+  return { start, end };
+}
+
+function formatGrowthPercent(current, previous) {
+  if (previous === 0) {
+    if (current === 0) return 'Không đổi so với kỳ trước';
+    return 'Mới có dữ liệu trong kỳ này';
+  }
+
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct > 0) return `Tăng ${pct}% so với kỳ trước`;
+  if (pct < 0) return `Giảm ${Math.abs(pct)}% so với kỳ trước`;
+  return 'Không đổi so với kỳ trước';
+}
+
+function formatRevenueVnd(amount) {
+  const value = Number(amount) || 0;
+  if (value <= 0) return '0 ₫';
+  if (value >= 1_000_000) {
+    const millions = value / 1_000_000;
+    const formatted = millions >= 10 ? Math.round(millions) : Math.round(millions * 10) / 10;
+    return `${formatted}Tr ₫`;
+  }
+  return `${value.toLocaleString('vi-VN')} ₫`;
+}
+
+async function countNewUsersInRange(start, end) {
+  return prisma.profiles.count({
+    where: {
+      role: 'USER',
+      users: {
+        created_at: {
+          gte: start,
+          lt: end,
+        },
+      },
+    },
+  });
+}
+
+async function sumRevenueInRange(start, end) {
+  const result = await prisma.payment_transactions.aggregate({
+    _sum: { amount: true },
+    where: {
+      status: { in: SUCCESS_PAYMENT_STATUSES },
+      created_at: {
+        gte: start,
+        lt: end,
+      },
+    },
+  });
+  return result._sum.amount || 0;
+}
+
+async function countLearningActivityInRange(start, end) {
+  const [logs, lessons, quizzes] = await Promise.all([
+    prisma.user_activity_log.count({
+      where: { created_at: { gte: start, lt: end } },
+    }),
+    prisma.user_lesson_progress.count({
+      where: { last_accessed: { gte: start, lt: end } },
+    }),
+    prisma.quiz_results.count({
+      where: { completed_at: { gte: start, lt: end } },
+    }),
+  ]);
+
+  return logs + lessons + quizzes;
+}
+
+async function countActiveUsersInRange(start, end) {
+  const rows = await prisma.$queryRaw`
+    SELECT COUNT(DISTINCT user_id)::int AS count
+    FROM (
+      SELECT user_id
+      FROM public.user_activity_log
+      WHERE created_at >= ${start} AND created_at < ${end}
+      UNION
+      SELECT user_id
+      FROM public.user_lesson_progress
+      WHERE last_accessed >= ${start} AND last_accessed < ${end}
+      UNION
+      SELECT user_id
+      FROM public.quiz_results
+      WHERE completed_at >= ${start} AND completed_at < ${end}
+    ) AS active_users
+    WHERE user_id IS NOT NULL
+  `;
+
+  return Number(rows[0]?.count ?? 0);
+}
+
+async function buildMonthlyActivityChart() {
+  const ranges = Array.from({ length: 12 }, (_, index) => getMonthRange(index - 11));
+  const values = await Promise.all(
+    ranges.map(({ start, end }) => countLearningActivityInRange(start, end))
+  );
+
+  return ranges.map(({ monthIndex }, index) => ({
+    name: MONTH_LABELS[monthIndex],
+    value: values[index],
+  }));
+}
+
+async function buildUserGrowthChart() {
+  const ranges = Array.from({ length: 12 }, (_, index) => getMonthRange(index - 11));
+  const values = await Promise.all(
+    ranges.map(({ start, end }) => countNewUsersInRange(start, end))
+  );
+
+  return ranges.map(({ monthIndex }, index) => ({
+    name: MONTH_LABELS[monthIndex],
+    value: values[index],
+  }));
+}
 
 export class GetAdminDashboardUseCase {
   async execute() {
-    // 1. Total Users
-    const totalUsersCount = await prisma.profiles.count({ where: { role: 'USER' } });
-    
-    // Growth calculation logic can be added here.
-    // For now we'll mock growth text to match UI
-    
-    // 2. Active Users (Simulate with activity log count, or users created this month)
-    const activeUsersCount = await prisma.user_activity_log.groupBy({
-      by: ['user_id'],
-      _count: true
-    }).then(res => res.length);
+    const thisMonth = getMonthRange(0);
+    const lastMonth = getMonthRange(-1);
+    const activeThisPeriod = getDayRange(0, 30);
+    const activeLastPeriod = getDayRange(30, 60);
 
-    // 3. Revenue (Sum of successful payments)
-    const revenueObj = await prisma.payment_transactions.aggregate({
-      _sum: { amount: true },
-      where: { status: 'SUCCESS' } // Assuming 'SUCCESS' or '00' is the completed status
-    });
-    const totalRevenue = revenueObj._sum.amount || 0;
-    // Format to 'Tr VNĐ'
-    const revenueFormatted = totalRevenue > 0 ? `${Math.round(totalRevenue / 1000000)}Tr VNĐ` : '0Tr VNĐ';
+    const [
+      totalUsersCount,
+      newUsersThisMonth,
+      newUsersLastMonth,
+      activeUsersCount,
+      activeUsersLastPeriod,
+      totalRevenue,
+      revenueThisMonth,
+      revenueLastMonth,
+      totalLessonsCount,
+      newLessonsThisMonth,
+      newLessonsLastMonth,
+      publishedLessonsCount,
+      completedProgress,
+      inProgressProgress,
+      activityChart,
+      growthChart,
+    ] = await Promise.all([
+      prisma.profiles.count({ where: { role: 'USER' } }),
+      countNewUsersInRange(thisMonth.start, thisMonth.end),
+      countNewUsersInRange(lastMonth.start, lastMonth.end),
+      countActiveUsersInRange(activeThisPeriod.start, activeThisPeriod.end),
+      countActiveUsersInRange(activeLastPeriod.start, activeLastPeriod.end),
+      prisma.payment_transactions.aggregate({
+        _sum: { amount: true },
+        where: { status: { in: SUCCESS_PAYMENT_STATUSES } },
+      }).then((res) => res._sum.amount || 0),
+      sumRevenueInRange(thisMonth.start, thisMonth.end),
+      sumRevenueInRange(lastMonth.start, lastMonth.end),
+      prisma.lessons.count(),
+      prisma.lessons.count({
+        where: { created_at: { gte: thisMonth.start, lt: thisMonth.end } },
+      }),
+      prisma.lessons.count({
+        where: { created_at: { gte: lastMonth.start, lt: lastMonth.end } },
+      }),
+      prisma.lessons.count({ where: { status: 'published' } }),
+      prisma.user_lesson_progress.count({ where: { is_completed: true } }),
+      prisma.user_lesson_progress.count({ where: { is_completed: false } }),
+      buildMonthlyActivityChart(),
+      buildUserGrowthChart(),
+    ]);
 
-    // 4. Total Lessons
-    const totalLessonsCount = await prisma.lessons.count();
+    const trackedProgress = completedProgress + inProgressProgress;
+    const totalPossibleProgress = totalUsersCount * publishedLessonsCount;
+    const notStartedEst = Math.max(0, totalPossibleProgress - trackedProgress);
 
-    // 5. Completion Data
-    const completedProgress = await prisma.user_lesson_progress.count({ where: { is_completed: true } });
-    const inProgressProgress = await prisma.user_lesson_progress.count({ where: { is_completed: false } });
-    const notStartedEst = Math.max(0, (totalUsersCount * totalLessonsCount) - (completedProgress + inProgressProgress));
+    const completionData =
+      trackedProgress + notStartedEst === 0
+        ? [{ name: 'Chưa có dữ liệu', value: 1, color: '#cbd5e1' }]
+        : [
+            { name: 'Hoàn thành', value: completedProgress, color: '#0275d8' },
+            { name: 'Đang học', value: inProgressProgress, color: '#e066ff' },
+            { name: 'Chưa bắt đầu', value: notStartedEst, color: '#ef4444' },
+          ];
 
-    const totalCalculated = completedProgress + inProgressProgress + notStartedEst;
-    // Use percentages for the chart
-    const getPercent = (val) => totalCalculated > 0 ? Math.round((val / totalCalculated) * 100) : 0;
-    
-    let compPer = getPercent(completedProgress);
-    let inProgPer = getPercent(inProgressProgress);
-    let notStartPer = getPercent(notStartedEst);
-    if(totalCalculated === 0) {
-       notStartPer = 100;
-    }
-
-    // Return structured payload matching the UI needs
     return {
       summary: {
         totalUsers: totalUsersCount.toString(),
-        totalUsersGrowth: "Tăng 5% so với tháng trước",
+        totalUsersGrowth: formatGrowthPercent(newUsersThisMonth, newUsersLastMonth),
         activeUsers: activeUsersCount.toString(),
-        activeUsersGrowth: "Tăng 3% so với tháng trước",
-        revenue: revenueFormatted,
-        revenueGrowth: "Tăng 10% so với tháng trước",
+        activeUsersGrowth: formatGrowthPercent(activeUsersCount, activeUsersLastPeriod),
+        revenue: formatRevenueVnd(totalRevenue),
+        revenueGrowth: formatGrowthPercent(revenueThisMonth, revenueLastMonth),
         totalLessons: totalLessonsCount.toString(),
-        totalLessonsGrowth: "Tăng 2% so với tháng trước"
+        totalLessonsGrowth: formatGrowthPercent(newLessonsThisMonth, newLessonsLastMonth),
       },
-      // Mocked sequential data for now since we'd need complex grouping by month
-      activityChart: [
-        { name: 'Jan', value: 75 },
-        { name: 'Feb', value: 85 },
-        { name: 'Mar', value: 50 },
-        { name: 'Apr', value: 92 },
-        { name: 'May', value: 115 },
-        { name: 'Jun', value: 85 },
-        { name: 'Jul', value: 105 },
-        { name: 'Aug', value: 95 },
-        { name: 'Sep', value: 125 },
-        { name: 'Oct', value: 80 },
-        { name: 'Nov', value: 100 },
-        { name: 'Dec', value: 85 },
-      ],
-      completionData: [
-        { name: 'Completed', value: compPer, color: '#0275d8' },
-        { name: 'In Progress', value: inProgPer, color: '#e066ff' },
-        { name: 'Not Started', value: notStartPer, color: '#ff0000' }
-      ],
-      // Mocked growth chart
-      growthChart: [
-        { name: 'Jan', value: 100 },
-        { name: '', value: 120 },
-        { name: '', value: 350 },
-        { name: '', value: 250 },
-        { name: '', value: 400 },
-        { name: '', value: 280 },
-        { name: 'Feb', value: 450 },
-        { name: '', value: 300 },
-        { name: '', value: 350 },
-        { name: '', value: 320 },
-        { name: '', value: 380 },
-        { name: '', value: 350 },
-        { name: '', value: 450 },
-        { name: '', value: 420 },
-        { name: '', value: 400 },
-        { name: 'Mar', value: 420 }
-      ]
+      activityChart,
+      completionData,
+      growthChart,
     };
   }
 }

@@ -31,6 +31,12 @@ const lessonApi = {
     return response.data;
   },
 
+  generateSubtitles: async (id) => {
+    const url = `/admin/lessons/${id}/generate-subtitles`;
+    const response = await axiosClient.post(url);
+    return response.data.data;
+  },
+
   saveProgress: async (id, event) => {
     const url = `/lessons/${id}/progress`;
     // payload: { event: 'OPEN' | 'COMPLETE' }

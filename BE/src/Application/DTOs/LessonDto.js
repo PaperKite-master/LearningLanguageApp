@@ -18,6 +18,7 @@ export function toLessonDto(lesson) {
     topic: lesson.topic ?? null,
     status: lesson.status ?? 'published',
     videoUrl: lesson.video_url ?? null,
+    subtitles: lesson.subtitles ?? null,
     contentMarkdown: lesson.content_markdown ?? null,
     order: lesson.order ?? 0,
     lessonCode: lesson.lesson_code ?? null,

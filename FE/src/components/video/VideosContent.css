@@ -23,6 +23,13 @@
   flex-direction: column;
 }
 
+.video-player-card .bilingual-video-layout {
+  margin-bottom: 0;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
 .video-player-screen {
   width: 100%;
   aspect-ratio: 16 / 9;
