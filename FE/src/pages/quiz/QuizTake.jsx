@@ -93,6 +93,109 @@ const MatchingQuestionUI = ({ question, answerPairs = [], onChange, readOnly, re
   );
 };
 
+const ReorderQuizUI = ({ question, answerOrder = [], onChange, readOnly, resultData }) => {
+  const [shuffledPool, setShuffledPool] = useState([]);
+  const [selectedWords, setSelectedWords] = useState([]);
+
+  useEffect(() => {
+    if (readOnly) {
+      setSelectedWords(answerOrder || []);
+      setShuffledPool([]);
+    } else {
+      const original = (question.options || []).map(o => o.text);
+      const userSelected = answerOrder || [];
+      setSelectedWords(userSelected);
+      
+      const pool = [];
+      const remainingCounts = {};
+      
+      (question.shuffledWords || original).forEach(w => {
+        remainingCounts[w] = (remainingCounts[w] || 0) + 1;
+      });
+      
+      userSelected.forEach(w => {
+        if (remainingCounts[w] > 0) {
+          remainingCounts[w]--;
+        }
+      });
+      
+      (question.shuffledWords || original).forEach(w => {
+        if (remainingCounts[w] > 0) {
+          pool.push(w);
+          remainingCounts[w]--;
+        }
+      });
+      
+      setShuffledPool(pool);
+    }
+  }, [question, answerOrder, readOnly]);
+
+  const selectWord = (word) => {
+    if (readOnly) return;
+    const newSelected = [...selectedWords, word];
+    setSelectedWords(newSelected);
+    onChange(newSelected);
+  };
+
+  const deselectWord = (word, idx) => {
+    if (readOnly) return;
+    const newSelected = selectedWords.filter((_, i) => i !== idx);
+    setSelectedWords(newSelected);
+    onChange(newSelected);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '12px' }}>
+      <div className="qt-reorder-target" style={{ minHeight: '54px', padding: '12px', background: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+        {selectedWords.length === 0 && !readOnly && (
+          <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>Nhấp vào các từ bên dưới để ghép câu...</span>
+        )}
+        {selectedWords.map((word, idx) => {
+          let bg = '#3b82f6';
+          let border = 'none';
+          if (readOnly && resultData) {
+            bg = resultData.isCorrect ? '#10b981' : '#ef4444';
+          }
+          return (
+            <button
+              key={`selected-${idx}`}
+              onClick={() => deselectWord(word, idx)}
+              disabled={readOnly}
+              style={{
+                padding: '8px 16px', background: bg, border, color: '#fff', borderRadius: '6px', cursor: readOnly ? 'default' : 'pointer', fontWeight: 500, fontSize: '0.95rem'
+              }}
+            >
+              {word}
+            </button>
+          );
+        })}
+      </div>
+
+      {!readOnly && (
+        <div className="qt-reorder-pool" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '5px' }}>
+          {shuffledPool.map((word, idx) => (
+            <button
+              key={`pool-${idx}`}
+              onClick={() => selectWord(word)}
+              style={{
+                padding: '8px 16px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', cursor: 'pointer', fontWeight: 500, color: '#475569', fontSize: '0.95rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+              }}
+            >
+              {word}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {readOnly && resultData && !resultData.isCorrect && (
+        <div style={{ marginTop: '5px', color: '#dc2626', fontSize: '0.9rem', fontWeight: 500 }}>
+          Đáp án đúng: {(question.options || []).map(o => o.text).join(' ')}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const QuizTake = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -109,13 +212,21 @@ const QuizTake = () => {
       try {
         const data = await quizApi.getQuizById(id);
         const processedQuestions = data.questions.map(q => {
-          if (q.questionType === 'matching' && Array.isArray(q.options)) {
+          const qType = q.questionType || q.question_type;
+          if (qType === 'matching' && Array.isArray(q.options)) {
             const lefts = q.options.map(o => o.left);
             const rights = q.options.map(o => o.right);
             return {
               ...q,
               shuffledLeft: [...lefts].sort(() => Math.random() - 0.5),
               shuffledRight: [...rights].sort(() => Math.random() - 0.5)
+            };
+          }
+          if (qType === 'reorder' && Array.isArray(q.options)) {
+            const original = q.options.map(o => o.text);
+            return {
+              ...q,
+              shuffledWords: [...original].sort(() => Math.random() - 0.5)
             };
           }
           return q;
@@ -159,6 +270,19 @@ const QuizTake = () => {
   const handleOptionSelect = (questionId, index) => {
     if (result) return;
     setAnswers({ ...answers, [questionId]: { answerIndex: index } });
+  };
+
+  const handleReadingSelect = (questionId, subQuestionId, index) => {
+    if (result) return;
+    const currentReadingAnswers = answers[questionId]?.readingAnswers || [];
+    let updatedReadingAnswers = [...currentReadingAnswers];
+    const existingIndex = updatedReadingAnswers.findIndex(a => a.subQuestionId === subQuestionId);
+    if (existingIndex >= 0) {
+      updatedReadingAnswers[existingIndex] = { subQuestionId, answerIndex: index };
+    } else {
+      updatedReadingAnswers.push({ subQuestionId, answerIndex: index });
+    }
+    setAnswers({ ...answers, [questionId]: { readingAnswers: updatedReadingAnswers } });
   };
 
   const handleTextChange = (questionId, text) => {
@@ -371,6 +495,72 @@ const QuizTake = () => {
                       />
                     )}
 
+                    {qType === 'reorder' && (
+                      <ReorderQuizUI 
+                        question={q}
+                        answerOrder={userAnswerObj.answerOrder || []}
+                        onChange={() => {}}
+                        readOnly={true}
+                        resultData={qResult}
+                      />
+                    )}
+
+                    {qType === 'reading' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '15px' }}>
+                        <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '15px', color: '#334155' }}>
+                          {q.questionText}
+                        </div>
+                        
+                        {(q.options || []).map((subQ, subIdx) => {
+                          const subQResult = qResult?.subQuestionResults?.find(sqr => sqr.subQuestionId === subQ.id);
+                          const userSelIdx = subQResult ? subQResult.userAnswerIndex : -1;
+                          const correctIdx = subQResult ? subQResult.correctOptionIndex : -1;
+                          
+                          return (
+                            <div key={subQ.id || subIdx} style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                              <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '12px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>Câu {qIndex + 1}.{subIdx + 1}: {subQ.questionText}</span>
+                                {subQResult && (
+                                  subQResult.isCorrect 
+                                    ? <CheckCircle2 color="#16a34a" size={18} /> 
+                                    : <XCircle color="#dc2626" size={18} />
+                                )}
+                              </div>
+                              <div className="qt-options-grid">
+                                {(subQ.options || []).map((opt, optIndex) => {
+                                  const isSelected = userSelIdx === optIndex;
+                                  const isCorrectAnswer = correctIdx === optIndex;
+                                  
+                                  let classes = 'qt-option disabled';
+                                  let icon = null;
+                                  
+                                  if (isCorrectAnswer) {
+                                    classes += ' correct';
+                                    icon = <CheckCircle2 color="#16a34a" size={20} />;
+                                  } else if (isSelected && !isCorrectAnswer) {
+                                    classes += ' wrong';
+                                    icon = <XCircle color="#dc2626" size={20} />;
+                                  } else if (isSelected) {
+                                    classes += ' selected';
+                                  }
+                                  
+                                  return (
+                                    <div key={optIndex} className={classes}>
+                                      <div className="qt-option-content">
+                                        <div className="qt-radio-circle"></div>
+                                        <span>{opt.text}</span>
+                                      </div>
+                                      {icon}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
                     {q.explanation && (
                       <div className="qt-explanation">
                         <div className="qt-explanation-title">Giải thích:</div>
@@ -462,6 +652,53 @@ const QuizTake = () => {
                       onChange={(pairs) => handleMatchingChange(q.id, pairs)}
                       readOnly={false}
                     />
+                  )}
+
+                  {qType === 'reorder' && (
+                    <ReorderQuizUI 
+                      question={q}
+                      answerOrder={userAnswerObj.answerOrder || []}
+                      onChange={(words) => setAnswers({ ...answers, [q.id]: { answerOrder: words } })}
+                      readOnly={false}
+                    />
+                  )}
+
+                  {qType === 'reading' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '15px' }}>
+                      <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '15px', color: '#334155' }}>
+                        {q.questionText}
+                      </div>
+                      
+                      {(q.options || []).map((subQ, subIdx) => {
+                        const subUserAns = (userAnswerObj.readingAnswers || []).find(ua => ua.subQuestionId === subQ.id);
+                        const selectedOptIndex = subUserAns ? subUserAns.answerIndex : -1;
+                        
+                        return (
+                          <div key={subQ.id || subIdx} style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                            <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '12px', fontSize: '14px' }}>
+                              Câu {qIndex + 1}.{subIdx + 1}: {subQ.questionText}
+                            </div>
+                            <div className="qt-options-grid">
+                              {(subQ.options || []).map((opt, optIndex) => {
+                                const isSelected = selectedOptIndex === optIndex;
+                                return (
+                                  <div 
+                                    key={optIndex}
+                                    className={`qt-option ${isSelected ? 'selected' : ''}`}
+                                    onClick={() => handleReadingSelect(q.id, subQ.id, optIndex)}
+                                  >
+                                    <div className="qt-option-content">
+                                      <div className="qt-radio-circle"></div>
+                                      <span>{opt.text}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
               );

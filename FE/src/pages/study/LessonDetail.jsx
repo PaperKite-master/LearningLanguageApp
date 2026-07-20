@@ -252,6 +252,24 @@ const LessonDetail = () => {
                   <h2>{lesson.title.toUpperCase()}</h2>
                 </div>
 
+                <div>
+                  <span className="pill-badge exercise-badge">Bài học</span>
+                  <div className="card-list">
+                    <div className="item-card" onClick={() => setViewMode('exercise')}>
+                      <div className="item-icon-left exercise-icon">
+                        <Edit2 size={24} color="#ffffff" strokeWidth={1.5} />
+                      </div>
+                      <div className="item-info">
+                        <h4>Bài Học</h4>
+                        <p>{totalExercises > 0 ? `${totalExercises} câu hỏi` : 'Đọc hiểu'}</p>
+                      </div>
+                      <div className="item-icon-right">
+                        {isExerciseCompleted ? <CheckCircle2 size={24} color="#10b981" /> : <ArrowRight size={24} color="#a855f7" />}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {grammars && grammars.length > 0 && (
                   <div>
                     <span className="pill-badge grammar-badge">Ngữ pháp</span>
@@ -274,23 +292,10 @@ const LessonDetail = () => {
                   </div>
                 )}
 
-                <div>
-                  <span className="pill-badge exercise-badge">Làm bài tập</span>
-                  <div className="card-list">
-                    <div className="item-card" onClick={() => setViewMode('exercise')}>
-                      <div className="item-icon-left exercise-icon">
-                        <Edit2 size={24} color="#ffffff" strokeWidth={1.5} />
-                      </div>
-                      <div className="item-info">
-                        <h4>Bài Học & Thực Hành</h4>
-                        <p>{totalExercises > 0 ? `${totalExercises} câu hỏi` : 'Đọc hiểu'}</p>
-                      </div>
-                      <div className="item-icon-right">
-                        {isExerciseCompleted ? <CheckCircle2 size={24} color="#10b981" /> : <Lock size={24} color="#94a3b8" />}
-                      </div>
-                    </div>
-
-                    {lessonQuiz && (
+                {lessonQuiz && (
+                  <div>
+                    <span className="pill-badge quiz-badge">Kiểm tra</span>
+                    <div className="card-list">
                       <div className="item-card" onClick={() => navigate(`/quiz/${lessonQuiz.id}`)}>
                         <div className="item-icon-left exercise-icon">
                           <ClipboardList size={24} color="#ffffff" strokeWidth={1.5} />
@@ -303,9 +308,9 @@ const LessonDetail = () => {
                           <ArrowRight size={24} color="#a855f7" />
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             )}
 
@@ -323,7 +328,7 @@ const LessonDetail = () => {
                 
                 <div className="practice-btn-container">
                   <button className="practice-btn" onClick={() => setViewMode('exercise')}>
-                    Luyện tập
+                    Bài học
                   </button>
                 </div>
               </>
@@ -350,12 +355,16 @@ const LessonDetail = () => {
                       <div className="vocab-meaning-group">
                         <div className="vocab-meaning">{vocab.meaning}</div>
                       </div>
-                      {vocab.questions && vocab.questions.length > 0 && (
-                        <VocabPractice questions={vocab.questions} />
-                      )}
                     </div>
                   ))}
                 </div>
+
+                {lesson.questions && lesson.questions.length > 0 && (
+                  <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '2px dashed #e2e8f0' }}>
+                    <h3 style={{ fontSize: '1.25rem', color: '#1e293b', marginBottom: '20px', fontWeight: 'bold' }}>Luyện tập</h3>
+                    <VocabPractice questions={lesson.questions} />
+                  </div>
+                )}
               </>
             )}
 

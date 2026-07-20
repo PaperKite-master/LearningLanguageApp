@@ -11,7 +11,8 @@ export const LessonDtoSchema = Type.Object({
   order: Type.Integer(),
   lessonCode: Type.Union([Type.String(), Type.Null()]),
   createdAt: Type.Union([Type.String(), Type.Null()]),
-  vocabularies: Type.Optional(Type.Array(Type.Any()))
+  vocabularies: Type.Optional(Type.Array(Type.Any())),
+  questions: Type.Optional(Type.Array(Type.Any()))
 });
 
 export const LessonIdParamsSchema = Type.Object({

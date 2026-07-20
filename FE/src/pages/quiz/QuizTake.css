@@ -127,7 +127,8 @@
 
 .qt-question-num {
   color: #3b82f6;
-  min-width: 60px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Options */
