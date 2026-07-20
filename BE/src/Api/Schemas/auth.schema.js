@@ -35,6 +35,9 @@ export const GenericMessageResponseSchema = Type.Object({
 export const RegisterResponseSchema = Type.Object({
   id: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   email: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  requiresOtpVerification: Type.Optional(Type.Boolean()),
+  emailSent: Type.Optional(Type.Boolean()),
+  otpProvider: Type.Optional(Type.String()),
   message: Type.String(),
 });
 
@@ -78,7 +81,8 @@ export const SendOtpBodySchema = Type.Object({
 
 export const VerifyOtpBodySchema = Type.Object({
   email: Type.String({ format: 'email', maxLength: 255, description: 'User email address' }),
-  token: Type.String({ minLength: 6, maxLength: 8, description: 'OTP code' }),
+  token: Type.String({ minLength: 6, maxLength: 6, description: '6-digit OTP code from Gmail' }),
+  password: Type.Optional(Type.String({ minLength: 8, maxLength: 32, description: 'Required for signup verification' })),
   type: Type.Union([
     Type.Literal('email'),
     Type.Literal('signup'),

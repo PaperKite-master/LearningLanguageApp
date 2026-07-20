@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Flame, Bell, UserCircle, ChevronDown, User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import authApi from '../../api/authApi';
 import userApi from '../../api/userApi';
+import { useLogout } from '../../context/AuthContext';
 import NotificationSettingsModal from './NotificationSettingsModal';
 
 const DashboardTopBar = () => {
@@ -12,6 +12,7 @@ const DashboardTopBar = () => {
   const [userName, setUserName] = useState('');
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const handleLogout = useLogout();
 
   useEffect(() => {
     // Fetch streak and username
@@ -56,10 +57,6 @@ const DashboardTopBar = () => {
     };
   }, [dropdownRef]);
 
-  const handleLogout = () => {
-    authApi.logout();
-    navigate('/login');
-  };
 
   return (
     <div className="dashboard-topbar">

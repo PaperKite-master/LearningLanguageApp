@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -12,15 +12,10 @@ import {
   Video
 } from 'lucide-react';
 import logo from '../../assets/logo.png';
-import authApi from '../../api/authApi';
+import { useLogout } from '../../context/AuthContext';
 
 const AdminSidebar = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    authApi.logout();
-    navigate('/login');
-  };
+  const handleLogout = useLogout();
 
   return (
     <aside className="dashboard-sidebar admin-sidebar">

@@ -1,9 +1,11 @@
 .video-page-container {
   display: flex;
   gap: 40px;
-  padding: 40px;
-  height: 100%;
-  background-color: #ffffff; /* Light theme */
+  padding: 0;
+  min-height: min-content;
+  height: auto;
+  align-items: flex-start;
+  background-color: #ffffff;
   color: #333;
 }
 
@@ -18,7 +20,7 @@
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
 }
@@ -93,8 +95,14 @@
 /* RIGHT PANEL: Playlist */
 .video-right-panel {
   width: 350px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 .video-module-title {

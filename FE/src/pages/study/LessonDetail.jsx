@@ -11,6 +11,7 @@ import DashboardTopBar from '../../components/dashboard/DashboardTopBar';
 import { InteractiveFillBlank, InteractiveMatching, InteractiveMultipleChoice, InteractiveReorder, InteractiveConnect } from '../../components/study/InteractiveExercises';
 import VocabPractice from '../../components/study/VocabPractice';
 import BilingualVideoPlayer from '../../components/study/BilingualVideoPlayer';
+import ProUpgradeBanner from '../../components/common/ProUpgradeBanner';
 import './LessonDetailNew.css';
 
 const extractText = (children) => {
@@ -59,6 +60,7 @@ const LessonDetail = () => {
   const [grammars, setGrammars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isProLocked, setIsProLocked] = useState(false);
   const [totalExercises, setTotalExercises] = useState(0);
   const [completedIds, setCompletedIds] = useState([]);
   
@@ -127,7 +129,14 @@ const LessonDetail = () => {
           if (q && q.id) setLessonQuiz(q);
         } catch (quizErr) {}
       } catch (err) {
-        setError('Không thể tải dữ liệu bài học. Vui lòng thử lại sau.');
+        const message = err?.message || '';
+        if (message.toLowerCase().includes('pro')) {
+          setIsProLocked(true);
+          setError('');
+        } else {
+          setIsProLocked(false);
+          setError('Không thể tải dữ liệu bài học. Vui lòng thử lại sau.');
+        }
       } finally {
         setLoading(false);
       }
@@ -202,6 +211,23 @@ const LessonDetail = () => {
         <Sidebar />
         <main className="dashboard-main-area" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <h2>Đang tải...</h2>
+        </main>
+      </div>
+    );
+  }
+
+  if (isProLocked) {
+    return (
+      <div className="dashboard-layout">
+        <Sidebar />
+        <main className="dashboard-main-area" style={{ padding: '40px 60px' }}>
+          <ProUpgradeBanner
+            title="Bài học thuộc timeline PRO"
+            description="Gói USER chỉ học được timeline đầu tiên. Nâng cấp PRO để mở khóa bài học này."
+          />
+          <button className="practice-btn" onClick={() => navigate('/study')} style={{ marginTop: '20px' }}>
+            Quay lại Lộ trình
+          </button>
         </main>
       </div>
     );

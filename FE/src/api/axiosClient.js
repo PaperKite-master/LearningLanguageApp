@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearAuthSession } from '../utils/authSession';
 
 // Dev/Docker cùng origin: để trống → '/api'. Deploy tách BE: VITE_API_BASE_URL=https://api.example.com
 const rawBase = import.meta.env.VITE_API_BASE_URL;
@@ -36,7 +37,9 @@ axiosClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Xử lý lỗi chung
+    if (error.response?.status === 401) {
+      clearAuthSession();
+    }
     const message = error.response?.data?.error || error.response?.data?.message || error.message || 'Có lỗi xảy ra, vui lòng thử lại!';
     console.error('API Error:', message);
     return Promise.reject(new Error(message));

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Eye, EyeOff, Target, ChevronDown, KeyRound, Lock } from 'lucide-react';
+import { User, Mail, Eye, EyeOff, Target, ChevronDown, Lock } from 'lucide-react';
 import authApi from '../../api/authApi';
 import Header from '../../components/Header';
+import OtpInput from '../../components/auth/OtpInput';
+import { useAuth } from '../../context/AuthContext';
+import { OTP_LENGTH, formatEmailDeliveryError } from '../../utils/otp';
 import computer from '../../assets/computer.png';
 import './Auth.css';
 
@@ -41,7 +44,11 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [step, setStep] = useState('form'); // 'form' or 'otp'
+  const [otpCode, setOtpCode] = useState('');
+  const [otpNotice, setOtpNotice] = useState('');
   const navigate = useNavigate();
+  const { refreshAuth } = useAuth();
 
   const targetOptions = [
     { value: 'N5', label: 'Mục tiêu: N5 (Sơ cấp 1)' },
@@ -51,9 +58,6 @@ const Signup = () => {
     { value: 'N1', label: 'Mục tiêu: N1 (Cao cấp 2)' }
   ];
 
-  const [step, setStep] = useState('form'); // 'form' or 'otp'
-  const [otpCode, setOtpCode] = useState('');
-  
   const validateForm = () => {
     const newErrors = {};
     if (!formData.fullName.trim()) newErrors.fullName = "Họ và tên không được để trống";
@@ -86,11 +90,18 @@ const Signup = () => {
           role: "USER",
           targetLevel: formData.targetLevel
         };
-        await authApi.register(payload);
+        const result = await authApi.register(payload);
+        setErrors({});
+        setOtpCode('');
+        setOtpNotice(
+          result.emailSent === false
+            ? 'Chưa gửi được email OTP. Kiểm tra App Password Gmail trong BE/.env, lưu file (Ctrl+S), restart backend, rồi bấm "Gửi lại mã OTP".'
+            : 'Mã OTP 6 số đã được gửi qua Gmail. Kiểm tra hộp thư (kể cả Spam).'
+        );
         setStep('otp');
       } catch (error) {
         console.error('Registration failed:', error);
-        setErrors({ submit: error.response?.data?.error || 'Đăng ký thất bại. Vui lòng thử lại.' });
+        setErrors({ submit: error.message || 'Đăng ký thất bại. Vui lòng thử lại.' });
       } finally {
         setIsLoading(false);
       }
@@ -99,8 +110,8 @@ const Signup = () => {
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (!otpCode || otpCode.length < 6) {
-      setErrors({ otp: "Vui lòng nhập đúng mã OTP" });
+    if (!otpCode || otpCode.length !== OTP_LENGTH) {
+      setErrors({ otp: `Vui lòng nhập đủ ${OTP_LENGTH} chữ số OTP` });
       return;
     }
     
@@ -109,13 +120,27 @@ const Signup = () => {
       await authApi.verifyOtp({
         email: formData.email,
         token: otpCode,
-        type: 'signup'
+        type: 'signup',
+        password: formData.password,
       });
-      alert('Xác thực email thành công! Đang chuyển hướng...');
-      navigate('/dashboard');
+      await refreshAuth();
+      navigate('/study', { replace: true });
     } catch (error) {
       console.error('OTP Verification failed:', error);
-      setErrors({ otp: error.response?.data?.error || 'Mã OTP không hợp lệ hoặc đã hết hạn.' });
+      setErrors({ otp: error.message || 'Mã OTP không hợp lệ hoặc đã hết hạn.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setIsLoading(true);
+    setErrors({});
+    try {
+      await authApi.resendSignupOtp(formData.email);
+      setOtpNotice('Mã OTP mới đã được gửi qua Gmail. Vui lòng kiểm tra email (kể cả Spam).');
+    } catch (error) {
+      setErrors({ otp: formatEmailDeliveryError(error.message) });
     } finally {
       setIsLoading(false);
     }
@@ -152,8 +177,18 @@ const Signup = () => {
         {/* Right Column - Form */}
         <div className="auth-right-column">
           <div className="auth-form-container">
-            <h1 className="auth-heading">CHÀO MỪNG ĐẾN VỚI<br />HINA!</h1>
-            <div className="auth-desc">Nền tảng ngôn ngữ được thiết kế riêng cho các lập trình viên.</div>
+            <h1 className="auth-heading">
+              {step === 'form' ? (
+                <>CHÀO MỪNG ĐẾN VỚI<br />HINA!</>
+              ) : (
+                <>XÁC THỰC<br />OTP</>
+              )}
+            </h1>
+            <div className="auth-desc">
+              {step === 'form'
+                ? 'Nền tảng ngôn ngữ được thiết kế riêng cho các lập trình viên.'
+                : `Nhập mã OTP ${OTP_LENGTH} chữ số đã gửi tới ${formData.email}`}
+            </div>
             
             {step === 'form' ? (
               <>
@@ -329,40 +364,38 @@ const Signup = () => {
                 </div>
               </>
             ) : (
-              <div className="otp-container" style={{ textAlign: 'center', marginTop: '20px' }}>
-                <p style={{ color: '#6b7280', marginBottom: '20px', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                  Chúng tôi đã gửi một mã OTP đến email <strong>{formData.email}</strong>. Vui lòng kiểm tra hộp thư (cả mục Spam) và nhập mã vào bên dưới để hoàn tất đăng ký.
+              <div className="otp-container" style={{ marginTop: '10px' }}>
+                <p style={{ color: '#6b7280', marginBottom: '20px', fontSize: '0.95rem', lineHeight: '1.6', textAlign: 'center' }}>
+                  Email xác thực gửi từ <strong>HiNa</strong> (Gmail) tới <strong>{formData.email}</strong>.
+                  Mã OTP gồm <strong>{OTP_LENGTH} chữ số</strong>.
                 </p>
+
+                {otpNotice && (
+                  <div style={{ background: '#fffbeb', color: '#92400e', padding: '12px 14px', borderRadius: '12px', marginBottom: '16px', border: '1px solid #fde68a', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                    {otpNotice}
+                  </div>
+                )}
                 
-                {errors.otp && <div style={{ color: '#ef4444', marginBottom: '15px' }}>{errors.otp}</div>}
+                {errors.otp && <div style={{ color: '#ef4444', marginBottom: '15px', textAlign: 'center' }}>{errors.otp}</div>}
                 
                 <form onSubmit={handleVerifyOtp}>
                   <div className="auth-input-group">
-                    <div className="auth-input-wrapper">
-                      <KeyRound className="auth-input-icon" size={20} />
-                      <input 
-                        type="text" 
-                        maxLength="8"
-                        value={otpCode}
-                        onChange={(e) => {
-                          setOtpCode(e.target.value.replace(/\D/g, ''));
-                          if (errors.otp) setErrors(prev => ({ ...prev, otp: '' }));
-                        }}
-                        className="auth-input" 
-                        placeholder="Nhập mã OTP" 
-                        style={{ 
-                          textAlign: 'center', 
-                          letterSpacing: '4px', 
-                          fontSize: '1.2rem', 
-                          fontWeight: 'bold',
-                          paddingLeft: '48px',
-                          borderColor: errors.otp ? '#ef4444' : '#e2e8f0'
-                        }}
-                      />
-                    </div>
+                    <label className="auth-input-label">Mã OTP ({OTP_LENGTH} chữ số)</label>
+                    <OtpInput
+                      value={otpCode}
+                      onChange={(nextValue) => {
+                        setOtpCode(nextValue);
+                        if (errors.otp) setErrors((prev) => ({ ...prev, otp: '' }));
+                      }}
+                      disabled={isLoading}
+                      hasError={Boolean(errors.otp)}
+                    />
+                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '10px', textAlign: 'center' }}>
+                      Nhập đúng {OTP_LENGTH} chữ số trong email. Có thể dán (paste) cả mã một lần.
+                    </p>
                   </div>
                   
-                  <button type="submit" className="auth-submit-btn" disabled={isLoading || otpCode.length < 6}>
+                  <button type="submit" className="auth-submit-btn" disabled={isLoading || otpCode.length !== OTP_LENGTH}>
                     {isLoading ? 'Đang xác thực...' : 'Xác nhận OTP'}
                   </button>
                   
@@ -370,7 +403,22 @@ const Signup = () => {
                     type="button" 
                     className="auth-submit-btn" 
                     style={{ backgroundColor: '#f1f5f9', color: '#1e293b' }}
-                    onClick={() => setStep('form')}
+                    onClick={handleResendOtp}
+                    disabled={isLoading}
+                  >
+                    Gửi lại mã OTP
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="auth-submit-btn" 
+                    style={{ backgroundColor: '#ffffff', color: '#64748b', border: '1px solid #e2e8f0', marginBottom: 0 }}
+                    onClick={() => {
+                      setStep('form');
+                      setOtpCode('');
+                      setOtpNotice('');
+                      setErrors({});
+                    }}
                     disabled={isLoading}
                   >
                     Quay lại

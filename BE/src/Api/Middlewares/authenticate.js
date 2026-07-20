@@ -1,15 +1,28 @@
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 
-const client = jwksClient({
-  jwksUri: `${process.env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`,
-  cache: true,
-  rateLimit: true,
-});
+let jwksClientInstance;
+
+function getJwksClient() {
+  if (jwksClientInstance) return jwksClientInstance;
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error('SUPABASE_URL is not configured');
+  }
+
+  jwksClientInstance = jwksClient({
+    jwksUri: `${supabaseUrl}/auth/v1/.well-known/jwks.json`,
+    cache: true,
+    rateLimit: true,
+  });
+
+  return jwksClientInstance;
+}
 
 function getSigningKey(header) {
   return new Promise((resolve, reject) => {
-    client.getSigningKey(header.kid, (err, key) => {
+    getJwksClient().getSigningKey(header.kid, (err, key) => {
       if (err) return reject(err);
       resolve(key.getPublicKey());
     });

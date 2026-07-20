@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import authApi from '../../api/authApi';
 import Header from '../../components/Header';
+import { useAuth } from '../../context/AuthContext';
+import { hasValidAccessToken } from '../../utils/authSession';
 import computer from '../../assets/computer.png';
 import './Auth.css';
 
@@ -30,11 +32,17 @@ const AppleIcon = () => (
 
 const Login = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user, refreshAuth, setUser } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !hasValidAccessToken()) return;
+    navigate(user?.role === 'ADMIN' ? '/admin/dashboard' : '/study', { replace: true });
+  }, [isAuthenticated, user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,17 +57,17 @@ const Login = () => {
     };
     
     try {
-      const result = await authApi.login(payload);
-      console.log('Login success:', result.message);
-      
-      const user = result.user || {};
-      localStorage.setItem('user', JSON.stringify(user));
-
-      if (user.role === 'ADMIN') {
-        navigate('/admin/dashboard');
+      const loginResult = await authApi.login(payload);
+      let verifiedUser = loginResult.user;
+      if (!verifiedUser?.id) {
+        verifiedUser = await refreshAuth();
       } else {
-        navigate('/dashboard');
+        setUser(verifiedUser);
       }
+      if (!verifiedUser?.id) {
+        throw new Error('Không thể xác thực phiên đăng nhập. Hãy restart backend rồi thử lại.');
+      }
+      navigate(verifiedUser.role === 'ADMIN' ? '/admin/dashboard' : '/study');
     } catch (error) {
       alert('Đăng nhập thất bại: ' + error.message);
     }

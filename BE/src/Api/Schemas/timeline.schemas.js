@@ -11,6 +11,7 @@ export const TimelineDtoSchema = Type.Object({
   description: Type.Union([Type.String(), Type.Null()]),
   order: Type.Integer(),
   createdAt: Type.Union([Type.String(), Type.Null()]),
+  isLocked: Type.Optional(Type.Boolean()),
   lessons: Type.Array(LessonDtoSchema)
 });
 
