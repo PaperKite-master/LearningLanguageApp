@@ -458,7 +458,9 @@ const QuizTake = () => {
                   <div key={q.id} className="qt-question-card">
                     <div className="qt-question-text">
                       <span className="qt-question-num">Câu {qIndex + 1}:</span> 
-                      <span>{q.questionText}</span>
+                      <span style={{ whiteSpace: 'pre-wrap' }}>
+                        {qType === 'reading' ? 'Đọc đoạn văn/email dưới đây và trả lời các câu hỏi phụ:' : q.questionText}
+                      </span>
                     </div>
 
                     {/* Show answered state similarly to normal take but locked */}
@@ -638,7 +640,9 @@ const QuizTake = () => {
                 <div key={q.id} className="qt-question-card">
                   <div className="qt-question-text">
                     <span className="qt-question-num">Câu {qIndex + 1}:</span> 
-                    <span>{q.questionText}</span>
+                    <span style={{ whiteSpace: 'pre-wrap' }}>
+                      {qType === 'reading' ? 'Đọc đoạn văn/email dưới đây và trả lời các câu hỏi phụ:' : q.questionText}
+                    </span>
                   </div>
                   
                   {qType === 'multiple_choice' && (

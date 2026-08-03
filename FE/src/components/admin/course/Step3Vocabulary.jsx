@@ -159,7 +159,7 @@ const Step3Vocabulary = ({ formData, setFormData }) => {
                 <span className="question-type-badge" style={{ padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
                   {q.question_type || 'multiple_choice'}
                 </span>
-                <span style={{ color: '#1f2937', flex: 1, fontWeight: 500, fontSize: '0.95rem' }}>
+                <span style={{ color: '#1f2937', flex: 1, fontWeight: 500, fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
                   {qIndex + 1}. {q.question_text}
                 </span>
               </div>

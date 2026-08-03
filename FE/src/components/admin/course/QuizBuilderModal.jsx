@@ -133,12 +133,13 @@ const QuizBuilderModal = ({ isOpen, onClose, initialQuestions, onSave }) => {
 
               <div className="form-group">
                 <label>Question Prompt</label>
-                <input 
-                  type="text" 
+                <textarea 
                   value={q.question_text} 
                   onChange={(e) => updateQuestionText(qIndex, e.target.value)} 
                   className="modal-input" 
                   placeholder="Enter the question..."
+                  rows={4}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', resize: 'vertical', fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}
                 />
               </div>
 

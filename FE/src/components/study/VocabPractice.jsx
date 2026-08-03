@@ -156,7 +156,9 @@ const VocabPractice = ({ questions }) => {
             
             return (
               <div key={qId} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <p style={{ fontWeight: 600, marginBottom: '12px', color: '#1e293b' }}>{index + 1}. {q.questionText || q.question_text}</p>
+                <p style={{ fontWeight: 600, marginBottom: '12px', color: '#1e293b', whiteSpace: 'pre-wrap' }}>
+                  {index + 1}. {qType === 'reading' ? 'Đọc đoạn văn/email dưới đây và trả lời các câu hỏi phụ:' : (q.questionText || q.question_text)}
+                </p>
                 
                 {qType === 'multiple_choice' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
