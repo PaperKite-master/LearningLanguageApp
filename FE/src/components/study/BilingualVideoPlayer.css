@@ -11,29 +11,67 @@
 .bilingual-video-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
-  margin: 0;
+  margin: 0 0 10px 0;
   color: #1e293b;
   font-size: 1rem;
 }
 
-.bilingual-video-toolbar h3 {
-  margin: 0;
-}
-
 .bilingual-track-toggles {
   display: flex;
-  gap: 14px;
-  font-size: 0.85rem;
+  gap: 20px;
+  font-size: 0.95rem;
   color: #475569;
+  font-weight: 600;
 }
 
 .bilingual-track-toggles label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
+  user-select: none;
+}
+
+.bilingual-track-toggles input[type="checkbox"] {
+  display: none;
+}
+
+.bilingual-track-toggles .custom-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: #ffffff;
+}
+
+/* Active State for Japanese (Pink) */
+.bilingual-track-toggles label.ja-toggle input[type="checkbox"]:checked + .custom-checkbox {
+  border-color: #d946ef;
+}
+.bilingual-track-toggles label.ja-toggle input[type="checkbox"]:checked + .custom-checkbox::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d946ef;
+}
+
+/* Active State for Vietnamese (Blue) */
+.bilingual-track-toggles label.vi-toggle input[type="checkbox"]:checked + .custom-checkbox {
+  border-color: #0ea5e9;
+}
+.bilingual-track-toggles label.vi-toggle input[type="checkbox"]:checked + .custom-checkbox::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0ea5e9;
 }
 
 .bilingual-video-player-wrap {

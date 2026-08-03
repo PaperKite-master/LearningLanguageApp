@@ -8,6 +8,7 @@ const NotificationSettingsModal = ({ isOpen, onClose }) => {
     is_enabled: true,
     reminder_time: '08:00',
     reminder_type: 'DAILY',
+    reminder_date: new Date().toISOString().split('T')[0],
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   });
   const [loading, setLoading] = useState(false);
@@ -130,6 +131,21 @@ const NotificationSettingsModal = ({ isOpen, onClose }) => {
                       <option value="ONE_TIME">Một lần (One-time)</option>
                     </select>
                   </div>
+
+                  {config.reminder_type === 'ONE_TIME' && (
+                    <div className="setting-group animate-fadeIn">
+                      <label>
+                        <Calendar size={16} /> Ngày nhận email
+                      </label>
+                      <input 
+                        type="date" 
+                        value={config.reminder_date || ''}
+                        onChange={(e) => setConfig({...config, reminder_date: e.target.value})}
+                        className="date-input"
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                  )}
                   
                   <div className="setting-group">
                     <label>Múi giờ</label>

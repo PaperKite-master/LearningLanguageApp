@@ -63,17 +63,6 @@ const DashboardTopBar = () => {
       <div className="topbar-spacer"></div>
       
       <div className="topbar-actions">
-        {/* Streak */}
-        <div className="topbar-streak">
-          <Flame size={20} color="#6b7280" />
-          <span className="streak-count">{streak}</span>
-        </div>
-        
-        {/* Notifications */}
-        <button className="topbar-icon-btn">
-          <Bell size={20} color="#6b7280" />
-        </button>
-        
         {/* Profile Dropdown */}
         <div className="topbar-profile" ref={dropdownRef}>
           <button 

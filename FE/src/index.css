@@ -758,7 +758,7 @@ body, html {
 }
 
 @media (max-width: 960px) {
-  .video-page-container {
+  .video-columns-wrapper {
     flex-direction: column;
   }
 

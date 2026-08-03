@@ -86,6 +86,7 @@ const ProfileContent = () => {
             preferredContact: userObj.preferredContact || prev.preferredContact,
             stats: {
               ...prev.stats,
+              completed: statsObj.completedLessons || 0,
               streak: `${statsObj.streak || 0} days`,
               hours: `${statsObj.totalHours || 0}H`,
               progress: `${statsObj.progress || 0}%`
@@ -161,22 +162,6 @@ const ProfileContent = () => {
     }
   };
 
-  const toggleVisibility = async () => {
-    const newVisibility = !userData.visibility;
-    setUserData(prev => ({ ...prev, visibility: newVisibility }));
-    try {
-      await userApi.updateProfile({ visibility: newVisibility });
-      const userStr = localStorage.getItem('user');
-      if (userStr && userStr !== 'undefined') {
-        const parsedUser = JSON.parse(userStr);
-        parsedUser.visibility = newVisibility;
-        localStorage.setItem('user', JSON.stringify(parsedUser));
-      }
-    } catch (e) {
-      console.error("Failed to update visibility", e);
-      setUserData(prev => ({ ...prev, visibility: !newVisibility }));
-    }
-  };
 
   const handlePreferredContactChange = async (e) => {
     const newValue = e.target.value;
@@ -376,16 +361,6 @@ const ProfileContent = () => {
         </div>
       </div>
 
-      {/* PROFILE VISIBILITY */}
-      <div className="profile-visibility-card">
-        <div className="profile-visibility-info">
-          <h4>Profile Visibility</h4>
-          <p>Kiểm soát ai có thể xem hồ sơ của bạn</p>
-        </div>
-        <div className={`profile-custom-toggle ${userData.visibility ? 'active' : ''}`} onClick={toggleVisibility}>
-          <div className="profile-toggle-thumb"></div>
-        </div>
-      </div>
 
       {/* SUBSCRIPTION PLANS */}
       <h3 className="profile-section-title">Nâng cấp gói học</h3>

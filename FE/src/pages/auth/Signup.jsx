@@ -179,9 +179,9 @@ const Signup = () => {
           <div className="auth-form-container">
             <h1 className="auth-heading">
               {step === 'form' ? (
-                <>CHÀO MỪNG ĐẾN VỚI<br />HINA!</>
+                <>{"CH\u00C0O M\u1EEANG \u0110\u1EBEN V\u1EDAI"}<br />HINA!</>
               ) : (
-                <>XÁC THỰC<br />OTP</>
+                <>{"X\u00C1C TH\u1EF0C"}<br />OTP</>
               )}
             </h1>
             <div className="auth-desc">

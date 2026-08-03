@@ -147,6 +147,22 @@ export async function getUserDashboardUseCase({ prisma, userId }) {
 
   const practiceToday = practiceQuizzesToday + practiceLogsToday;
 
+  const completedLessonsCount = await prisma.user_lesson_progress.count({
+    where: {
+      user_id: userId,
+      is_completed: true,
+      lessons: { status: 'published' }
+    }
+  });
+
+  const totalLessonsCount = await prisma.lessons.count({
+    where: { status: 'published' }
+  });
+
+  const progress = totalLessonsCount > 0
+    ? Math.round((completedLessonsCount / totalLessonsCount) * 100)
+    : 0;
+
   return {
     user: {
       name: profile.full_name ?? 'User',
@@ -162,6 +178,8 @@ export async function getUserDashboardUseCase({ prisma, userId }) {
       target: profile.target_level ?? 'N3',
       totalHours: Math.floor(totalMinutes / 60),
       weeklyGrowth,
+      completedLessons: completedLessonsCount,
+      progress,
     },
     dailyGoals: {
       lessons: {

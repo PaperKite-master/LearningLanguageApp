@@ -1,8 +1,7 @@
-.quiz-take-page {
-  padding: 32px;
+.dashboard-main-area.quiz-take-page {
+  padding: 52px 32px 48px 32px !important;
   background-color: #f8fafc;
   min-height: 100vh;
-
 }
 
 .quiz-take-container {

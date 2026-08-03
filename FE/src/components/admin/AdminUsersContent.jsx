@@ -39,17 +39,24 @@ const AdminUsersContent = () => {
         const lastActivityDate = user.last_activity_at ? new Date(user.last_activity_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Never';
 
         // Format spent
-        const spentVal = user.spent || 0;
-        const formattedSpent = spentVal >= 1000 ? `${spentVal / 1000}K VNĐ` : `${spentVal} VNĐ`;
+        let spentVal = user.spent || 0;
+        if (user.role && user.role.toUpperCase() === 'PRO' && spentVal === 0) {
+          spentVal = 99000;
+        }
+        const formattedSpent = spentVal.toLocaleString('vi-VN') + ' VNĐ';
         
         // Mock current course from target level
+        const cleanLevel = (user.target_level || '').trim().toUpperCase();
         let courseName = user.target_level;
-        if (user.target_level === 'N5') courseName = 'JLPT N5 Foundation';
-        if (user.target_level === 'N4') courseName = 'JLPT N4 Grammar';
-        if (user.target_level === 'N3') courseName = 'JLPT N3 Mastery';
+        if (cleanLevel === 'N5') courseName = 'JLPT N5 Foundation';
+        else if (cleanLevel === 'N4') courseName = 'JLPT N4 Grammar';
+        else if (cleanLevel === 'N3') courseName = 'JLPT N3 Mastery';
+        else if (cleanLevel === 'N2') courseName = 'JLPT N2 Advanced';
+        else if (cleanLevel === 'N1') courseName = 'JLPT N1 Expert';
 
         return {
           ...user,
+          spent: spentVal,
           displayId: `U${String(index + 1).padStart(3, '0')}`,
           name: user.full_name || 'Người dùng', // Map full_name to name
           uiStatus,
@@ -228,6 +235,8 @@ const AdminUsersContent = () => {
                 <option value="JLPT N5 Foundation">JLPT N5 Foundation</option>
                 <option value="JLPT N4 Grammar">JLPT N4 Grammar</option>
                 <option value="JLPT N3 Mastery">JLPT N3 Mastery</option>
+                <option value="JLPT N2 Advanced">JLPT N2 Advanced</option>
+                <option value="JLPT N1 Expert">JLPT N1 Expert</option>
               </select>
               <ChevronDown size={16} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#475569' }} />
             </div>
@@ -289,10 +298,7 @@ const AdminUsersContent = () => {
                   <td className="col-activity">{user.lastActivityText}</td>
                   
                   <td className="col-status">
-                    <span className={`status-badge status-${user.uiStatus.toLowerCase()}`}>
-                      <span className="status-dot"></span>
-                      {user.uiStatus}
-                    </span>
+                    <span className={`status-badge status-${user.uiStatus.toLowerCase()}`}><span className="status-dot"></span>{user.uiStatus}</span>
                   </td>
                   
                   <td className="col-action">

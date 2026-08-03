@@ -1,12 +1,18 @@
 .video-page-container {
   display: flex;
-  gap: 40px;
-  padding: 0;
+  flex-direction: column;
+  padding: 30px 32px 40px 32px;
   min-height: min-content;
   height: auto;
-  align-items: flex-start;
   background-color: #ffffff;
   color: #333;
+}
+
+.video-columns-wrapper {
+  display: flex;
+  width: 100%;
+  gap: 40px;
+  align-items: flex-start;
 }
 
 /* LEFT PANEL: Video Player */
@@ -16,10 +22,17 @@
   flex-direction: column;
 }
 
+.video-page-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #000;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
 .video-player-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: transparent;
+  box-shadow: none;
   overflow: visible;
   display: flex;
   flex-direction: column;
@@ -30,6 +43,10 @@
   background: transparent;
   padding: 0;
   border-radius: 0;
+}
+
+.video-player-card .bilingual-video-toolbar {
+  padding: 0;
 }
 
 .video-player-screen {

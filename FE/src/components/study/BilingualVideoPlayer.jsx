@@ -137,23 +137,24 @@ const BilingualVideoPlayer = ({ videoUrl, subtitles = [] }) => {
   return (
     <div className="bilingual-video-layout">
       <div className="bilingual-video-toolbar">
-        <h3>Video bài giảng</h3>
         {subtitles.length > 0 && (
           <div className="bilingual-track-toggles">
-            <label>
+            <label className="ja-toggle">
               <input
                 type="checkbox"
                 checked={showJa}
                 onChange={(e) => setShowJa(e.target.checked)}
               />
+              <span className="custom-checkbox"></span>
               Tiếng Nhật
             </label>
-            <label>
+            <label className="vi-toggle">
               <input
                 type="checkbox"
                 checked={showVi}
                 onChange={(e) => setShowVi(e.target.checked)}
               />
+              <span className="custom-checkbox"></span>
               Tiếng Việt
             </label>
           </div>

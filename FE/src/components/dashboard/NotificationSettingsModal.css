@@ -193,7 +193,7 @@ input:checked + .slider:before {
   margin-bottom: 8px;
 }
 
-.time-input, .type-select, .timezone-input {
+.time-input, .date-input, .type-select, .timezone-input {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid #d1d5db;
@@ -209,7 +209,7 @@ input:checked + .slider:before {
   cursor: not-allowed;
 }
 
-.time-input:focus, .type-select:focus {
+.time-input:focus, .date-input:focus, .type-select:focus {
   outline: none;
   border-color: #8b5cf6;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);

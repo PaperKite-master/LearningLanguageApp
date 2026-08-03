@@ -97,7 +97,7 @@ const Login = () => {
         {/* Right Column - Form */}
         <div className="auth-right-column">
           <div className="auth-form-container">
-            <h1 className="auth-heading">CHÀO MỪNG<br />TRỞ LẠI VỚI HINA!</h1>
+            <h1 className="auth-heading">{"CH\u00C0O M\u1EEANG"}<br />{"TR\u1EDE L\u1EA0I V\u1EDAI HINA!"}</h1>
             
             <div className="auth-social-buttons">
               <button type="button" className="auth-social-btn google" onClick={handleGoogleLogin}>

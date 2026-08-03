@@ -42,11 +42,6 @@ const UserSettings = () => {
             <User size={20} />
             <span>Account Settings</span>
           </NavLink>
-          
-          <NavLink to="/settings/notifications" className="settings-nav-item">
-            <Bell size={20} />
-            <span>Notification Settings</span>
-          </NavLink>
         </nav>
       </aside>
 
@@ -55,13 +50,6 @@ const UserSettings = () => {
         {/* Topbar */}
         <header className="settings-topbar">
           <div className="settings-topbar-actions">
-            <div className="settings-streak">
-              <Flame size={20} color="#64748b" />
-              <span>1</span>
-            </div>
-            
-            <Bell className="settings-bell" size={20} />
-            
             <div className="settings-user-profile" onClick={handleDropdown}>
               <div className="settings-avatar-wrapper">
                 <User size={20} color="#ffffff" />
