@@ -95,8 +95,8 @@ const Signup = () => {
         setOtpCode('');
         setOtpNotice(
           result.emailSent === false
-            ? 'Chưa gửi được email OTP. Kiểm tra App Password Gmail trong BE/.env, lưu file (Ctrl+S), restart backend, rồi bấm "Gửi lại mã OTP".'
-            : 'Mã OTP 6 số đã được gửi qua Gmail. Kiểm tra hộp thư (kể cả Spam).'
+            ? 'Chưa gửi được email OTP. Trên Render free hãy thêm RESEND_API_KEY (resend.com) → Redeploy → bấm "Gửi lại mã OTP". Local: kiểm tra SMTP trong BE/.env.'
+            : 'Mã OTP 6 số đã được gửi qua email. Kiểm tra hộp thư (kể cả Spam).'
         );
         setStep('otp');
       } catch (error) {
@@ -138,7 +138,7 @@ const Signup = () => {
     setErrors({});
     try {
       await authApi.resendSignupOtp(formData.email);
-      setOtpNotice('Mã OTP mới đã được gửi qua Gmail. Vui lòng kiểm tra email (kể cả Spam).');
+      setOtpNotice('Mã OTP mới đã được gửi qua email. Vui lòng kiểm tra hộp thư (kể cả Spam).');
     } catch (error) {
       setErrors({ otp: formatEmailDeliveryError(error.message) });
     } finally {
@@ -366,7 +366,7 @@ const Signup = () => {
             ) : (
               <div className="otp-container" style={{ marginTop: '10px' }}>
                 <p style={{ color: '#6b7280', marginBottom: '20px', fontSize: '0.95rem', lineHeight: '1.6', textAlign: 'center' }}>
-                  Email xác thực gửi từ <strong>HiNa</strong> (Gmail) tới <strong>{formData.email}</strong>.
+                  Email xác thực gửi từ <strong>HiNa</strong> tới <strong>{formData.email}</strong>.
                   Mã OTP gồm <strong>{OTP_LENGTH} chữ số</strong>.
                 </p>
 
