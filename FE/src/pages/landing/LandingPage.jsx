@@ -269,9 +269,23 @@ const LandingPage = () => {
                 Nền tảng học Tiếng Nhật hàng đầu dành riêng cho Kỹ sư và sinh viên chuyên ngành Công Nghệ Thông Tin.
               </p>
               <div className="lp-footer-social">
-                <a href="#"><Facebook size={20} /></a>
+                <a
+                  href="https://www.facebook.com/profile.php?id=100076481693039"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} />
+                </a>
                 <a href="#"><Twitter size={20} /></a>
-                <a href="#"><Instagram size={20} /></a>
+                <a
+                  href="https://www.instagram.com/hina_technihongo/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={20} />
+                </a>
                 <a href="#"><Github size={20} /></a>
               </div>
             </div>
