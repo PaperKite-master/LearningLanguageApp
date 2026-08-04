@@ -25,6 +25,7 @@ import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import PaymentResult from './pages/payment/PaymentResult';
+import Team from './pages/team/Team';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
@@ -80,6 +81,7 @@ function App() {
         <OAuthRedirect />
         <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/team" element={<Team />} />
         
         <Route path="/dashboard" element={<Navigate to="/study" replace />} />
         

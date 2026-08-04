@@ -304,9 +304,17 @@ const LandingPage = () => {
               <h3 className="lp-footer-title">Về chúng tôi</h3>
               <ul className="lp-footer-links">
                 <li><a href="#">Giới thiệu</a></li>
-                <li><a href="#">Đội ngũ</a></li>
+                <li><Link to="/team">Đội ngũ</Link></li>
                 <li><a href="#">Tuyển dụng</a></li>
-                <li><a href="#">Liên hệ</a></li>
+                <li>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=100076481693039"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Liên hệ
+                  </a>
+                </li>
               </ul>
             </div>
             
