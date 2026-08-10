@@ -53,16 +53,7 @@ const NotificationSettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleTest = async () => {
-    try {
-      setMessage({ type: '', text: '' });
-      await userApi.sendTestNotification();
-      setMessage({ type: 'success', text: 'Đã gửi email nhắc nhở thử nghiệm!' });
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Lỗi khi gửi email thử nghiệm.' });
-      console.error("Failed to send test email", err);
-    }
-  };
+
 
   if (!isOpen) return null;
 
@@ -164,9 +155,6 @@ const NotificationSettingsModal = ({ isOpen, onClose }) => {
         </div>
 
         <div className="notification-modal-footer">
-          <button className="btn-test" onClick={handleTest} disabled={loading || saving}>
-            Gửi Test Email
-          </button>
           <div className="footer-actions">
             <button className="btn-cancel" onClick={onClose} disabled={saving}>Hủy</button>
             <button className="btn-save" onClick={handleSave} disabled={loading || saving}>
